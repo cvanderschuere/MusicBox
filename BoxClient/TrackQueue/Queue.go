@@ -9,7 +9,7 @@ type Queue struct{
 	History []Track.Track
 }
 
-func NewQueue(tracks []Track.Track) (&Queue){
+func NewQueue(tracks []Track.Track) (*Queue){
 	q := new(Queue);
 	q.Tracks = make([]Track.Track, 0)
 	q.History = make([]Track.Track, 100)
@@ -20,7 +20,7 @@ func NewQueue(tracks []Track.Track) (&Queue){
 		}
 	}
 	
-	return &q;
+	return q;
 }
 
 func (q *Queue) AddTrack(track Track.Track){
