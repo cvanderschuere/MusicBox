@@ -16,28 +16,8 @@ func recommendSongs(numToAdd uint){
 		fmt.Println(err.Error())
 	}
 	
-	
-	/*
-		//Launch webrequest for similar songs
-		songsToAdd := findSimilarSongsLastFM(baseTrack,numToAdd)
-	
-		if len(songsToAdd) == 0{
-			log.Error("Found no similar songs")
-			return
-		}
-		
-		//Send addTrack to all devices (including self) with new songs
-		data := make([](map[string]string),len(songsToAdd))
-		for i,song := range songsToAdd{
-			songDict := map[string]string{"trackName":song.TrackName, "albumName":song.AlbumName, "artistName":song.ArtistName, "service":song.Service, "url":song.URL}
-			data[i] = songDict
-		}
-	
-		addMsg := map[string]interface{}{"command":"addTrack", "data":data}
-		client.Publish(baseURL+username+"/"+deviceName,addMsg) 
-	*/
+	//Return call handled with other events
 }
-
 
 //JSON structs 
 
@@ -86,11 +66,11 @@ const baseURLLastFM = "http://ws.audioscrobbler.com/2.0/?method=track.getsimilar
 const baseURLSpotifySearch = "http://ws.spotify.com/search/1/track.json?q="
 
 //Use Last.fm's track.getSimilar API to find songs
-func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTrack){
+func findSimilarSongsLastFM(baseTrack TrackItem, numToAdd uint)([]TrackItem){
 	
 	//Make track.getsimilar request (need at least 2 to force array return type & should give padding in case of unfound songs)
 	lastFMURL := baseURLLastFM + 
-			fmt.Sprintf("&artist=%s&track=%s&limit=%d",url.QueryEscape(baseTrack.ArtistName),url.QueryEscape(baseTrack.TrackName),(numToAdd)*5)
+			fmt.Sprintf("&artist=%s&track=%s&limit=%d",url.QueryEscape(baseTrack.ArtistName),url.QueryEscape(baseTrack.Title),(numToAdd)*5)
 	
 	log.Debug(lastFMURL)
 	resp,err := http.Get(lastFMURL)
@@ -109,7 +89,7 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 			log.Trace(string(body))
 	}
 				
-	returnChan := make(chan *MusicBoxTrack,numToAdd)	
+	returnChan := make(chan *TrackItem,numToAdd)	
 		
 	//Convert to MusicBoxTracks (match to spotify)
 	for _,similarTrack := range responseObject.Similartracks.Track{
@@ -118,7 +98,7 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 		go matchToSpotify(similarTrack,returnChan)
 	}
 	
-	var addedTracks []MusicBoxTrack
+	var addedTracks []TrackItem
 	
 	//Read in created tracks
 	for i:=0;i<len(responseObject.Similartracks.Track);i++{
@@ -137,7 +117,7 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 
 //Make search call to spotify with artist name & track name 
 //Return musicBoxTrack on chan if found
-func matchToSpotify(track lastFMTrack,resultChan chan *MusicBoxTrack){
+func matchToSpotify(track lastFMTrack,resultChan chan *TrackItem){
 	response,error := http.Get(baseURLSpotifySearch + url.QueryEscape(track.Artist.Name+" "+track.Name))
 	if error != nil {
 		// handle error
@@ -176,6 +156,6 @@ func matchToSpotify(track lastFMTrack,resultChan chan *MusicBoxTrack){
 	}
 
 	//Form musicBoxTrack and pass on channel(sync)
-	newTrack := &MusicBoxTrack{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,TrackName:foundSpotifyTrack.Name,Service:"Spotify",URL:foundSpotifyTrack.Href}
+	newTrack := &TrackItem{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,Title:foundSpotifyTrack.Name,ProviderID:foundSpotifyTrack.Href}
 	resultChan<-newTrack
 }

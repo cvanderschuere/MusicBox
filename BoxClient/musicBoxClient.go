@@ -46,13 +46,20 @@ const(
 )
 
 //Fields must be exported for JSON marshal
-type MusicBoxTrack struct{
-	Service string
-	URL		string
-	AlbumName string
+type TrackItem struct{
+	Title string
 	ArtistName string
-	TrackName	string
+	AlbumName	string
+	ArtworkURL	string
+	
+	//Track info
+	ProviderID	string
+	
+	//Storage info
+	CompositeID	string //username:BoxID
+	Date	string  //Date played for accounting purposes
 }
+
 
 /*
 	Functions
@@ -136,13 +143,13 @@ func main() {
 			//Take action based on update type
 			switch update.Kind{
 			case AddedToQueue:
-				track := update.Content.(MusicBoxTrack)
-				log.Debug("Added Track: "+track.Service+" "+track.URL)
+				track := update.Content.(TrackItem)
+				log.Debug("Added Track: "+track.ProviderID)
 				
 			case RemovedFromQueue:
 				//Should have to do nothing...unless is current track
-				track := update.Content.(MusicBoxTrack)	
-				log.Debug("Removed Track: "+track.Service+" "+track.URL)
+				track := update.Content.(TrackItem)	
+				log.Debug("Removed Track: "+track.ProviderID)
 				
 			case PausedTrack:
 				//Send pause command				
@@ -161,10 +168,20 @@ func main() {
 				
 			case NextTrack:
 				//Play track passed
-				track := update.Content.(MusicBoxTrack)
-				log.Debug("Play Next Track: "+track.URL)
+				track := update.Content.(TrackItem)
+				log.Debug("Play Next Track: "+track.ProviderID)
 				
-				item := &spotify.SpotifyItem{Url:track.URL}
+				//Send startedTrack message
+				msg := map[string]interface{} {
+					"command":"startedTrack",
+					"data": map[string]interface{}{ 
+						"deviceID":musicBoxID,
+						"track":track,
+					},
+				}
+				client.PublishExcludeMe(baseURL+username+"/"+deviceName,msg) //Let others know track has started playing
+				
+				item := &spotify.SpotifyItem{Url:track.ProviderID}
 				endOfTrackChan,err = spotify.Play(item,streamChan)
 				if err != nil{
 					log.Error("Error playing track: "+err.Error())
@@ -191,7 +208,7 @@ func main() {
 func eventHandler(client *turnpike.Client, notiChan chan Notification){
 
 	//initial queue...maybe fetch update from server with rpc call
-	var queue []MusicBoxTrack
+	var queue []TrackItem
 	var isPlaying bool = false
 	
 	EVENT_LOOP:
@@ -215,10 +232,10 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					//Add all passed tracks
 					for _,trackDict := range data {
 						track := trackDict.(map[string]interface{})
-						newTrack := MusicBoxTrack{Service:track["service"].(string),URL:track["url"].(string),TrackName:track["trackName"].(string),ArtistName:track["artistName"].(string),AlbumName:track["albumName"].(string)}
+						newTrack := TrackItem{ProviderID:track["ProviderID"].(string),Title:track["Title"].(string),ArtistName:track["ArtistName"].(string),AlbumName:track["albumName"].(string)}
 						if queue == nil{
 							//create queue
-							queue = make([]MusicBoxTrack,1)
+							queue = make([]TrackItem,1)
 							queue[0] = newTrack
 							notiChan <- Notification{Kind:NextTrack,Content:newTrack} // Start initial playback
 							isPlaying = true
@@ -305,8 +322,8 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					
 					for _,m := range tracks{
 						track := m.(map[string]interface{})
+						t := TrackItem{ProviderID:track["ProviderID"].(string),Title:track["Title"].(string),ArtistName:track["ArtistName"].(string),AlbumName:track["AlbumName"].(string),ArtworkURL:track["ArtworkURL"].(string)}
 						
-						t := MusicBoxTrack{TrackName:track["Title"].(string), ArtistName:track["ArtistName"].(string),AlbumName:track["AlbumName"].(string),URL:track["ProviderID"].(string),Service:"Spotify"}
 						queue = append(queue,t)					
 					}	
 					
