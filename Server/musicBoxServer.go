@@ -14,9 +14,9 @@ var server *turnpike.Server
 func main() {
 	server = turnpike.NewServer()
 	
-	//Setup RPC Functions...wrong place to do this
-	//We should be doing this per non-music box client
-	server.RegsterRPC("http://www.MusicBox.com/christopher.vanderschuere@gmail.com/LivingRoom/currentQueueRequest",queueRequest)
+	//Setup RPC Functions (probably not the right way to do this)
+	server.RegisterRPC("http://www.MusicBox.com/currentQueueRequest",queueRequest)
+	server.RegisterRPC("http://www.MusicBox.com/players",boxRequest)
 	
 	http.Handle("/", websocket.Handler(turnpike.HandleWebsocket(server)))
 	
@@ -27,11 +27,29 @@ func main() {
 
 //RPC Handler of form: res, err = f(id, msg.ProcURI, msg.CallArgs...)
 func queueRequest(id, url string, args ...interface{})(interface{},error){
+	//Format: [username password(hashed) deviceName]
+	username := args[0].(string)
+	//password := args[1].(string)
+	deviceName := args[2].(string)
+	
 	//Recieved request for queue...for now just pass on to music box
 	
 	//This will forward an event on a private channel to the music box
 	//The music box will then publish a typical CurrentQueue update to everyone
-	server.SendEvent(url+"/internal","QueueRequest");
+	server.SendEvent("http://www.MusicBox.com/"+username+"/"+deviceName+"/internal","QueueRequest");
 	
-	return "QueueRequest Sent",nil
+	//No response necessary
+	return nil,nil
+}
+
+//Return music box device names for given user (need auth down the line)
+func boxRequest(id,url string, args ...interface{})(interface{},error){
+	//Format: [username password(hashed)]
+	//username := args[0].(string)
+	//password := args[1].(string)
+	
+	//Simulate for  now
+	players := []string{"LivingRoom"}
+	
+	return players,nil
 }
