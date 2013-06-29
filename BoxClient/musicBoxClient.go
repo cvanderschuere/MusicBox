@@ -60,6 +60,7 @@ func main() {
 	
 	//Subscribe as appropriate
 	client.Subscribe("http://www.MusicBox.com/"+username+"/"+deviceName)
+	client.Subscribe("http://www.MusicBox.com/"+username+"/"+deviceName+"/internal") //Also recieve music box exclusive events
 	
 	//Login to services & music sink
 	controlChan := make(chan bool)
@@ -196,6 +197,12 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					
 						notiChan <- Notification{Kind:NextTrack,Content:next}
 					}
+				//
+				//Internal Events
+				//
+				case "QueueRequest":
+					//Publish queue update...only music box responds to this but all client should recieve CurrentQueue
+					client.PublishExcludeMe(serverURL+"/"+username+"/"+deviceName,"CurrentQueue",queue)
 				}
 				
 			default:
