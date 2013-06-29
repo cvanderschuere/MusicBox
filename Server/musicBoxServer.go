@@ -4,8 +4,8 @@ import (
 	"code.google.com/p/go.net/websocket"
 	"log"
 	"net/http"
-	//"github.com/cvanderschuere/turnpike"
-	"turnpike"
+	"github.com/cvanderschuere/turnpike"
+	//"turnpike"
 )
 
 func main() {

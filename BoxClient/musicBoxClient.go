@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
-	//"github.com/cvanderschuere/turnpike"
-	"turnpike"
-	//"spotify"
-	//"alsa"
+	"github.com/cvanderschuere/turnpike"
+	"github.com/cvanderschuere/spotify-go"
+	"github.com/cvanderschuere/alsa-go"
 	"strings"
 )
 
@@ -63,14 +62,22 @@ func main() {
 	client.Subscribe("http://www.MusicBox.com/"+username+"/"+deviceName)
 	
 	//Login to services & music sink
+	controlChan := make(chan bool)
+	streamChan := alsa.Init(controlChan)
+	
+	//Login to spotify (should always work if login test passed)
+	ch := spotify.Login(username,password)
+	<-ch//Login sync	
+	
 	
 	endOfTrackChan := make(chan bool)//Hack: need chan open initially
-	
+	var err error
 	
 	for{
 		select{
 		case <-endOfTrackChan:
 			//Pass message that track is over
+			notiChan <- Notification{Kind:EndOfTrack}
 		case update := <-updateChan:
 			fmt.Println("Update: ",update.Kind)
 			//Take action based on update type
@@ -88,15 +95,29 @@ func main() {
 			case PausedTrack:
 				//Send pause command				
 				fmt.Println("Paused Track")
+				controlChan<-false
+				
 			case ResumedTrack:
 				//Send play
 				fmt.Println("Resumed Track")
+				controlChan<-true
+				
 			case StoppedTrack:
 				//Unload current track
 				fmt.Println("Stopped Track")
+				spotify.Stop()
+				
 			case NextTrack:
 				//Play track passed
-				fmt.Println("Next Track")
+				fmt.Println("Play Next Track")
+				track := update.Content.(MusicBoxTrack)
+				
+				item := &spotify.SpotifyItem{Url:track.URL}
+				err,endOfTrackChan = spotify.Play(item,streamChan)
+				if err != nil{
+					t.Fatalf("Fail: %s",err.Error())
+				}
+				
 			default:
 				fmt.Println("Unknown Update Type: %d",update)
 			}	
@@ -105,6 +126,13 @@ func main() {
 	
 	//Cleanup
 	
+	//Close alsa stream
+	close(streamChan)
+	
+	
+	//Logout of services
+	logout := spotify.Logout()
+	<-logout	
 }
 
 //Decoded event into music box instruction
@@ -137,12 +165,11 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 							//create queue
 							queue = make([]MusicBoxTrack,1)
 							queue[0] = newTrack
+							notiChan <- Notification{Kind:AddedToQueue,Content:newTrack} // Start initial playback
 						}else{
 							//Append
 							queue = append(queue,newTrack)
 						}
-						
-						notiChan <- Notification{Kind:AddedToQueue,Content:newTrack}
 					}
 				case "RemoveTrack":
 					//Format: [RemoveTrack ServiceName TrackName]
@@ -183,6 +210,10 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 				
 					//Send update to play next song
 					notiChan <- Notification{Kind:NextTrack,Content:queue[0]}
+				}
+				else{
+					//Empty entire list
+					queue = nil
 				}
 				//Publish event
 				client.PublishExcludeMe(serverURL+"/"+username+"/"+deviceName,"EndOfTrack")
