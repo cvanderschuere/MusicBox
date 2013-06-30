@@ -15,23 +15,22 @@
                             <collectionView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" minimumZoomScale="0.0" maximumZoomScale="0.0" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Ava-ou-DkE">
                                 <color key="backgroundColor" cocoaTouchSystemColor="scrollViewTexturedBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="FFx-Pj-7yU">
-                                    <size key="itemSize" width="299" height="159"/>
+                                    <size key="itemSize" width="258" height="185"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="trackCell" id="7Jc-yR-uSm" customClass="TrackCell">
-                                        <rect key="frame" x="10" y="0.0" width="299" height="159"/>
+                                        <rect key="frame" x="31" y="0.0" width="258" height="185"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="299" height="159"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="258" height="185"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" image="music-note.jpg" translatesAutoresizingMaskIntoConstraints="NO" id="Gal-oP-IJl">
                                                     <constraints>
-                                                        <constraint firstAttribute="height" constant="131" id="06l-S0-KPD"/>
-                                                        <constraint firstAttribute="width" constant="231" id="EIL-4g-ka9"/>
+                                                        <constraint firstAttribute="height" constant="148" id="6pP-yk-rVD"/>
                                                     </constraints>
                                                 </imageView>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Someone that I used to know" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="8" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QQP-fZ-xFJ">
@@ -46,11 +45,12 @@
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <constraints>
-                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="top" secondItem="7Jc-yR-uSm" secondAttribute="top" type="default" id="8SV-BM-3hB"/>
-                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="centerX" secondItem="7Jc-yR-uSm" secondAttribute="centerX" type="default" id="DH0-a4-5sP"/>
-                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="centerX" secondItem="QQP-fZ-xFJ" secondAttribute="centerX" type="default" id="KEt-IH-bVi"/>
-                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="bottom" secondItem="7Jc-yR-uSm" secondAttribute="bottom" type="default" id="nv5-eC-UWL"/>
-                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="leading" secondItem="7Jc-yR-uSm" secondAttribute="leading" type="default" id="qO5-60-1nv"/>
+                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="top" secondItem="7Jc-yR-uSm" secondAttribute="top" constant="8" id="642-kz-Umg"/>
+                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="leading" secondItem="7Jc-yR-uSm" secondAttribute="leading" type="default" id="8DM-Lz-srx"/>
+                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="bottom" secondItem="7Jc-yR-uSm" secondAttribute="bottom" type="default" id="BTc-A1-lTv"/>
+                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="centerX" secondItem="Gal-oP-IJl" secondAttribute="centerX" type="default" id="VNl-ka-1J0"/>
+                                            <constraint firstAttribute="trailing" secondItem="Gal-oP-IJl" secondAttribute="trailing" constant="20" type="default" id="WXF-bu-j6J"/>
+                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="leading" secondItem="7Jc-yR-uSm" secondAttribute="leading" constant="20" type="default" id="jul-av-DWf"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="albumArt" destination="Gal-oP-IJl" id="Znw-Ol-WDY"/>
@@ -81,8 +81,11 @@
                                 </items>
                             </navigationBar>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sMw-cq-YIk">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="87" id="xzY-rx-Q33"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <state key="normal" title="PLAY/PAUSE">
+                                <state key="normal" title="Play">
                                     <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -94,8 +97,11 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SLU-08-rxH">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="88" id="2ef-RF-s65"/>
+                                </constraints>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <state key="normal" title="NEXT">
+                                <state key="normal" title="Next">
                                     <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
                                     <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
@@ -110,15 +116,16 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="DWh-vm-sR4" firstAttribute="trailing" secondItem="75B-Tx-dIV" secondAttribute="trailing" type="default" id="7VZ-AY-pBo"/>
-                            <constraint firstItem="SLU-08-rxH" firstAttribute="baseline" secondItem="sMw-cq-YIk" secondAttribute="baseline" type="default" id="8JC-oP-uXD"/>
+                            <constraint firstItem="SLU-08-rxH" firstAttribute="baseline" secondItem="sMw-cq-YIk" secondAttribute="baseline" type="user" id="8JC-oP-uXD"/>
                             <constraint firstItem="DWh-vm-sR4" firstAttribute="top" secondItem="75B-Tx-dIV" secondAttribute="top" type="default" id="GGN-wf-w7h"/>
-                            <constraint firstAttribute="bottom" secondItem="sMw-cq-YIk" secondAttribute="bottom" constant="5" id="Gs4-pV-t9Z"/>
+                            <constraint firstAttribute="bottom" secondItem="sMw-cq-YIk" secondAttribute="bottom" constant="5" type="user" id="Gs4-pV-t9Z"/>
                             <constraint firstItem="Ava-ou-DkE" firstAttribute="top" secondItem="DWh-vm-sR4" secondAttribute="bottom" type="default" id="Kr6-fB-igD"/>
                             <constraint firstItem="DWh-vm-sR4" firstAttribute="leading" secondItem="75B-Tx-dIV" secondAttribute="leading" type="default" id="MIR-In-ZnF"/>
                             <constraint firstItem="Ava-ou-DkE" firstAttribute="trailing" secondItem="75B-Tx-dIV" secondAttribute="trailing" type="default" id="T63-jN-F6x"/>
-                            <constraint firstItem="sMw-cq-YIk" firstAttribute="leading" secondItem="75B-Tx-dIV" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="YYT-h2-xTI"/>
                             <constraint firstItem="Ava-ou-DkE" firstAttribute="leading" secondItem="75B-Tx-dIV" secondAttribute="leading" type="default" id="mL1-Q2-QCY"/>
+                            <constraint firstAttribute="bottom" secondItem="SLU-08-rxH" secondAttribute="bottom" constant="5" type="user" id="nqB-Ey-vQ9"/>
                             <constraint firstAttribute="trailing" secondItem="SLU-08-rxH" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="tR2-Ss-vO3"/>
+                            <constraint firstItem="sMw-cq-YIk" firstAttribute="leading" secondItem="75B-Tx-dIV" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="tkZ-gh-ooq"/>
                             <constraint firstItem="Ava-ou-DkE" firstAttribute="bottom" secondItem="75B-Tx-dIV" secondAttribute="bottom" type="default" id="uLU-am-sjC"/>
                         </constraints>
                     </view>

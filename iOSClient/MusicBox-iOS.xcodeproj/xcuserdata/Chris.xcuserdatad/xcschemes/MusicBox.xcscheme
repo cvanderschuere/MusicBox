@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "83ECA5F51704B9CE00E75B14"
-               BuildableName = "MusicBox.app"
-               BlueprintName = "MusicBox"
-               ReferencedContainer = "container:MusicBox.xcodeproj">
+               BuildableName = "MusicBox-iOS.app"
+               BlueprintName = "MusicBox-iOS"
+               ReferencedContainer = "container:MusicBox-iOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "83ECA5F51704B9CE00E75B14"
-            BuildableName = "MusicBox.app"
-            BlueprintName = "MusicBox"
-            ReferencedContainer = "container:MusicBox.xcodeproj">
+            BuildableName = "MusicBox-iOS.app"
+            BlueprintName = "MusicBox-iOS"
+            ReferencedContainer = "container:MusicBox-iOS.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -52,9 +52,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "83ECA5F51704B9CE00E75B14"
-            BuildableName = "MusicBox.app"
-            BlueprintName = "MusicBox"
-            ReferencedContainer = "container:MusicBox.xcodeproj">
+            BuildableName = "MusicBox-iOS.app"
+            BlueprintName = "MusicBox-iOS"
+            ReferencedContainer = "container:MusicBox-iOS.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -70,9 +70,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "83ECA5F51704B9CE00E75B14"
-            BuildableName = "MusicBox.app"
-            BlueprintName = "MusicBox"
-            ReferencedContainer = "container:MusicBox.xcodeproj">
+            BuildableName = "MusicBox-iOS.app"
+            BlueprintName = "MusicBox-iOS"
+            ReferencedContainer = "container:MusicBox-iOS.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
