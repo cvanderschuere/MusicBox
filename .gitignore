@@ -42,3 +42,4 @@ profile
 DerivedData
 .idea/
 *.hmap
+*.xcuserstate
