@@ -5,18 +5,22 @@ import (
 	"log"
 	"net/http"
 	"github.com/cvanderschuere/turnpike"
-	//"turnpike"
+	//"turnpike" //Local Dev
 )
 
 //Global
 var server *turnpike.Server
 
+const(
+	baseURL = "http://www.musicbox.com/"
+)
+
 func main() {
 	server = turnpike.NewServer()
 	
 	//Setup RPC Functions (probably not the right way to do this)
-	server.RegisterRPC("http://www.musicbox.com/currentQueueRequest",queueRequest)
-	server.RegisterRPC("http://www.musicbox.com/players",boxRequest)
+	server.RegisterRPC(baseURL+"currentQueueRequest",queueRequest)
+	server.RegisterRPC(baseURL+"players",boxRequest)
 	
 	http.Handle("/", websocket.Handler(turnpike.HandleWebsocket(server)))
 	
@@ -36,7 +40,7 @@ func queueRequest(id, url string, args ...interface{})(interface{},error){
 	
 	//This will forward an event on a private channel to the music box
 	//The music box will then publish a typical CurrentQueue update to everyone
-	server.SendEvent("http://www.musicbox.com/"+username+"/"+deviceName+"/internal","QueueRequest");
+	server.SendEvent(baseURL+username+"/"+deviceName+"/internal","QueueRequest");
 	
 	//No response necessary
 	return nil,nil
