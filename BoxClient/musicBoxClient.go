@@ -8,7 +8,8 @@ import (
 	"strings"
 )
 
-const serverURL = "localhost:8080"
+const serverURL = "ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080"
+const baseURL = "http://www.musicbox.com/"
 
 const(
         username string = "christopher.vanderschuere@gmail.com"
@@ -59,8 +60,8 @@ func main() {
 	go eventHandler(client,updateChan)
 	
 	//Subscribe as appropriate
-	client.Subscribe("http://www.MusicBox.com/"+username+"/"+deviceName)
-	client.Subscribe("http://www.MusicBox.com/"+username+"/"+deviceName+"/internal") //Also recieve music box exclusive events
+	client.Subscribe(baseURL+username+"/"+deviceName)
+	client.Subscribe(baseURL+username+"/"+deviceName+"/internal") //Also recieve music box exclusive events
 	
 	//Login to services & music sink
 	controlChan := make(chan bool)
@@ -71,14 +72,17 @@ func main() {
 	<-ch//Login sync	
 	
 	
-	endOfTrackChan := make(chan bool)//Hack: need chan open initially
+	//endOfTrackChan := make(chan bool)//Hack: need chan open initially
+	var endOfTrackChan <-chan bool
 	var err error
 	
 	for{
 		select{
 		case <-endOfTrackChan:
 			//Pass message that track is over
-			notiChan <- Notification{Kind:EndOfTrack}
+			fmt.Println("Recieved on end of track chan")
+			updateChan <- Notification{Kind:EndOfTrack}
+			fmt.Println("Finished send on end of track update")
 		case update := <-updateChan:
 			fmt.Println("Update: ",update.Kind)
 			//Take action based on update type
@@ -110,13 +114,13 @@ func main() {
 				
 			case NextTrack:
 				//Play track passed
-				fmt.Println("Play Next Track")
 				track := update.Content.(MusicBoxTrack)
+				fmt.Println("Play Next Track: "+track.URL)
 				
 				item := &spotify.SpotifyItem{Url:track.URL}
 				err,endOfTrackChan = spotify.Play(item,streamChan)
 				if err != nil{
-					t.Fatalf("Fail: %s",err.Error())
+					fmt.Println("Error playing track: "+err.Error())
 				}
 				
 			default:
@@ -129,7 +133,6 @@ func main() {
 	
 	//Close alsa stream
 	close(streamChan)
-	
 	
 	//Logout of services
 	logout := spotify.Logout()
@@ -153,8 +156,9 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 			switch event.(type){
 			case turnpike.EventMsg:
 				commandString := event.(turnpike.EventMsg).Event.(string)
-				command := strings.Split(commandString,":")
+				command := strings.Split(commandString,",")
 				
+				fmt.Println("String: "+commandString)
 				fmt.Println("Command: "+command[0])
 				//Switch through command types
 				switch command[0]{
@@ -166,10 +170,11 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 							//create queue
 							queue = make([]MusicBoxTrack,1)
 							queue[0] = newTrack
-							notiChan <- Notification{Kind:AddedToQueue,Content:newTrack} // Start initial playback
+							notiChan <- Notification{Kind:NextTrack,Content:newTrack} // Start initial playback
 						}else{
 							//Append
 							queue = append(queue,newTrack)
+							notiChan <- Notification{Kind:AddedToQueue,Content:newTrack} // Give chance to preload
 						}
 					}
 				case "RemoveTrack":
@@ -185,8 +190,8 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					notiChan <- Notification{Kind:ResumedTrack}
 				case "PauseTrack":
 					notiChan <- Notification{Kind:PausedTrack}
-				case "StoppedTrack":
-					notiChan <- Notification{Kind:StoppedTrack}
+				case "StopTrack":
+					notiChan <- Notification{Kind:StoppedTrack} //Song stays in queue...no different than pause?
 				case "NextTrack":
 					if len(queue)>1{
 						//Remove current track
@@ -197,12 +202,13 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					
 						notiChan <- Notification{Kind:NextTrack,Content:next}
 					}
+					//Else don't allow
 				//
 				//Internal Events
 				//
 				case "QueueRequest":
 					//Publish queue update...only music box responds to this but all client should recieve CurrentQueue
-					client.PublishExcludeMe(serverURL+"/"+username+"/"+deviceName,"CurrentQueue",queue)
+					client.PublishExcludeMe(baseURL+username+"/"+deviceName,queue)
 				}
 				
 			default:
@@ -215,15 +221,16 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					//Remove first track
 					queue = queue[1:]
 				
+					fmt.Println("Moving to next song")
 					//Send update to play next song
 					notiChan <- Notification{Kind:NextTrack,Content:queue[0]}
-				}
-				else{
+				}else{
+					fmt.Println("Clear queue")
 					//Empty entire list
 					queue = nil
 				}
 				//Publish event
-				client.PublishExcludeMe(serverURL+"/"+username+"/"+deviceName,"EndOfTrack")
+				client.PublishExcludeMe(baseURL+username+"/"+deviceName,"EndOfTrack")
 			}
 		}
 	}
