@@ -7,6 +7,12 @@
 _obj
 _test
 
+#OSX Files
+.DS_Store
+
+#Spotify
+appkey.h
+
 # Architecture specific extensions/prefixes
 *.[568vq]
 [568vq].out
