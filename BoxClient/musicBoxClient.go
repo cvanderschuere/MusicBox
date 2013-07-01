@@ -3,13 +3,17 @@ package main
 import (
 	"fmt"
 	"github.com/cvanderschuere/turnpike"
+	"github.com/jcelliott/lumber"
 	"github.com/cvanderschuere/spotify-go"
 	"github.com/cvanderschuere/alsa-go"
 	"strings"
+	"runtime"
 )
 
 const serverURL = "ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
+
+var log = lumber.NewConsoleLogger(lumber.WARN)
 
 const(
         username string = "christopher.vanderschuere@gmail.com"
@@ -45,6 +49,8 @@ type MusicBoxTrack struct{
 */
 
 func main() {
+	runtime.GOMAXPROCS(2)
+	
 	client := turnpike.NewClient()
 	
 	//Connect socket between server port and local port
@@ -148,6 +154,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 	
 	EVENT_LOOP:
 	for{
+		log.Trace("Event Handler Select")
 		select{
 		case event,ok := <-client.HandleChan:
 			if ok == false{
@@ -171,6 +178,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 							queue = make([]MusicBoxTrack,1)
 							queue[0] = newTrack
 							notiChan <- Notification{Kind:NextTrack,Content:newTrack} // Start initial playback
+							client.PublishExcludeMe(baseURL+username+"/"+deviceName,"PlayTrack") //Let others know track is playing
 						}else{
 							//Append
 							queue = append(queue,newTrack)
