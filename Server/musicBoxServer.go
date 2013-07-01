@@ -21,6 +21,8 @@ func main() {
 	//Setup RPC Functions (probably not the right way to do this)
 	server.RegisterRPC(baseURL+"currentQueueRequest",queueRequest)
 	server.RegisterRPC(baseURL+"players",boxRequest)
+	//	server.RegisterRPC(baseURL+"user/status",userUpdate)
+	//	server.RegisterRPC(baseURL+"player/status",playerUpdate)
 	
 	http.Handle("/", websocket.Handler(turnpike.HandleWebsocket(server)))
 	
@@ -57,3 +59,4 @@ func boxRequest(id,url string, args ...interface{})(interface{},error){
 	
 	return players,nil
 }
+
