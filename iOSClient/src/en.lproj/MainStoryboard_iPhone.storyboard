@@ -15,22 +15,22 @@
                             <collectionView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" minimumZoomScale="0.0" maximumZoomScale="0.0" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="Ava-ou-DkE">
                                 <color key="backgroundColor" cocoaTouchSystemColor="scrollViewTexturedBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="FFx-Pj-7yU">
-                                    <size key="itemSize" width="258" height="185"/>
+                                    <size key="itemSize" width="288" height="190"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="trackCell" id="7Jc-yR-uSm" customClass="TrackCell">
-                                        <rect key="frame" x="31" y="0.0" width="258" height="185"/>
+                                        <rect key="frame" x="16" y="0.0" width="288" height="190"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="258" height="185"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="288" height="190"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" image="music-note.jpg" translatesAutoresizingMaskIntoConstraints="NO" id="Gal-oP-IJl">
                                                     <constraints>
-                                                        <constraint firstAttribute="height" constant="148" id="6pP-yk-rVD"/>
+                                                        <constraint firstAttribute="height" constant="161" id="qGT-kS-Taa"/>
                                                     </constraints>
                                                 </imageView>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Someone that I used to know" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="8" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QQP-fZ-xFJ">
@@ -45,12 +45,12 @@
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <constraints>
-                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="top" secondItem="7Jc-yR-uSm" secondAttribute="top" constant="8" id="642-kz-Umg"/>
-                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="leading" secondItem="7Jc-yR-uSm" secondAttribute="leading" type="default" id="8DM-Lz-srx"/>
-                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="bottom" secondItem="7Jc-yR-uSm" secondAttribute="bottom" type="default" id="BTc-A1-lTv"/>
-                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="centerX" secondItem="Gal-oP-IJl" secondAttribute="centerX" type="default" id="VNl-ka-1J0"/>
-                                            <constraint firstAttribute="trailing" secondItem="Gal-oP-IJl" secondAttribute="trailing" constant="20" type="default" id="WXF-bu-j6J"/>
-                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="leading" secondItem="7Jc-yR-uSm" secondAttribute="leading" constant="20" type="default" id="jul-av-DWf"/>
+                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="top" secondItem="7Jc-yR-uSm" secondAttribute="top" constant="4" id="CIi-mf-XTr"/>
+                                            <constraint firstAttribute="trailing" secondItem="Gal-oP-IJl" secondAttribute="trailing" constant="20" type="default" id="DNc-5l-cmI"/>
+                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="top" secondItem="7Jc-yR-uSm" secondAttribute="top" constant="157" id="OhW-E7-21p"/>
+                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="trailing" secondItem="7Jc-yR-uSm" secondAttribute="trailing" type="default" id="PPj-2w-Nay"/>
+                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="leading" secondItem="7Jc-yR-uSm" secondAttribute="leading" constant="20" type="default" id="nIj-kW-XJK"/>
+                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="leading" secondItem="7Jc-yR-uSm" secondAttribute="leading" type="default" id="xUD-O8-mEB"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="albumArt" destination="Gal-oP-IJl" id="Znw-Ol-WDY"/>
@@ -131,6 +131,8 @@
                     </view>
                     <connections>
                         <outlet property="collectionView" destination="Ava-ou-DkE" id="xmw-IV-vDz"/>
+                        <outlet property="nextButton" destination="SLU-08-rxH" id="Lmy-ai-BUr"/>
+                        <outlet property="playPauseButton" destination="sMw-cq-YIk" id="Skh-BY-Jbn"/>
                         <outlet property="playerButton" destination="B4j-Az-JeK" id="Xf2-eX-g12"/>
                     </connections>
                 </viewController>
@@ -317,6 +319,8 @@
                 <relationship kind="action" name="unwindFromPlayerSelection:" candidateClass="UIStoryboardSegue"/>
                 <relationship kind="action" name="unwindFromTrackSelection:" candidateClass="UIStoryboardSegue"/>
                 <relationship kind="outlet" name="collectionView" candidateClass="UICollectionView"/>
+                <relationship kind="outlet" name="nextButton" candidateClass="UIButton"/>
+                <relationship kind="outlet" name="playPauseButton" candidateClass="UIButton"/>
                 <relationship kind="outlet" name="playerButton" candidateClass="UIBarButtonItem"/>
             </relationships>
         </class>

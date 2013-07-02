@@ -58,12 +58,16 @@
     [super viewDidLoad];
 	// Do any additional setup after loading the view.
     
+    [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
+    
     //Add refresh control
-    UIRefreshControl *refreshControl = [[UIRefreshControl alloc] init];
-    refreshControl.tintColor = [UIColor lightGrayColor];
-    [refreshControl addTarget:self action:@selector(refreshPlaylist:) forControlEvents:UIControlEventValueChanged];
-    [self.collectionView addSubview:refreshControl];
+    self.refreshControl = [[UIRefreshControl alloc] init];
+    self.refreshControl.tintColor = [UIColor lightGrayColor];
+    [self.refreshControl addTarget:self action:@selector(refreshPlaylist:) forControlEvents:UIControlEventValueChanged];
+    [self.collectionView addSubview:self.refreshControl];
     self.collectionView.alwaysBounceVertical = YES;
+    
+    [self.refreshControl beginRefreshing];
     
     //Refresh UI for previously selected player
     NSString* previousPlayerTitle = [[NSUserDefaults standardUserDefaults] valueForKey:@"previousPlayer"];
@@ -96,9 +100,11 @@
 }
 #pragma mark WAMP event 
 - (void) onEvent:(NSString *)topicUri eventObject:(id)object{
-    NSLog(@"Recieved Event:%@",topicUri);
+    NSLog(@"Recieved Event:%@",object);
     NSString* username = @"christopher.vanderschuere@gmail.com";
     NSString* deviceName = @"LivingRoom";
+    
+    [self.refreshControl endRefreshing];
     
     //Form: baseURL+username+"/"+deviceName+"/currentQueue"
     if ([topicUri isEqualToString:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,deviceName]]&& [object isKindOfClass:[NSArray class]]) {
@@ -109,6 +115,24 @@
         
         [self.currentPlayer setTracksWithLinks:recievedTracks];
     }
+    else if ([object isKindOfClass:[NSString class]]){
+        //Split string into components
+        NSArray* components = [object componentsSeparatedByString:@","];
+        if (components.count >0) {
+            //Determine recieved command
+            if ([components[0] isEqualToString:@"PlayTrack"]) {
+                //Update display
+                [self.playPauseButton setTitle:@"Pause" forState:UIControlStateNormal];
+            }
+            else if ([components[0] isEqualToString:@"PauseTrack"]) {
+                //Update display
+                [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
+            }
+        }
+        
+        
+    }
+    
 }
 
 #pragma mark RPC Response
@@ -125,8 +149,6 @@
     [delegate.requestQueue addOperationWithBlock:^(){
         [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:@"christopher.vanderschuere@gmail.com",@"ExamplePassword",self.currentPlayer.title, nil];
     }];
-    
-    [sender endRefreshing];
 }
 #pragma mark - UICollectionView Datasource methods
 -(NSInteger) collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
@@ -140,9 +162,27 @@
     
     //Load art in background
     cell.albumArt.image = track.album.cover.image;
+    cell.albumArt.layer.cornerRadius = 5.0f;
+    cell.albumArt.layer.masksToBounds = YES;
     
     return cell;
 }
+#pragma mark Rotation Events
+-(void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
+                               duration:(NSTimeInterval)duration{
+    
+    //Get current layout
+    UICollectionViewFlowLayout* layout = (UICollectionViewFlowLayout*) self.collectionView.collectionViewLayout;
+    
+    if (UIDeviceOrientationIsPortrait(toInterfaceOrientation)) {
+        layout.scrollDirection = UICollectionViewScrollDirectionVertical;
+        [self.collectionView reloadData];
+    } else {
+        layout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+        [self.collectionView reloadData];
+    }
+}
+
 
 #pragma mark - UIStoryboard Segue Methods
 - (IBAction)nextPressed:(id)sender {
@@ -154,6 +194,21 @@
 }
 
 - (IBAction)playPausePressed:(id)sender {
+    NSString* username = @"christopher.vanderschuere@gmail.com";
+    AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
+
+    if ([self.playPauseButton.titleLabel.text isEqualToString:@"Play"]) {
+        [delegate.requestQueue addOperationWithBlock:^{
+            [delegate.ws publish:@"PlayTrack" toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+        }];
+        [self.playPauseButton setTitle:@"Pause" forState:UIControlStateNormal];
+    }
+    else{
+        [delegate.requestQueue addOperationWithBlock:^{
+            [delegate.ws publish:@"PauseTrack" toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+        }];
+        [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
+    }
 }
 
 -(IBAction)unwindFromPlayerSelection:(UIStoryboardSegue*)sender{

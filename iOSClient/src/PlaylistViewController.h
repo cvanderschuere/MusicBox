@@ -15,6 +15,9 @@
 @property (nonatomic,strong) MusicBox *currentPlayer;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *playerButton;
 @property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
+@property (weak, nonatomic) IBOutlet UIButton *playPauseButton;
+@property (weak, nonatomic) IBOutlet UIButton *nextButton;
+@property (nonatomic,strong) UIRefreshControl *refreshControl;
 
 - (IBAction)nextPressed:(id)sender;
 - (IBAction)playPausePressed:(id)sender;

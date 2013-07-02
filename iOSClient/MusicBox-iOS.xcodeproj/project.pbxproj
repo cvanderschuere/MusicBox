@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		83206377171FA9320021A88D /* TrackCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83206376171FA9320021A88D /* TrackCell.m */; };
 		834BF80A1708D8090005F8DB /* music-note.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 834BF8091708D8090005F8DB /* music-note.jpg */; };
+		835D938C17826653000EB969 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 835D938B17826653000EB969 /* QuartzCore.framework */; };
 		83799EFC177F6228008DCCC3 /* libicucore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 83799EFB177F6228008DCCC3 /* libicucore.dylib */; };
 		83799EFE177F6257008DCCC3 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83799EFD177F6257008DCCC3 /* Security.framework */; };
 		83799F06177FCFD4008DCCC3 /* MusicBox.m in Sources */ = {isa = PBXBuildFile; fileRef = 83799F05177FCFD4008DCCC3 /* MusicBox.m */; };
@@ -60,6 +61,7 @@
 		83206375171FA9320021A88D /* TrackCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackCell.h; sourceTree = "<group>"; };
 		83206376171FA9320021A88D /* TrackCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrackCell.m; sourceTree = "<group>"; };
 		834BF8091708D8090005F8DB /* music-note.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "music-note.jpg"; sourceTree = "<group>"; };
+		835D938B17826653000EB969 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		83799EFB177F6228008DCCC3 /* libicucore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.dylib; path = usr/lib/libicucore.dylib; sourceTree = SDKROOT; };
 		83799EFD177F6257008DCCC3 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		83799F04177FCFD4008DCCC3 /* MusicBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MusicBox.h; sourceTree = "<group>"; };
@@ -103,6 +105,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				835D938C17826653000EB969 /* QuartzCore.framework in Frameworks */,
 				839E4E6B1780FA4700EBB519 /* libCocoaLibSpotify.a in Frameworks */,
 				83799EFE177F6257008DCCC3 /* Security.framework in Frameworks */,
 				83DEC8BC1704CD2B00414A78 /* CFNetwork.framework in Frameworks */,
@@ -152,6 +155,7 @@
 		83ECA5F81704B9CE00E75B14 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				835D938B17826653000EB969 /* QuartzCore.framework */,
 				839E4E691780FA3A00EBB519 /* MDWamp.framework */,
 				8309C8691780D8950031D30D /* CocoaLibSpotify iOS Library.xcodeproj */,
 				8382C2C71719E8C300EED999 /* MobileCoreServices.framework */,
