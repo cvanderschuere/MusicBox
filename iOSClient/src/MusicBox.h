@@ -19,6 +19,7 @@
 @interface MusicBox : NSObject
 
 @property (nonatomic,strong) NSString* title;
+@property BOOL playing;
 
 //track handling
 @property (nonatomic, strong) NSMutableArray *tracks; //Sp_track instances
