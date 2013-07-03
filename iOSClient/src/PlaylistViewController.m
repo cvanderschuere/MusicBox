@@ -110,7 +110,7 @@
     if ([topicUri isEqualToString:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,deviceName]]&& [object isKindOfClass:[NSArray class]]) {
         NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
         for(NSDictionary *item in object){
-            [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:item[@"URL"]]];
+            [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]]];
         }
         
         [self.currentPlayer setTracksWithLinks:recievedTracks];
@@ -127,6 +127,12 @@
             else if ([components[0] isEqualToString:@"PauseTrack"]) {
                 //Update display
                 [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
+            }
+            else if ([components[0] isEqualToString:@"AddTrack"]){
+                if (components.count >=3 ) {
+                    MusicBoxTrack* addedTrack = [MusicBoxTrack trackWithService:components[1] Url:[NSURL URLWithString:components[2]]];
+                    [self.currentPlayer addTrackWithLink:addedTrack atIndex:self.currentPlayer.tracks.count]; //Add to back
+                }
             }
         }
         
@@ -223,15 +229,18 @@
 -(IBAction)unwindFromTrackSelection:(UIStoryboardSegue *)sender{
     //Get selected track from 
     TrackSearchViewController* trackVC = sender.sourceViewController;
-    NSLog(@"Track: %@",trackVC.selectedTrackURL);
+    NSLog(@"Track: %@",trackVC.selectedTrack.url);
     
-    if (trackVC.selectedTrackURL && self.currentPlayer) {
+    if (trackVC.selectedTrack && self.currentPlayer) {
+        //Add locally
+        [self.currentPlayer addTrackWithLink:trackVC.selectedTrack atIndex:self.currentPlayer.tracks.count];
+        
         //Add track
         AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
         NSString* username = @"christopher.vanderschuere@gmail.com";
-        NSString* serviceType = @"Spotify";
+        
         [delegate.requestQueue addOperationWithBlock:^{
-            [delegate.ws publish:[NSString stringWithFormat:@"AddTrack,%@,%@",serviceType,trackVC.selectedTrackURL]toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+            [delegate.ws publish:[NSString stringWithFormat:@"AddTrack,%@,%@",trackVC.selectedTrack.service,trackVC.selectedTrack.url]toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
         }];
     }
     

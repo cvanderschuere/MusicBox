@@ -9,7 +9,7 @@
 #import "MusicBox.h"
 
 @implementation MusicBoxTrack
-+(instancetype) trackWithService:(NSString*)serviceName Url:(NSString*)url{
++(instancetype) trackWithService:(NSString*)serviceName Url:(NSURL*)url{
     MusicBoxTrack *newTrack = [[MusicBoxTrack alloc] init];
     newTrack.service = serviceName;
     newTrack.url = url;
@@ -35,7 +35,7 @@
     [self.tracks removeAllObjects];
     self.loaded = NO;
     for(MusicBoxTrack *linkedTrack in self.links){
-        [SPTrack trackForTrackURL:[NSURL URLWithString:linkedTrack.url] inSession:[SPSession sharedSession] callback:^(SPTrack *track) {
+        [SPTrack trackForTrackURL:linkedTrack.url inSession:[SPSession sharedSession] callback:^(SPTrack *track) {
             [self.tracks addObject:track];
             if (self.tracks.count == linkArray.count){
                 //Load all tracks
@@ -56,6 +56,32 @@
             }
         }];
     }
+}
+
+- (void) addTrackWithLink:(MusicBoxTrack*)link atIndex:(NSUInteger)idx{
+    [self.links insertObject:link atIndex:idx];
+    
+    self.loaded = NO;
+    [SPTrack trackForTrackURL:link.url inSession:[SPSession sharedSession] callback:^(SPTrack *track) {
+        [self.tracks insertObject:track atIndex:idx];
+        
+        [SPAsyncLoading waitUntilLoaded:track timeout:10 then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
+            if (loadedItems.count>0) {
+                SPTrack *track = loadedItems.lastObject;
+                
+                [SPAsyncLoading waitUntilLoaded:track.album.cover timeout:10 then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
+                    self.loaded = YES;
+                }];
+            }
+        }];
+
+    }];
+    
+}
+- (void) removeTrackWithLink:(MusicBoxTrack*)link{
+    NSUInteger idx = [self.links indexOfObject:link];
+    [self.tracks removeObjectAtIndex:idx];
+    [self.links removeObjectAtIndex:idx];
 }
 
 @end

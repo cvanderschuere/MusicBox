@@ -7,11 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MusicBox.h"
 
 @interface TrackSearchViewController : UIViewController <UISearchBarDelegate, UITableViewDelegate,UITableViewDataSource>
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
 @property (weak, nonatomic) IBOutlet UITableView *results;
 
-@property (nonatomic, strong) NSURL* selectedTrackURL;
+@property (nonatomic, strong) MusicBoxTrack* selectedTrack;
 
 @end

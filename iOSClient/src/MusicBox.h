@@ -10,9 +10,9 @@
 
 @interface MusicBoxTrack : NSObject
 @property (nonatomic,strong) NSString *service;
-@property (nonatomic,strong) NSString *url;
+@property (nonatomic,strong) NSURL *url;
 
-+(instancetype) trackWithService:(NSString*)serviceName Url:(NSString*)url;
++(instancetype) trackWithService:(NSString*)serviceName Url:(NSURL*)url;
 @end
 
 
@@ -28,5 +28,7 @@
 + (instancetype) musicBoxWithName:(NSString*) name;
 
 -(void) setTracksWithLinks:(NSArray*)linkArray;
+- (void) addTrackWithLink:(MusicBoxTrack*)link atIndex:(NSUInteger)idx;
+- (void) removeTrackWithLink:(MusicBoxTrack*)link;
 
 @end

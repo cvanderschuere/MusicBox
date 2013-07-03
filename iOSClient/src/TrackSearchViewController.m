@@ -70,9 +70,7 @@
         default:
             break;
     }
-    
-    self.selectedTrackURL = url;
-
+    self.selectedTrack = [MusicBoxTrack trackWithService:@"Service" Url:url];
     
     [self.searchBar resignFirstResponder];
     [self performSegueWithIdentifier:@"unwindSegue" sender:self];
