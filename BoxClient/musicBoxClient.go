@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/cvanderschuere/turnpike"
 	"github.com/jcelliott/lumber"
 	"github.com/cvanderschuere/spotify-go"
@@ -55,7 +54,7 @@ func main() {
 	
 	//Connect socket between server port and local port
 	if err := client.Connect("ws://"+serverURL, "http://localhost:4040"); err != nil {
-		fmt.Println("Error connecting:", err)
+		log.Error("Error connecting:", err)
 		return
 	}
 	
@@ -86,51 +85,51 @@ func main() {
 		select{
 		case <-endOfTrackChan:
 			//Pass message that track is over
-			fmt.Println("Recieved on end of track chan")
+			log.Trace("Recieved on end of track chan")
 			updateChan <- Notification{Kind:EndOfTrack}
-			fmt.Println("Finished send on end of track update")
+			log.Trace("Finished send on end of track update")
 		case update := <-updateChan:
-			fmt.Println("Update: ",update.Kind)
+			log.Trace("Update: ",update.Kind)
 			//Take action based on update type
 			switch update.Kind{
 			case AddedToQueue:
 				track := update.Content.(MusicBoxTrack)
 				
 				//If nothing playing...start it playing
-				fmt.Println("Added Track: "+track.Service+" "+track.URL)
+				log.Debug("Added Track: "+track.Service+" "+track.URL)
 			case RemovedFromQueue:
 				//Should have to do nothing...unless is current track
 				track := update.Content.(MusicBoxTrack)
 				
-				fmt.Println("Removed Track: "+track.Service+" "+track.URL)
+				log.Debug("Removed Track: "+track.Service+" "+track.URL)
 			case PausedTrack:
 				//Send pause command				
-				fmt.Println("Paused Track")
+				log.Debug("Paused Track")
 				controlChan<-false
 				
 			case ResumedTrack:
 				//Send play
-				fmt.Println("Resumed Track")
+				log.Debug("Resumed Track")
 				controlChan<-true
 				
 			case StoppedTrack:
 				//Unload current track
-				fmt.Println("Stopped Track")
+				log.Debug("Stopped Track")
 				spotify.Stop()
 				
 			case NextTrack:
 				//Play track passed
 				track := update.Content.(MusicBoxTrack)
-				fmt.Println("Play Next Track: "+track.URL)
+				log.Debug("Play Next Track: "+track.URL)
 				
 				item := &spotify.SpotifyItem{Url:track.URL}
 				err,endOfTrackChan = spotify.Play(item,streamChan)
 				if err != nil{
-					fmt.Println("Error playing track: "+err.Error())
+					log.Error("Error playing track: "+err.Error())
 				}
 				
 			default:
-				fmt.Println("Unknown Update Type: %d",update)
+				log.Warn("Unknown Update Type: %d",update)
 			}	
 		}
 	}
@@ -165,8 +164,8 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 				commandString := event.(turnpike.EventMsg).Event.(string)
 				command := strings.Split(commandString,",")
 				
-				fmt.Println("String: "+commandString)
-				fmt.Println("Command: "+command[0])
+				log.Trace("String: "+commandString)
+				log.Debug("Command: "+command[0])
 				//Switch through command types
 				switch command[0]{
 				case "AddTrack":
@@ -220,7 +219,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 				}
 				
 			default:
-				fmt.Println("Recieved Unknown type")
+				log.Warn("Recieved Unknown type")
 			}
 			
 		case update,ok := <-notiChan:
@@ -229,11 +228,11 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					//Remove first track
 					queue = queue[1:]
 				
-					fmt.Println("Moving to next song")
+					log.Trace("Moving to next song")
 					//Send update to play next song
 					notiChan <- Notification{Kind:NextTrack,Content:queue[0]}
 				}else{
-					fmt.Println("Clear queue")
+					log.Trace("Clear queue")
 					//Empty entire list
 					queue = nil
 				}
