@@ -107,6 +107,7 @@
     [self.refreshControl endRefreshing];
     
     //Form: baseURL+username+"/"+deviceName+"/currentQueue"
+    //Queue update
     if ([topicUri isEqualToString:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,deviceName]]&& [object isKindOfClass:[NSArray class]]) {
         NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
         for(NSDictionary *item in object){
@@ -114,6 +115,26 @@
         }
         
         [self.currentPlayer setTracksWithLinks:recievedTracks];
+    }
+    //Status update
+    else if ([topicUri isEqualToString:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,deviceName]]&& [object isKindOfClass:[NSDictionary class]]) {
+        NSDictionary* statusObject = (NSDictionary*) object;
+        
+        //Play/Pause
+        self.currentPlayer.playing = [[statusObject objectForKey:@"isPlaying"] boolValue];
+        [self.playPauseButton setTitle:self.currentPlayer.playing?@"Pause":@"Play" forState:UIControlStateNormal];
+        
+        //Queue
+        if (![[statusObject objectForKey:@"queue"] isKindOfClass:[NSNull class]]) {
+            NSArray *queue = (NSArray*) [statusObject objectForKey:@"queue"];
+            if (queue.count>0) {
+                NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
+                for(NSDictionary *item in queue){
+                    [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]]];
+                }
+                [self.currentPlayer setTracksWithLinks:recievedTracks];
+            }
+        }
     }
     else if ([object isKindOfClass:[NSString class]]){
         //Split string into components

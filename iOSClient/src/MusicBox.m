@@ -25,6 +25,7 @@
     box.title = name;
     box.tracks = [NSMutableArray array];
     box.links = [NSMutableArray array];
+    box.playing = false;
     return box;
 }
 
