@@ -4,7 +4,6 @@ import (
 	"github.com/cvanderschuere/turnpike"
 	"github.com/jcelliott/lumber"
 	"github.com/cvanderschuere/spotify-go"
-	"github.com/cvanderschuere/alsa-go"
 	"strings"
 	"runtime"
 )
@@ -67,10 +66,6 @@ func main() {
 	//Subscribe as appropriate
 	client.Subscribe(baseURL+username+"/"+deviceName)
 	client.Subscribe(baseURL+username+"/"+deviceName+"/internal") //Also recieve music box exclusive events
-	
-	//Login to services & music sink
-	controlChan := make(chan bool)
-	streamChan := alsa.Init(controlChan)
 	
 	//Login to spotify (should always work if login test passed)
 	ch := spotify.Login(username,password)
