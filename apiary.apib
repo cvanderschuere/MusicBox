@@ -1,36 +1,74 @@
-HOST: http://www.google.com/
+HOST: baseURL/username/deviceName/currentQueue
 
 --- Project Music Box v1 ---
 
 ---
-Welcome to the our sample API documentation. All comments can be written in (support [Markdown](http://daringfireball.net/projects/markdown/syntax) syntax)
+Documentation of WAMP protocol between MusicBox & clients
 ---
 
 --
-Shopping Cart Resources
-The following is a section of resources related to the shopping cart
+Track Handling
+
+Used to modify the queue
 --
 
-List products added into your shopping-cart. (comment block again in Markdown)
-GET /shopping-cart
+Message sent to add array of tracks to all listeners
+GET /addTrack
 < 200
 < Content-Type: application/json
-{ "items": [
-{ "url": "/shopping-cart/1", "product":"2ZY48XPZ", "quantity": 1, "name": "New socks", "price": 1.25 }
-] }
+{  "command":"addTrack"
+   "data": [
+        {
+            "url": "http://www.example.com/123", 
+            "trackName":"Get Lucky", 
+            "artistName": "Daft Punk", 
+            "service": "Spotify", 
+            "artworkURL": "http://www.example.com/123" 
+        }
+    ] 
+}
 
-Save new products in your shopping cart
-POST /shopping-cart
-> Content-Type: application/json
-{ "product":"1AB23ORM", "quantity": 2 }
-< 201
-< Content-Type: application/json
-{ "status": "created", "url": "/shopping-cart/2" }
+--
+Control Commands
 
--- Payment Resources --
+Isssued to control music box playback
+--
 
-This resource allows you to submit payment information to process your *shopping cart* items
-POST /payment
-{ "cc": "12345678900", "cvc": "123", "expiry": "0112" }
+GET /playTrack
 < 200
-{ "receipt": "/payment/receipt/1" }
+< Content-Type: application/json
+{  
+    "command":"playTrack"
+}
+
+GET /pauseTrack
+< 200
+< Content-Type: application/json
+{  
+    "command":"pauseTrack"
+}
+
+
+--
+Queue Managment 
+
+Maintain and inform about current queue of tracks to all interested parties (MusicBox & Clients) 
+--
+
+
+GET statusUpdate
+< 200
+{   "command":"statusUpdate"
+    "data":{ 
+        "isPlaying": 1
+        "queue":[
+            {
+                "url": "http://www.example.com/123", 
+                "trackName":"Get Lucky", 
+                "artistName": "Daft Punk", 
+                "service": "Spotify", 
+                "artworkURL": "http://www.example.com/123" 
+            }
+        ]
+    }
+}
