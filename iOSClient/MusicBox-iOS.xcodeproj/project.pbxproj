@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		83206377171FA9320021A88D /* TrackCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83206376171FA9320021A88D /* TrackCell.m */; };
+		832A4E2D17BF1EB600C3277A /* SpotifyTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = 832A4E2C17BF1EB600C3277A /* SpotifyTrack.m */; };
+		832A4E3217BF1ECB00C3277A /* SpotifyAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 832A4E3117BF1ECB00C3277A /* SpotifyAlbum.m */; };
+		832A4E3517BF1EDA00C3277A /* SpotifyArtist.m in Sources */ = {isa = PBXBuildFile; fileRef = 832A4E3417BF1EDA00C3277A /* SpotifyArtist.m */; };
 		834BF80A1708D8090005F8DB /* music-note.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 834BF8091708D8090005F8DB /* music-note.jpg */; };
 		835D938C17826653000EB969 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 835D938B17826653000EB969 /* QuartzCore.framework */; };
 		83799EFC177F6228008DCCC3 /* libicucore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 83799EFB177F6228008DCCC3 /* libicucore.dylib */; };
@@ -37,6 +40,7 @@
 		83ECA60E1704B9CE00E75B14 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83ECA60D1704B9CE00E75B14 /* Default@2x.png */; };
 		83ECA6101704B9CE00E75B14 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83ECA60F1704B9CE00E75B14 /* Default-568h@2x.png */; };
 		83ECA6131704B9CE00E75B14 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83ECA6111704B9CE00E75B14 /* MainStoryboard_iPhone.storyboard */; };
+		EAB24BC0E7EC4C9BBD5C43E0 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 564DF071E99B43B2A30D5DBE /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,9 +61,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3431E95553E5402A84C77A2F /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
+		564DF071E99B43B2A30D5DBE /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		8309C8691780D8950031D30D /* CocoaLibSpotify iOS Library.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "CocoaLibSpotify iOS Library.xcodeproj"; path = "External/cocoalibspotify/iOS Library/CocoaLibSpotify iOS Library.xcodeproj"; sourceTree = "<group>"; };
 		83206375171FA9320021A88D /* TrackCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackCell.h; sourceTree = "<group>"; };
 		83206376171FA9320021A88D /* TrackCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrackCell.m; sourceTree = "<group>"; };
+		832A4E2B17BF1EB600C3277A /* SpotifyTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpotifyTrack.h; sourceTree = "<group>"; };
+		832A4E2C17BF1EB600C3277A /* SpotifyTrack.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpotifyTrack.m; sourceTree = "<group>"; };
+		832A4E3017BF1ECB00C3277A /* SpotifyAlbum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpotifyAlbum.h; sourceTree = "<group>"; };
+		832A4E3117BF1ECB00C3277A /* SpotifyAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpotifyAlbum.m; sourceTree = "<group>"; };
+		832A4E3317BF1EDA00C3277A /* SpotifyArtist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpotifyArtist.h; sourceTree = "<group>"; };
+		832A4E3417BF1EDA00C3277A /* SpotifyArtist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpotifyArtist.m; sourceTree = "<group>"; };
 		834BF8091708D8090005F8DB /* music-note.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "music-note.jpg"; sourceTree = "<group>"; };
 		835D938B17826653000EB969 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		83799EFB177F6228008DCCC3 /* libicucore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.dylib; path = usr/lib/libicucore.dylib; sourceTree = SDKROOT; };
@@ -120,12 +132,26 @@
 				83DEC8BB1704CD2B00414A78 /* libstdc++.dylib in Frameworks */,
 				8382C2C81719E8C300EED999 /* MobileCoreServices.framework in Frameworks */,
 				839E4E6A1780FA3A00EBB519 /* MDWamp.framework in Frameworks */,
+				EAB24BC0E7EC4C9BBD5C43E0 /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		832A4E3617BF1EE200C3277A /* Spotify Objects */ = {
+			isa = PBXGroup;
+			children = (
+				832A4E3017BF1ECB00C3277A /* SpotifyAlbum.h */,
+				832A4E3117BF1ECB00C3277A /* SpotifyAlbum.m */,
+				832A4E3317BF1EDA00C3277A /* SpotifyArtist.h */,
+				832A4E3417BF1EDA00C3277A /* SpotifyArtist.m */,
+				832A4E2B17BF1EB600C3277A /* SpotifyTrack.h */,
+				832A4E2C17BF1EB600C3277A /* SpotifyTrack.m */,
+			);
+			name = "Spotify Objects";
+			sourceTree = "<group>";
+		};
 		839E4E611780F9DD00EBB519 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -141,6 +167,7 @@
 				83ECA5FF1704B9CE00E75B14 /* MusicBox */,
 				83ECA5F81704B9CE00E75B14 /* Frameworks */,
 				83ECA5F71704B9CE00E75B14 /* Products */,
+				3431E95553E5402A84C77A2F /* Pods.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -170,6 +197,7 @@
 				83DEC8B51704CD2B00414A78 /* libstdc++.dylib */,
 				83DEC8B61704CD2B00414A78 /* CFNetwork.framework */,
 				83DEC8B71704CD2B00414A78 /* SystemConfiguration.framework */,
+				564DF071E99B43B2A30D5DBE /* libPods.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -190,6 +218,7 @@
 				83BEBED11707FA6A00550849 /* PlayersTableViewController.m */,
 				83E2FCF21704D13F00C10B5E /* TrackSearchViewController.h */,
 				83E2FCF31704D13F00C10B5E /* TrackSearchViewController.m */,
+				832A4E3617BF1EE200C3277A /* Spotify Objects */,
 				83E2FCFD170548BE00C10B5E /* LiveSearch.h */,
 				83E2FCFE170548BE00C10B5E /* LiveSearch.m */,
 				834BF8091708D8090005F8DB /* music-note.jpg */,
@@ -222,9 +251,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 83ECA61C1704B9CE00E75B14 /* Build configuration list for PBXNativeTarget "MusicBox-iOS" */;
 			buildPhases = (
+				0EB6D53F62B841C3BCD5CA03 /* Check Pods Manifest.lock */,
 				83ECA5F21704B9CE00E75B14 /* Sources */,
 				83ECA5F31704B9CE00E75B14 /* Frameworks */,
 				83ECA5F41704B9CE00E75B14 /* Resources */,
+				862566B29C514C238AF63DE6 /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -301,6 +332,39 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		0EB6D53F62B841C3BCD5CA03 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		862566B29C514C238AF63DE6 /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		83ECA5F21704B9CE00E75B14 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -314,6 +378,9 @@
 				83801CC91708A6F0007C0095 /* PlaylistViewController.m in Sources */,
 				83206377171FA9320021A88D /* TrackCell.m in Sources */,
 				83799F06177FCFD4008DCCC3 /* MusicBox.m in Sources */,
+				832A4E2D17BF1EB600C3277A /* SpotifyTrack.m in Sources */,
+				832A4E3217BF1ECB00C3277A /* SpotifyAlbum.m in Sources */,
+				832A4E3517BF1EDA00C3277A /* SpotifyArtist.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,6 +468,7 @@
 		};
 		83ECA61D1704B9CE00E75B14 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3431E95553E5402A84C77A2F /* Pods.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -414,6 +482,7 @@
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
+					"$(inherited)",
 				);
 				PRODUCT_NAME = "MusicBox-iOS";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -423,6 +492,7 @@
 		};
 		83ECA61E1704B9CE00E75B14 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3431E95553E5402A84C77A2F /* Pods.xcconfig */;
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -436,6 +506,7 @@
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
+					"$(inherited)",
 				);
 				PRODUCT_NAME = "MusicBox-iOS";
 				TARGETED_DEVICE_FAMILY = 1;
