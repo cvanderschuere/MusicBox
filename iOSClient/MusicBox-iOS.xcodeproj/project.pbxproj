@@ -29,7 +29,6 @@
 		83DEC8BC1704CD2B00414A78 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83DEC8B61704CD2B00414A78 /* CFNetwork.framework */; };
 		83DEC8BD1704CD2B00414A78 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83DEC8B71704CD2B00414A78 /* SystemConfiguration.framework */; };
 		83E2FCF41704D13F00C10B5E /* TrackSearchViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83E2FCF31704D13F00C10B5E /* TrackSearchViewController.m */; };
-		83E2FCFF170548BE00C10B5E /* LiveSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = 83E2FCFE170548BE00C10B5E /* LiveSearch.m */; };
 		83ECA5FA1704B9CE00E75B14 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83ECA5F91704B9CE00E75B14 /* UIKit.framework */; };
 		83ECA5FC1704B9CE00E75B14 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83ECA5FB1704B9CE00E75B14 /* Foundation.framework */; };
 		83ECA5FE1704B9CE00E75B14 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83ECA5FD1704B9CE00E75B14 /* CoreGraphics.framework */; };
@@ -93,8 +92,6 @@
 		83DEC8B71704CD2B00414A78 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		83E2FCF21704D13F00C10B5E /* TrackSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackSearchViewController.h; sourceTree = "<group>"; };
 		83E2FCF31704D13F00C10B5E /* TrackSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrackSearchViewController.m; sourceTree = "<group>"; };
-		83E2FCFD170548BE00C10B5E /* LiveSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LiveSearch.h; sourceTree = "<group>"; };
-		83E2FCFE170548BE00C10B5E /* LiveSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LiveSearch.m; sourceTree = "<group>"; };
 		83ECA5F61704B9CE00E75B14 /* MusicBox-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MusicBox-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		83ECA5F91704B9CE00E75B14 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		83ECA5FB1704B9CE00E75B14 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -219,8 +216,6 @@
 				83E2FCF21704D13F00C10B5E /* TrackSearchViewController.h */,
 				83E2FCF31704D13F00C10B5E /* TrackSearchViewController.m */,
 				832A4E3617BF1EE200C3277A /* Spotify Objects */,
-				83E2FCFD170548BE00C10B5E /* LiveSearch.h */,
-				83E2FCFE170548BE00C10B5E /* LiveSearch.m */,
 				834BF8091708D8090005F8DB /* music-note.jpg */,
 				83ECA6001704B9CE00E75B14 /* Supporting Files */,
 			);
@@ -373,7 +368,6 @@
 				83ECA6061704B9CE00E75B14 /* main.m in Sources */,
 				83ECA60A1704B9CE00E75B14 /* AppDelegate.m in Sources */,
 				83E2FCF41704D13F00C10B5E /* TrackSearchViewController.m in Sources */,
-				83E2FCFF170548BE00C10B5E /* LiveSearch.m in Sources */,
 				83BEBED21707FA6A00550849 /* PlayersTableViewController.m in Sources */,
 				83801CC91708A6F0007C0095 /* PlaylistViewController.m in Sources */,
 				83206377171FA9320021A88D /* TrackCell.m in Sources */,

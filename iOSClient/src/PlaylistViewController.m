@@ -190,8 +190,7 @@
     SPTrack* track = [self.currentPlayer.tracks objectAtIndex:indexPath.row];
     cell.trackTitle.text = track.name;
     
-    //Load art in background
-    cell.albumArt.image = track.album.cover.image;
+    [cell.albumArt setImageWithURL:[NSURL URLWithString:@"http://userserve-ak.last.fm/serve/126/8674593.jpg"] placeholderImage:[UIImage imageNamed:@"music-note.jpg"]];
     cell.albumArt.layer.cornerRadius = 5.0f;
     cell.albumArt.layer.masksToBounds = YES;
     
