@@ -13,5 +13,6 @@
     #import <Foundation/Foundation.h>
     #import <QuartzCore/QuartzCore.h>
     #import "CocoaLibSpotify.h"
+    #import <AFNetworking/AFNetworking.h>
     #import <RestKit/RestKit.h>
 #endif

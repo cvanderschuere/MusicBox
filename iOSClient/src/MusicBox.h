@@ -10,10 +10,12 @@
 
 @interface MusicBoxTrack : NSObject
 @property (nonatomic,strong) NSString *service;
-@property (nonatomic,strong) NSURL *url; 
+@property (nonatomic,strong) NSURL *url;
 
 @property (nonatomic,strong) NSString *trackName;
 @property (nonatomic,strong) NSString * artistName;
+
+@property (nonatomic,strong) NSURL *artworkURL;
 
 +(instancetype) trackWithService:(NSString*)serviceName Url:(NSURL*)url Name:(NSString*)trackName Artist:(NSString*) artistName;
 @end

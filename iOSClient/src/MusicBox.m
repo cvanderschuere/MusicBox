@@ -16,6 +16,9 @@
     newTrack.trackName = trackName;
     newTrack.artistName = artistName;
     
+    //Fetch Album artwork from last.fm (Do in background)
+    
+    
     return newTrack;
 }
 
