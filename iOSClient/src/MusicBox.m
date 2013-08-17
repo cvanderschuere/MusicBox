@@ -9,10 +9,13 @@
 #import "MusicBox.h"
 
 @implementation MusicBoxTrack
-+(instancetype) trackWithService:(NSString*)serviceName Url:(NSURL*)url{
++(instancetype) trackWithService:(NSString*)serviceName Url:(NSURL*)url Name:(NSString *)trackName Artist:(NSString *)artistName{
     MusicBoxTrack *newTrack = [[MusicBoxTrack alloc] init];
     newTrack.service = serviceName;
     newTrack.url = url;
+    newTrack.trackName = trackName;
+    newTrack.artistName = artistName;
+    
     return newTrack;
 }
 

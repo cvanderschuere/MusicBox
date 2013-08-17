@@ -111,7 +111,8 @@
     if ([topicUri isEqualToString:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,deviceName]]&& [object isKindOfClass:[NSArray class]]) {
         NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
         for(NSDictionary *item in object){
-            [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]]];
+            //FIXME
+            [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]Name:@"Blank" Artist:@"Blank"]];
         }
         
         [self.currentPlayer setTracksWithLinks:recievedTracks];
@@ -130,7 +131,8 @@
             if (queue.count>0) {
                 NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
                 for(NSDictionary *item in queue){
-                    [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]]];
+                    //FIXME
+                    [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]Name:@"Blank" Artist:@"Unknown"]];
                 }
                 [self.currentPlayer setTracksWithLinks:recievedTracks];
             }
@@ -151,7 +153,8 @@
             }
             else if ([components[0] isEqualToString:@"AddTrack"]){
                 if (components.count >=3 ) {
-                    MusicBoxTrack* addedTrack = [MusicBoxTrack trackWithService:components[1] Url:[NSURL URLWithString:components[2]]];
+                    //FIXME
+                    MusicBoxTrack* addedTrack = [MusicBoxTrack trackWithService:components[1] Url:[NSURL URLWithString:components[2]]Name:@"Blank" Artist:@"Unknown"];
                     [self.currentPlayer addTrackWithLink:addedTrack atIndex:self.currentPlayer.tracks.count]; //Add to back
                 }
             }

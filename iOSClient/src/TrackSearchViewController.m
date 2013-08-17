@@ -61,9 +61,11 @@
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    NSURL* url = [NSURL URLWithString:[self.resultsArray[indexPath.row] spotifyID]];
+    SpotifyTrack* track = self.resultsArray[indexPath.row];
     
-    self.selectedTrack = [MusicBoxTrack trackWithService:@"Service" Url:url];
+    NSURL* url = [NSURL URLWithString:track.spotifyID];
+    
+    self.selectedTrack = [MusicBoxTrack trackWithService:@"Spotify" Url:url Name:track.name Artist:[track.artists[0] name]];
     
     [self.searchBar resignFirstResponder];
     [self performSegueWithIdentifier:@"unwindSegue" sender:self];
