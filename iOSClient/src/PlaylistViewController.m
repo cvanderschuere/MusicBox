@@ -127,7 +127,7 @@
             if (queue.count>0) {
                 NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:queue.count];
                 for(NSDictionary *track in queue){
-                    MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"service"] Url:[NSURL URLWithString:track[@"url"]]Name:track[@"trackName"] Album:track[@"albumName"]Artist: track[@"artistName"]];
+                    MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"service"] Url:track[@"url"] Name:track[@"trackName"] Album:track[@"albumName"]Artist: track[@"artistName"]];
                     [recievedTracks addObject:addedTrack];
                     [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
                 }
@@ -139,7 +139,7 @@
     else if ([[object objectForKey:@"command"] isEqualToString:@"addTrack"]){
         NSArray *tracks = [object objectForKey:@"data"];
         for (NSDictionary* track in tracks) {
-            MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"service"] Url:[NSURL URLWithString:track[@"url"]]Name:track[@"trackName"] Album:track[@"albumName"]Artist: track[@"artistName"]];
+            MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"service"] Url:track[@"url"] Name:track[@"trackName"] Album:track[@"albumName"]Artist: track[@"artistName"]];
             [self.currentPlayer.tracks addObject:addedTrack];
             [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
         }

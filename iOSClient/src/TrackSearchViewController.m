@@ -63,9 +63,8 @@
     
     SpotifyTrack* track = self.resultsArray[indexPath.row];
     
-    NSURL* url = [NSURL URLWithString:track.spotifyID];
     
-    self.selectedTrack = [MusicBoxTrack trackWithService:@"Spotify" Url:url Name:track.name Album:track.album.name Artist:[track.artists[0] name]];
+    self.selectedTrack = [MusicBoxTrack trackWithService:@"Spotify" Url:track.spotifyID Name:track.name Album:track.album.name Artist:[track.artists[0] name]];
     
     [self.searchBar resignFirstResponder];
     [self performSegueWithIdentifier:@"unwindSegue" sender:self];
@@ -139,8 +138,6 @@
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://ws.spotify.com/search/1/track.json?q=%@",escapedString]]];
     RKObjectRequestOperation *operation = [[RKObjectRequestOperation alloc] initWithRequest:request responseDescriptors:@[self.trackResponseDescriptor]];
     [operation setCompletionBlockWithSuccess:^(RKObjectRequestOperation *operation, RKMappingResult *result) {
-        SpotifyTrack *track = [result firstObject];
-        NSLog(@"Mapped the track: %@ by %@", track.name,[[track.artists objectAtIndex:0] name]);
         self.resultsArray = result.array.mutableCopy;
         [self.results reloadData];
     } failure:^(RKObjectRequestOperation *operation, NSError *error) {

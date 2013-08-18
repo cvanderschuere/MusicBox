@@ -11,7 +11,7 @@
 
 
 @implementation MusicBoxTrack
-+(instancetype) trackWithService:(NSString*)serviceName Url:(NSURL*)url Name:(NSString *)trackName Album:(NSString *)albumName Artist:(NSString *)artistName{
++(instancetype) trackWithService:(NSString*)serviceName Url:(NSString*)url Name:(NSString *)trackName Album:(NSString *)albumName Artist:(NSString *)artistName{
     MusicBoxTrack *newTrack = [[MusicBoxTrack alloc] init];
     newTrack.service = serviceName;
     newTrack.url = url;
