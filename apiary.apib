@@ -41,13 +41,6 @@ GET /playTrack
     "command":"playTrack"
 }
 
-GET /nextTrack
-< 200
-< Content-Type: application/json
-{  
-    "command":"nextTrack"
-}
-
 GET /pauseTrack
 < 200
 < Content-Type: application/json
@@ -55,11 +48,28 @@ GET /pauseTrack
     "command":"pauseTrack"
 }
 
+GET /nextTrack
+< 200
+< Content-Type: application/json
+{  
+    "command":"nextTrack"
+}
+
+GET /endOfTrack
+< 200
+< Content-Type: application/json
+{  
+    "command":"endOfTrack"
+}
+
+
+
 
 --
 Queue Managment 
 
-Maintain and inform about current queue of tracks to all interested parties (MusicBox & Clients) 
+Maintain and inform about current queue of tracks to all interested parties (MusicBox & Clients). 
+Notice capital letters to track properties (due to shortcut in go; might change latter)
 --
 
 
@@ -71,11 +81,11 @@ GET statusUpdate
         "isPlaying": 1
         "queue":[
             {
-                "url": "http://www.example.com/123", 
-                "trackName":"Get Lucky", 
-                "artistName": "Daft Punk",
-                "albumName": "Random Access Memories",
-                "service": "Spotify", 
+                "Url": "http://www.example.com/123", 
+                "TrackName":"Get Lucky", 
+                "ArtistName": "Daft Punk",
+                "AlbumName": "Random Access Memories",
+                "Service": "Spotify", 
             }
         ]
     }
