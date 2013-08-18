@@ -62,8 +62,27 @@ GET /endOfTrack
     "command":"endOfTrack"
 }
 
+__
+RPC Calls
+
+Used to poll server for static
+--
 
 
+Make call to baseURL/players with args username,password to recieve array of avaliable player names
+GET /players
+< 200
+[
+    "playerName1",
+    "playerName2"
+]
+
+Make call to baseURL/currentQueueRequest with args username,password,playerTitle to recieve statusUpdate message. This call returns nothing but a statusUpdate message from the box will follow on usual topic
+GET /currentQueueRequest
+< 200
+{
+    nil
+}
 
 --
 Queue Managment 
