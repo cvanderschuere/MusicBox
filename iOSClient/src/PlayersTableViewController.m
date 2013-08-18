@@ -111,9 +111,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    MusicBox *selectedBox = [[MusicBox alloc] init];
-    selectedBox.title = self.players[indexPath.row];
-    self.selectedPlayer = selectedBox;
+    self.selectedPlayer = [MusicBox musicBoxWithName:self.players[indexPath.row]];
     [self performSegueWithIdentifier:@"unwindSeque" sender:nil];
 }
 

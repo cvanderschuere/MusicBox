@@ -29,8 +29,6 @@
 
 //track handling
 @property (nonatomic, strong) NSMutableArray *tracks; //MusicBoxTrack instances
-@property (nonatomic, strong) NSMutableArray *links; //Links in the form of MusicBoxTrack
-@property BOOL loaded;
 
 + (instancetype) musicBoxWithName:(NSString*) name;
 
