@@ -65,7 +65,7 @@
     
     NSURL* url = [NSURL URLWithString:track.spotifyID];
     
-    self.selectedTrack = [MusicBoxTrack trackWithService:@"Spotify" Url:url Name:track.name Artist:[track.artists[0] name]];
+    self.selectedTrack = [MusicBoxTrack trackWithService:@"Spotify" Url:url Name:track.name Album:track.album.name Artist:[track.artists[0] name]];
     
     [self.searchBar resignFirstResponder];
     [self performSegueWithIdentifier:@"unwindSegue" sender:self];

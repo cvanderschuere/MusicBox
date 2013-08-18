@@ -15,7 +15,7 @@ const static NSString* baseURL = @"http://www.musicbox.com/";
 @interface AppDelegate : UIResponder <UIApplicationDelegate,SPSessionDelegate,MDWampDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-@property (nonatomic, strong) NSOperationQueue *requestQueue;
+@property (nonatomic, strong) NSOperationQueue *websocketRequestQueue;
 
 @property (nonatomic, strong) MDWamp *ws;
 

@@ -25,7 +25,7 @@
     if (_currentPlayer) {
         [_currentPlayer removeObserver:self forKeyPath:@"loaded"];
         
-        [delegate.requestQueue addOperationWithBlock:^(){
+        [delegate.websocketRequestQueue addOperationWithBlock:^(){
             //Unsubscribe to updates
             [delegate.ws unsubscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,_currentPlayer.title]];
         }];
@@ -36,7 +36,7 @@
     //Add observer
     [_currentPlayer addObserver:self forKeyPath:@"loaded" options:NSKeyValueObservingOptionInitial context:NULL];
     
-    [delegate.requestQueue addOperationWithBlock:^(){
+    [delegate.websocketRequestQueue addOperationWithBlock:^(){
         //Subscribe to updates
         [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] withDelegate:self];
     }];
@@ -80,15 +80,16 @@
        
         AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
         
-        [delegate.requestQueue addOperationWithBlock:^(){
+        [delegate.websocketRequestQueue addOperationWithBlock:^(){
             //Request tracks of previous player
             [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:username,password,self.currentPlayer.title, nil];
         }];
     }
 }
 - (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if ([keyPath isEqualToString:@"loaded"]) {
-        NSLog(@"Loaded");
+    if ([keyPath isEqualToString:@"artworkURL"]) {
+        NSLog(@"Artwork Loaded");
+    
         //Refresh playlist
         [self.collectionView reloadData];        
     }
@@ -112,10 +113,10 @@
         NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
         for(NSDictionary *item in object){
             //FIXME
-            [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]Name:@"Blank" Artist:@"Blank"]];
+            [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]Name:@"Blank" Album:@"Album" Artist:@"Blank"]];
         }
         
-        [self.currentPlayer setTracksWithLinks:recievedTracks];
+        self.currentPlayer.tracks = recievedTracks;
     }
     //Status update
     else if ([topicUri isEqualToString:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,deviceName]]&& [object isKindOfClass:[NSDictionary class]]) {
@@ -131,10 +132,10 @@
             if (queue.count>0) {
                 NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
                 for(NSDictionary *item in queue){
-                    //FIXME
-                    [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]Name:@"Blank" Artist:@"Unknown"]];
+                    // FIXME Album & artist name
+                    [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]Name:@"Blank" Album:@"Album" Artist:@"Unknown"]];
                 }
-                [self.currentPlayer setTracksWithLinks:recievedTracks];
+                self.currentPlayer.tracks = recievedTracks;
             }
         }
     }
@@ -153,9 +154,11 @@
             }
             else if ([components[0] isEqualToString:@"AddTrack"]){
                 if (components.count >=3 ) {
-                    //FIXME
-                    MusicBoxTrack* addedTrack = [MusicBoxTrack trackWithService:components[1] Url:[NSURL URLWithString:components[2]]Name:@"Blank" Artist:@"Unknown"];
-                    [self.currentPlayer addTrackWithLink:addedTrack atIndex:self.currentPlayer.tracks.count]; //Add to back
+                    //FIXME artist & album name
+                    MusicBoxTrack* addedTrack = [MusicBoxTrack trackWithService:components[1] Url:[NSURL URLWithString:components[2]]Name:@"Blank" Album:@"Album" Artist:@"Unknown"];
+                    [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
+                    [self.currentPlayer.tracks addObject:addedTrack]; //Add to back
+                    [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
                 }
             }
         }
@@ -176,7 +179,7 @@
 -(void) refreshPlaylist:(UIRefreshControl*)sender{    
     //Refresh tracks of previous player
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
-    [delegate.requestQueue addOperationWithBlock:^(){
+    [delegate.websocketRequestQueue addOperationWithBlock:^(){
         [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:@"christopher.vanderschuere@gmail.com",@"ExamplePassword",self.currentPlayer.title, nil];
     }];
 }
@@ -187,10 +190,17 @@
 - (UICollectionViewCell*) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     TrackCell* cell = (TrackCell*)[collectionView dequeueReusableCellWithReuseIdentifier:@"trackCell" forIndexPath:indexPath];
     
-    SPTrack* track = [self.currentPlayer.tracks objectAtIndex:indexPath.row];
-    cell.trackTitle.text = track.name;
+    MusicBoxTrack* track = [self.currentPlayer.tracks objectAtIndex:indexPath.row];
+    cell.trackTitle.text = track.trackName;
     
-    [cell.albumArt setImageWithURL:[NSURL URLWithString:@"http://userserve-ak.last.fm/serve/126/8674593.jpg"] placeholderImage:[UIImage imageNamed:@"music-note.jpg"]];
+    if (track.artworkURL) {
+        //Set by url
+        [cell.albumArt setImageWithURL:track.artworkURL placeholderImage:[UIImage imageNamed:@"music-note.jpg"]];
+    }
+    else{
+        //Use default while waiting
+        cell.albumArt.image = [UIImage imageNamed:@"music-note.jpg"];
+    }
     cell.albumArt.layer.cornerRadius = 5.0f;
     cell.albumArt.layer.masksToBounds = YES;
     
@@ -217,7 +227,7 @@
 - (IBAction)nextPressed:(id)sender {
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
     NSString* username = @"christopher.vanderschuere@gmail.com";
-    [delegate.requestQueue addOperationWithBlock:^{
+    [delegate.websocketRequestQueue addOperationWithBlock:^{
         [delegate.ws publish:@"NextTrack" toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
     }];
 }
@@ -227,13 +237,13 @@
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
 
     if ([self.playPauseButton.titleLabel.text isEqualToString:@"Play"]) {
-        [delegate.requestQueue addOperationWithBlock:^{
+        [delegate.websocketRequestQueue addOperationWithBlock:^{
             [delegate.ws publish:@"PlayTrack" toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
         }];
         [self.playPauseButton setTitle:@"Pause" forState:UIControlStateNormal];
     }
     else{
-        [delegate.requestQueue addOperationWithBlock:^{
+        [delegate.websocketRequestQueue addOperationWithBlock:^{
             [delegate.ws publish:@"PauseTrack" toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
         }];
         [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
@@ -256,13 +266,16 @@
     
     if (trackVC.selectedTrack && self.currentPlayer) {
         //Add locally
-        [self.currentPlayer addTrackWithLink:trackVC.selectedTrack atIndex:self.currentPlayer.tracks.count];
+        [self.currentPlayer.tracks addObject:trackVC.selectedTrack];
+        [trackVC.selectedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
+        [self.collectionView reloadData];
         
         //Add track
         AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
         NSString* username = @"christopher.vanderschuere@gmail.com";
         
-        [delegate.requestQueue addOperationWithBlock:^{
+        //TODO: Use new api format
+        [delegate.websocketRequestQueue addOperationWithBlock:^{
             [delegate.ws publish:[NSString stringWithFormat:@"AddTrack,%@,%@",trackVC.selectedTrack.service,trackVC.selectedTrack.url]toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
         }];
     }

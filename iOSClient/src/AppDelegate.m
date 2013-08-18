@@ -30,9 +30,9 @@
     // set seconds between each reconnection try
     [self.ws setAutoreconnectDelay:5];
     
-    //Create Request Queue
-    self.requestQueue = [[NSOperationQueue alloc] init];
-    [self.requestQueue setSuspended:YES];
+    //Create Request Queue for websocket
+    self.websocketRequestQueue = [[NSOperationQueue alloc] init];
+    [self.websocketRequestQueue setSuspended:YES];
     
     //Actually connect
     [self.ws connect];
@@ -140,7 +140,7 @@
 #pragma mark MDWamp Delegate
 - (void) onOpen{
     NSLog(@"Websocket is open");
-    [self.requestQueue setSuspended:NO];
+    [self.websocketRequestQueue setSuspended:NO];
 }
 - (void) onClose:(int)code reason:(NSString *)reason{
     NSLog(@"Websocket closed with reason: %@",reason);

@@ -57,7 +57,9 @@
     [sender beginRefreshing];
     
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
-    [delegate.ws call:[NSString stringWithFormat:@"%@players",baseURL] withDelegate:self args:@"christopher.vanderschuere@gmail.com",@"Example Password", nil];
+    [delegate.websocketRequestQueue addOperationWithBlock:^{
+        [delegate.ws call:[NSString stringWithFormat:@"%@players",baseURL] withDelegate:self args:@"christopher.vanderschuere@gmail.com",@"Example Password", nil];
+    }];
 }
 
 #pragma mark Websocket Delegate
