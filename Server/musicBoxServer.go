@@ -43,7 +43,7 @@ func queueRequest(id, url string, args ...interface{})(interface{},error){
 	//This will forward an event on a private channel to the music box
 	//The music box will then publish a typical CurrentQueue update to everyone
 	statusMsg := map[string]string{
-		"command":"statusUpdate"
+		"command":"statusUpdate",
 	}
 	
 	server.SendEvent(baseURL+username+"/"+deviceName+"/internal",statusMsg);
