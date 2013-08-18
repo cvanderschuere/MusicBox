@@ -59,7 +59,7 @@ func boxRequest(id,url string, args ...interface{})(interface{},error){
 	//password := args[1].(string)
 	
 	//Simulate for  now
-	players := []string{"Awolnation","Beatles","Coldplay"}
+	players := []string{"Awolnation","Beatles","Coldplay","Deadmau5"}
 	
 	return players,nil
 }
