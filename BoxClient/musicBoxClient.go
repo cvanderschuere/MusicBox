@@ -5,7 +5,6 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/cvanderschuere/spotify-go"
 	"github.com/cvanderschuere/alsa-go"
-	"strings"
 	"runtime"
 )
 
@@ -17,7 +16,7 @@ var log = lumber.NewConsoleLogger(lumber.TRACE)
 const(
         username string = "christopher.vanderschuere@gmail.com"
         password string = "N0ttingham11"
-		deviceName string = "LivingRoom"
+		deviceName string = "Beatles"
 )
 
 type Notification struct{
@@ -41,6 +40,9 @@ const(
 type MusicBoxTrack struct{
 	Service string
 	URL		string
+	AlbumName string
+	ArtistName string
+	TrackName	string
 }
 
 /*
@@ -48,7 +50,7 @@ type MusicBoxTrack struct{
 */
 
 func main() {
-	runtime.GOMAXPROCS(2)
+	runtime.GOMAXPROCS(2) // Used to regulate main thread managment with libspotify (might not be needed)
 	
 	client := turnpike.NewClient()
 	
@@ -161,49 +163,51 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 			}
 			switch event.(type){
 			case turnpike.EventMsg:
-				commandString := event.(turnpike.EventMsg).Event.(string)
-				command := strings.Split(commandString,",")
+				message := event.(turnpike.EventMsg).Event.(map[string]interface{})
 				
-				log.Trace("String: "+commandString)
-				log.Debug("Command: "+command[0])
+				log.Debug("Command: "+ message["command"].(string))
 				//Switch through command types
-				switch command[0]{
-				case "AddTrack":
-					//Format: [AddTrack ServiceName TrackName]
-					if len(command) >=3{
-						newTrack := MusicBoxTrack{Service:command[1],URL:command[2]}
+				switch message["command"]{
+				case "addTrack":
+					data := message["data"].([]interface{})
+					
+					for _,trackDict := range data {
+						track := trackDict.(map[string]interface{})
+						newTrack := MusicBoxTrack{Service:track["service"].(string),URL:track["url"].(string),TrackName:track["trackName"].(string),ArtistName:track["artistName"].(string),AlbumName:track["albumName"].(string)}
 						if queue == nil{
 							//create queue
 							queue = make([]MusicBoxTrack,1)
 							queue[0] = newTrack
 							notiChan <- Notification{Kind:NextTrack,Content:newTrack} // Start initial playback
 							isPlaying = true
-							client.PublishExcludeMe(baseURL+username+"/"+deviceName,"PlayTrack") //Let others know track is playing
+						
+							playMsg := map[string]string{
+								"command":"playTrack",
+							}
+							client.PublishExcludeMe(baseURL+username+"/"+deviceName,playMsg) //Let others know track is playing
 						}else{
 							//Append
 							queue = append(queue,newTrack)
 							notiChan <- Notification{Kind:AddedToQueue,Content:newTrack} // Give chance to preload
 						}
 					}
-				case "RemoveTrack":
+				case "removeTrack":
 					//Format: [RemoveTrack ServiceName TrackName]
-					if len(command) >=3{
 						//trackToRemove := MusicBoxTrack{Service:command[1],URL:command[2]}
 						
-						//Iterate search and remove (Front to back)
-						//TODO
-						//notiChan <- Notification{Kind:RemovedFromQueue,Content:trackToRemove}
-					}
-				case "PlayTrack":
+					//Iterate search and remove (Front to back)
+					//TODO
+					//notiChan <- Notification{Kind:RemovedFromQueue,Content:trackToRemove}
+				case "playTrack":
 					isPlaying = true
 					notiChan <- Notification{Kind:ResumedTrack}
-				case "PauseTrack":
+				case "pauseTrack":
 					isPlaying = false
 					notiChan <- Notification{Kind:PausedTrack}
-				case "StopTrack":
+				case "stopTrack":
 					isPlaying = false
 					notiChan <- Notification{Kind:StoppedTrack} //Song stays in queue...no different than pause?
-				case "NextTrack":
+				case "nextTrack":
 					if len(queue)>1{
 						//Remove current track
 						queue = queue[1:]
@@ -221,14 +225,20 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 				case "QueueRequest":
 					//Publish queue update...only music box responds to this but all client should recieve CurrentQueue
 					client.PublishExcludeMe(baseURL+username+"/"+deviceName,queue)
-				case "StatusRequest":
+				case "statusUpdate":
 					//Send back map of current status values: title,isPlaying,queue
-					response := make(map[string]interface{})
-					response["name"] = deviceName
-					response["isPlaying"] = isPlaying
-					response["queue"] = queue
-				
-					client.PublishExcludeMe(baseURL+username+"/"+deviceName,response)
+					response := map[string]interface{}{
+						"deviceName": deviceName,
+						"isPlaying": isPlaying,
+						"queue": queue,	
+					}
+					
+					responseMessage := map[string]interface{}{
+						"command": "statusUpdate",
+						"data": response,
+					}
+					
+					client.PublishExcludeMe(baseURL+username+"/"+deviceName,responseMessage)
 				}
 				
 			default:
@@ -252,7 +262,11 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					isPlaying = false
 				}
 				//Publish event
-				client.PublishExcludeMe(baseURL+username+"/"+deviceName,"EndOfTrack")
+				msg := map[string]string{
+					"command":"endOfTrack",
+				}
+				
+				client.PublishExcludeMe(baseURL+username+"/"+deviceName,msg)
 			}
 		}
 	}
