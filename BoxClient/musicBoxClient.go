@@ -6,6 +6,7 @@ import (
 	"github.com/cvanderschuere/spotify-go"
 	"github.com/cvanderschuere/alsa-go"
 	"runtime"
+	"os"
 )
 
 const serverURL = "ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080"
@@ -16,8 +17,9 @@ var log = lumber.NewConsoleLogger(lumber.TRACE)
 const(
         username string = "christopher.vanderschuere@gmail.com"
         password string = "N0ttingham11"
-		deviceName string = "Beatles"
 )
+var deviceName,_ = os.Hostname()
+
 
 type Notification struct{
 	Kind NotificationType
