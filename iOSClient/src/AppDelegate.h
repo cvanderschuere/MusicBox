@@ -12,7 +12,7 @@
 //Global
 const static NSString* baseURL = @"http://www.musicbox.com/";
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate,SPSessionDelegate,MDWampDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate,MDWampDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (nonatomic, strong) NSOperationQueue *websocketRequestQueue;

@@ -19,9 +19,7 @@
 		83801CC91708A6F0007C0095 /* PlaylistViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83801CC81708A6F0007C0095 /* PlaylistViewController.m */; };
 		8382C2C81719E8C300EED999 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8382C2C71719E8C300EED999 /* MobileCoreServices.framework */; };
 		839E4E6A1780FA3A00EBB519 /* MDWamp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 839E4E691780FA3A00EBB519 /* MDWamp.framework */; };
-		839E4E6B1780FA4700EBB519 /* libCocoaLibSpotify.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 839E4E661780F9DD00EBB519 /* libCocoaLibSpotify.a */; };
 		83BEBED21707FA6A00550849 /* PlayersTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83BEBED11707FA6A00550849 /* PlayersTableViewController.m */; };
-		83DEC8A61704CBE300414A78 /* SPLoginResources.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 83DEC8A51704CBE300414A78 /* SPLoginResources.bundle */; };
 		83DEC8B81704CD2B00414A78 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83DEC8B21704CD2B00414A78 /* AVFoundation.framework */; };
 		83DEC8B91704CD2B00414A78 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83DEC8B31704CD2B00414A78 /* AudioToolbox.framework */; };
 		83DEC8BA1704CD2B00414A78 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83DEC8B41704CD2B00414A78 /* CoreAudio.framework */; };
@@ -42,27 +40,9 @@
 		EAB24BC0E7EC4C9BBD5C43E0 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 564DF071E99B43B2A30D5DBE /* libPods.a */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		839E4E651780F9DD00EBB519 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 8309C8691780D8950031D30D /* CocoaLibSpotify iOS Library.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 50AF49DC1439CBFE00E4A5EF;
-			remoteInfo = CocoaLibSpotify;
-		};
-		839E4E671780F9DD00EBB519 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 8309C8691780D8950031D30D /* CocoaLibSpotify iOS Library.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 50D4F52B156BCDE800E237DD;
-			remoteInfo = CocoaLSTests;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		3431E95553E5402A84C77A2F /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
 		564DF071E99B43B2A30D5DBE /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		8309C8691780D8950031D30D /* CocoaLibSpotify iOS Library.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "CocoaLibSpotify iOS Library.xcodeproj"; path = "External/cocoalibspotify/iOS Library/CocoaLibSpotify iOS Library.xcodeproj"; sourceTree = "<group>"; };
 		83206375171FA9320021A88D /* TrackCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackCell.h; sourceTree = "<group>"; };
 		83206376171FA9320021A88D /* TrackCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrackCell.m; sourceTree = "<group>"; };
 		832A4E2B17BF1EB600C3277A /* SpotifyTrack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpotifyTrack.h; sourceTree = "<group>"; };
@@ -83,7 +63,6 @@
 		839E4E691780FA3A00EBB519 /* MDWamp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MDWamp.framework; path = External/MDWamp.framework; sourceTree = "<group>"; };
 		83BEBED01707FA6A00550849 /* PlayersTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PlayersTableViewController.h; sourceTree = "<group>"; };
 		83BEBED11707FA6A00550849 /* PlayersTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PlayersTableViewController.m; sourceTree = "<group>"; };
-		83DEC8A51704CBE300414A78 /* SPLoginResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = SPLoginResources.bundle; path = "../External/cocoalibspotify/iOS Library/SPLoginResources.bundle"; sourceTree = "<group>"; };
 		83DEC8B21704CD2B00414A78 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		83DEC8B31704CD2B00414A78 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		83DEC8B41704CD2B00414A78 /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
@@ -106,7 +85,6 @@
 		83ECA60D1704B9CE00E75B14 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		83ECA60F1704B9CE00E75B14 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		83ECA6121704B9CE00E75B14 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
-		83ED2FC717080374009572E1 /* appkey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = appkey.h; path = ../appkey.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,7 +93,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				835D938C17826653000EB969 /* QuartzCore.framework in Frameworks */,
-				839E4E6B1780FA4700EBB519 /* libCocoaLibSpotify.a in Frameworks */,
 				83799EFE177F6257008DCCC3 /* Security.framework in Frameworks */,
 				83DEC8BC1704CD2B00414A78 /* CFNetwork.framework in Frameworks */,
 				83799EFC177F6228008DCCC3 /* libicucore.dylib in Frameworks */,
@@ -149,15 +126,6 @@
 			name = "Spotify Objects";
 			sourceTree = "<group>";
 		};
-		839E4E611780F9DD00EBB519 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				839E4E661780F9DD00EBB519 /* libCocoaLibSpotify.a */,
-				839E4E681780F9DD00EBB519 /* CocoaLSTests.app */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		83ECA5ED1704B9CE00E75B14 = {
 			isa = PBXGroup;
 			children = (
@@ -181,7 +149,6 @@
 			children = (
 				835D938B17826653000EB969 /* QuartzCore.framework */,
 				839E4E691780FA3A00EBB519 /* MDWamp.framework */,
-				8309C8691780D8950031D30D /* CocoaLibSpotify iOS Library.xcodeproj */,
 				8382C2C71719E8C300EED999 /* MobileCoreServices.framework */,
 				83ECA5F91704B9CE00E75B14 /* UIKit.framework */,
 				83799EFB177F6228008DCCC3 /* libicucore.dylib */,
@@ -226,8 +193,6 @@
 		83ECA6001704B9CE00E75B14 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				83ED2FC717080374009572E1 /* appkey.h */,
-				83DEC8A51704CBE300414A78 /* SPLoginResources.bundle */,
 				83ECA6011704B9CE00E75B14 /* MusicBox-iOS-Info.plist */,
 				83ECA6021704B9CE00E75B14 /* InfoPlist.strings */,
 				83ECA6051704B9CE00E75B14 /* main.m */,
@@ -280,35 +245,12 @@
 			mainGroup = 83ECA5ED1704B9CE00E75B14;
 			productRefGroup = 83ECA5F71704B9CE00E75B14 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 839E4E611780F9DD00EBB519 /* Products */;
-					ProjectRef = 8309C8691780D8950031D30D /* CocoaLibSpotify iOS Library.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				83ECA5F51704B9CE00E75B14 /* MusicBox-iOS */,
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		839E4E661780F9DD00EBB519 /* libCocoaLibSpotify.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libCocoaLibSpotify.a;
-			remoteRef = 839E4E651780F9DD00EBB519 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		839E4E681780F9DD00EBB519 /* CocoaLSTests.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = CocoaLSTests.app;
-			remoteRef = 839E4E671780F9DD00EBB519 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		83ECA5F41704B9CE00E75B14 /* Resources */ = {
@@ -320,7 +262,6 @@
 				83ECA60E1704B9CE00E75B14 /* Default@2x.png in Resources */,
 				83ECA6101704B9CE00E75B14 /* Default-568h@2x.png in Resources */,
 				83ECA6131704B9CE00E75B14 /* MainStoryboard_iPhone.storyboard in Resources */,
-				83DEC8A61704CBE300414A78 /* SPLoginResources.bundle in Resources */,
 				834BF80A1708D8090005F8DB /* music-note.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

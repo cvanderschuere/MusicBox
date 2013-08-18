@@ -59,6 +59,15 @@
     return newTrack;
 }
 
+- (BOOL) isEqual:(id)object{
+    if ([object isKindOfClass:[MusicBoxTrack class]]) {
+        MusicBoxTrack *compareTrack = (MusicBoxTrack*) object;
+        return [self.url isEqualToString:compareTrack.url];
+    }
+    else
+        return [super isEqual:object];
+}
+
 @end
 
 @implementation MusicBox
@@ -67,7 +76,6 @@
     MusicBox *box = [[MusicBox alloc] init];
     box.title = name;
     box.tracks = [NSMutableArray array];
-    box.links = [NSMutableArray array];
     box.playing = false;
     return box;
 }

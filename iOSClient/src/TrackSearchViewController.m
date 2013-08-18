@@ -112,6 +112,8 @@
     [searchBar resignFirstResponder];
 }
 - (void) searchBarSearchButtonClicked:(UISearchBar *)searchBar{
+    [self searchForTrackWithName:searchBar.text];
+    
     [searchBar resignFirstResponder];
 }
 - (BOOL) searchBarShouldBeginEditing:(UISearchBar *)searchBar{
@@ -127,14 +129,19 @@
     if (searchText.length == 0)
 		return;
     
+    [self searchForTrackWithName:searchText];
+}
+
+- (void) searchForTrackWithName:(NSString*)searchText{
     //Escape search string
     NSString *escapedString = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
                                                                                                     NULL,
-                                                                        (__bridge CFStringRef) searchText,
+                                                                                                    (__bridge CFStringRef) searchText,
                                                                                                     NULL,
-                                                                            CFSTR("!*'();:@&=+$,/?%#[]"),
-                                                                                kCFStringEncodingUTF8));
-	//TODO: Perform search with this information
+                                                                                                    CFSTR("!*'();:@&=+$,/?%#[]"),
+                                                                                                    kCFStringEncodingUTF8));
+
+    
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://ws.spotify.com/search/1/track.json?q=%@",escapedString]]];
     RKObjectRequestOperation *operation = [[RKObjectRequestOperation alloc] initWithRequest:request responseDescriptors:@[self.trackResponseDescriptor]];
     [operation setCompletionBlockWithSuccess:^(RKObjectRequestOperation *operation, RKMappingResult *result) {
@@ -144,6 +151,6 @@
         NSLog(@"Failed with error: %@", [error localizedDescription]);
     }];
     [operation start];
-    
+
 }
 @end

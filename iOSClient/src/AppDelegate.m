@@ -7,7 +7,6 @@
 //
 
 #import "AppDelegate.h"
-#import "appkey.h"
 
 @implementation AppDelegate
 
@@ -36,31 +35,6 @@
     
     //Actually connect
     [self.ws connect];
-    
-    NSString *userAgent = [[[NSBundle mainBundle] infoDictionary] valueForKey:(__bridge NSString *)kCFBundleIdentifierKey];
-	NSData *appKey = [NSData dataWithBytes:&g_appkey length:g_appkey_size];
-    
-	NSError *error = nil;
-	[SPSession initializeSharedSessionWithApplicationKey:appKey
-											   userAgent:userAgent
-										   loadingPolicy:SPAsyncLoadingManual
-												   error:&error];
-	if (error != nil) {
-		NSLog(@"CocoaLibSpotify init failed: %@", error);
-		abort();
-	}
-	[[SPSession sharedSession] setDelegate:self];
-    
-    //Login to spotify
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSString *username = [defaults valueForKey:@"userName"];
-    
-    if (username)
-      [[SPSession sharedSession] attemptLoginWithUserName:username existingCredential:[defaults valueForKey:@"credential"]];
-    else{
-        [self performSelector:@selector(showLogin) withObject:NULL afterDelay:0.0]; //Show after this method finishes
-    }
-    
         
     return YES;
 }
@@ -92,50 +66,6 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
-#pragma mark SPSession Delegate
--(UIViewController *)viewControllerToPresentLoginViewForSession:(SPSession *)aSession {
-    //All methods needing this viewcontroller use this method so you only need to change this
-    return self.window.rootViewController;
-}
--(void)session:(SPSession *)aSession didGenerateLoginCredentials:(NSString *)credential forUserName:(NSString *)userName {
-	
-	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];    
-	[defaults setValue:credential forKey:@"credential"];
-	[defaults setValue:userName forKey:@"userName"];
-}
-- (void)sessionDidLoginSuccessfully:(SPSession *)aSession{
-}
-- (void)session:(SPSession *)aSession didFailToLoginWithError:(NSError *)error{
-    [self showLogin];
-}
--(void) session:(SPSession *)aSession didEncounterNetworkError:(NSError *)error{
-    NSLog(@"Error: %@",error);
-}
--(void) session:(SPSession *)aSession didEncounterScrobblingError:(NSError *)error{
-    NSLog(@"Error: %@",error);
-}
--(void)sessionDidLogOut:(SPSession *)aSession {
-    [self showLogin];
-}
--(void) showLogin{
-    if ([self viewControllerToPresentLoginViewForSession:[SPSession sharedSession]].presentedViewController != nil) return;
-    SPLoginViewController *controller = [SPLoginViewController loginControllerForSession:[SPSession sharedSession]];
-	controller.allowsCancel = NO;
-	[[self viewControllerToPresentLoginViewForSession:[SPSession sharedSession]] presentViewController:controller animated:YES completion:NULL];
-}
-
--(void)session:(SPSession *)aSession didLogMessage:(NSString *)aMessage; {}
--(void)sessionDidChangeMetadata:(SPSession *)aSession; {}
-
--(void)session:(SPSession *)aSession recievedMessageForUser:(NSString *)aMessage; {
-	return;
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Message from Spotify"
-													message:aMessage
-												   delegate:nil
-										  cancelButtonTitle:@"OK"
-										  otherButtonTitles:nil];
-	[alert show];
-}
 
 #pragma mark MDWamp Delegate
 - (void) onOpen{

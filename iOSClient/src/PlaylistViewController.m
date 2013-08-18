@@ -20,27 +20,36 @@
 - (void) setCurrentPlayer:(MusicBox *)currentPlayer{
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
     NSString* username = @"christopher.vanderschuere@gmail.com";
+    NSString* password = @"Example";
+
     
     //Cleanup from previous
-    if (_currentPlayer) {
-        [_currentPlayer removeObserver:self forKeyPath:@"loaded"];
-        
+    if (_currentPlayer) {        
         [delegate.websocketRequestQueue addOperationWithBlock:^(){
             //Unsubscribe to updates
             [delegate.ws unsubscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,_currentPlayer.title]];
+            
+            //Subscribe to new topic
+            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,currentPlayer.title] withDelegate:self];
+            
+            //Request tracks of previous player
+            [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:username,password,currentPlayer.title, nil];
+
+        }];
+    }
+    else{
+        //Just subscribe
+        [delegate.websocketRequestQueue addOperationWithBlock:^(){
+            //Subscribe to new topic
+            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,currentPlayer.title] withDelegate:self];
+            
+            //Request tracks of previous player
+            [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:username,password,currentPlayer.title, nil];
+
         }];
     }
     
     _currentPlayer = currentPlayer;
-    
-    //Add observer
-    [_currentPlayer addObserver:self forKeyPath:@"loaded" options:NSKeyValueObservingOptionInitial context:NULL];
-    
-    [delegate.websocketRequestQueue addOperationWithBlock:^(){
-        //Subscribe to updates
-        [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] withDelegate:self];
-    }];
-
     
     //Update top bottom
     if (_currentPlayer)
@@ -51,6 +60,9 @@
     //Save for later
     [[NSUserDefaults standardUserDefaults] setValue:_currentPlayer.title forKey:@"previousPlayer"];
     [[NSUserDefaults standardUserDefaults]synchronize];
+    
+    //Refresh screen
+    [self.collectionView reloadData];
 }
 
 - (void)viewDidLoad
@@ -74,16 +86,6 @@
     if (previousPlayerTitle) {
         //Create player
         self.currentPlayer = [MusicBox musicBoxWithName:previousPlayerTitle];
-        
-        NSString* username = @"christopher.vanderschuere@gmail.com";
-        NSString* password = @"Example";
-       
-        AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
-        
-        [delegate.websocketRequestQueue addOperationWithBlock:^(){
-            //Request tracks of previous player
-            [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:username,password,self.currentPlayer.title, nil];
-        }];
     }
 }
 - (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
@@ -121,17 +123,27 @@
         self.currentPlayer.playing = [[data objectForKey:@"isPlaying"] boolValue];
         [self.playPauseButton setTitle:self.currentPlayer.playing?@"Pause":@"Play" forState:UIControlStateNormal];
         
-        //Queue
+        //Queue: merge
         if (![[data objectForKey:@"queue"] isKindOfClass:[NSNull class]]) {
             NSArray *queue = (NSArray*) [data objectForKey:@"queue"];
+            NSMutableArray *recievedArray = [NSMutableArray arrayWithCapacity:queue.count];
+
             if (queue.count>0) {
-                NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:queue.count];
                 for(NSDictionary *track in queue){
-                    MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"service"] Url:track[@"url"] Name:track[@"trackName"] Album:track[@"albumName"]Artist: track[@"artistName"]];
-                    [recievedTracks addObject:addedTrack];
-                    [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
+                    MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"Service"] Url:track[@"URL"] Name:track[@"TrackName"] Album:track[@"AlbumName"]Artist: track[@"ArtistName"]];
+                    
+                    NSUInteger index = [self.currentPlayer.tracks indexOfObject:addedTrack];
+                    if (index == NSNotFound) {
+                        //Add new track
+                        [recievedArray addObject:addedTrack];
+                        [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
+                    }
+                    else{
+                        //Add existing version
+                        [recievedArray addObject:[self.currentPlayer.tracks objectAtIndex:index]];
+                    }
                 }
-                self.currentPlayer.tracks = recievedTracks;
+                self.currentPlayer.tracks = recievedArray;
                 [self.collectionView reloadData];
             }
         }
@@ -140,6 +152,7 @@
         NSArray *tracks = [object objectForKey:@"data"];
         for (NSDictionary* track in tracks) {
             MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"service"] Url:track[@"url"] Name:track[@"trackName"] Album:track[@"albumName"]Artist: track[@"artistName"]];
+            
             [self.currentPlayer.tracks addObject:addedTrack];
             [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
         }
@@ -275,6 +288,16 @@
     [delegate.websocketRequestQueue addOperationWithBlock:^{
         [delegate.ws publish:@{@"command": @"nextTrack"} toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
     }];
+    
+    //Animate deletion (only if not only song left)
+    if (self.currentPlayer.tracks.count > 1) {
+        [self.collectionView performBatchUpdates:^{
+            [self.currentPlayer.tracks removeObjectAtIndex:0];
+            [self.collectionView deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
+        } completion:^(BOOL finished) {
+            
+        }];
+    }
 }
 
 - (IBAction)playPausePressed:(id)sender {
