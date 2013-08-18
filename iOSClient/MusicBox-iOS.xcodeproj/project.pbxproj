@@ -71,7 +71,7 @@
 		83DEC8B71704CD2B00414A78 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		83E2FCF21704D13F00C10B5E /* TrackSearchViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackSearchViewController.h; sourceTree = "<group>"; };
 		83E2FCF31704D13F00C10B5E /* TrackSearchViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrackSearchViewController.m; sourceTree = "<group>"; };
-		83ECA5F61704B9CE00E75B14 /* MusicBox-iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MusicBox-iOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		83ECA5F61704B9CE00E75B14 /* Music Box.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Music Box.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		83ECA5F91704B9CE00E75B14 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		83ECA5FB1704B9CE00E75B14 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		83ECA5FD1704B9CE00E75B14 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -139,7 +139,7 @@
 		83ECA5F71704B9CE00E75B14 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				83ECA5F61704B9CE00E75B14 /* MusicBox-iOS.app */,
+				83ECA5F61704B9CE00E75B14 /* Music Box.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -223,7 +223,7 @@
 			);
 			name = "MusicBox-iOS";
 			productName = DJPi;
-			productReference = 83ECA5F61704B9CE00E75B14 /* MusicBox-iOS.app */;
+			productReference = 83ECA5F61704B9CE00E75B14 /* Music Box.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -419,7 +419,7 @@
 					"-all_load",
 					"$(inherited)",
 				);
-				PRODUCT_NAME = "MusicBox-iOS";
+				PRODUCT_NAME = "Music Box";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
@@ -443,7 +443,7 @@
 					"-all_load",
 					"$(inherited)",
 				);
-				PRODUCT_NAME = "MusicBox-iOS";
+				PRODUCT_NAME = "Music Box";
 				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
