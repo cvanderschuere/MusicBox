@@ -22,6 +22,7 @@ GET /addTrack
             "url": "http://www.example.com/123", 
             "trackName":"Get Lucky", 
             "artistName": "Daft Punk", 
+            "albumName": "Random Access Memories",
             "service": "Spotify", 
         }
     ] 
@@ -38,6 +39,13 @@ GET /playTrack
 < Content-Type: application/json
 {  
     "command":"playTrack"
+}
+
+GET /nextTrack
+< 200
+< Content-Type: application/json
+{  
+    "command":"nextTrack"
 }
 
 GET /pauseTrack
@@ -59,12 +67,14 @@ GET statusUpdate
 < 200
 {   "command":"statusUpdate"
     "data":{ 
+        "deviceName": "My Device Name"
         "isPlaying": 1
         "queue":[
             {
                 "url": "http://www.example.com/123", 
                 "trackName":"Get Lucky", 
-                "artistName": "Daft Punk", 
+                "artistName": "Daft Punk",
+                "albumName": "Random Access Memories",
                 "service": "Spotify", 
             }
         ]
