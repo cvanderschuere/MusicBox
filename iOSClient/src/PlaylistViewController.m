@@ -102,12 +102,59 @@
 #pragma mark WAMP event 
 - (void) onEvent:(NSString *)topicUri eventObject:(id)object{
     NSLog(@"Recieved Event:%@",object);
-    NSString* username = @"christopher.vanderschuere@gmail.com";
-    NSString* deviceName = @"LivingRoom";
     
     [self.refreshControl endRefreshing];
     
+    //TOD): Check if still same player ![self.currentPlayer.title isEqualToString:topicUri.lastPathComponent]
+    if (![object isKindOfClass:[NSDictionary class]] ) {
+        //Incorrect object recieved
+        return;
+    }
+    
     //Form: baseURL+username+"/"+deviceName+"/currentQueue"
+    //Follow api as define in apiary.io blueprint
+    
+    if ([[object objectForKey:@"command"] isEqualToString:@"statusUpdate"]) {
+        NSDictionary *data = [object objectForKey:@"data"];
+        
+        //Play/Pause
+        self.currentPlayer.playing = [[data objectForKey:@"isPlaying"] boolValue];
+        [self.playPauseButton setTitle:self.currentPlayer.playing?@"Pause":@"Play" forState:UIControlStateNormal];
+        
+        //Queue
+        if (![[data objectForKey:@"queue"] isKindOfClass:[NSNull class]]) {
+            NSArray *queue = (NSArray*) [data objectForKey:@"queue"];
+            if (queue.count>0) {
+                NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:queue.count];
+                for(NSDictionary *track in queue){
+                    MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"service"] Url:[NSURL URLWithString:track[@"url"]]Name:track[@"trackName"] Album:track[@"albumName"]Artist: track[@"artistName"]];
+                    [recievedTracks addObject:addedTrack];
+                    [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
+                }
+                self.currentPlayer.tracks = recievedTracks;
+                [self.collectionView reloadData];
+            }
+        }
+    }
+    else if ([[object objectForKey:@"command"] isEqualToString:@"addTrack"]){
+        NSArray *tracks = [object objectForKey:@"data"];
+        for (NSDictionary* track in tracks) {
+            MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"service"] Url:[NSURL URLWithString:track[@"url"]]Name:track[@"trackName"] Album:track[@"albumName"]Artist: track[@"artistName"]];
+            [self.currentPlayer.tracks addObject:addedTrack];
+            [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
+        }
+        [self.collectionView reloadData];
+        
+    }
+    else if ([[object objectForKey:@"command"] isEqualToString:@"playTrack"]){
+        [self.playPauseButton setTitle:@"Pause" forState:UIControlStateNormal];
+        
+    }
+    else if ([[object objectForKey:@"command"] isEqualToString:@"pauseTrack"]){
+        [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
+    }
+    
+    /*
     //Queue update
     if ([topicUri isEqualToString:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,deviceName]]&& [object isKindOfClass:[NSArray class]]) {
         NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
@@ -156,15 +203,13 @@
                 if (components.count >=3 ) {
                     //FIXME artist & album name
                     MusicBoxTrack* addedTrack = [MusicBoxTrack trackWithService:components[1] Url:[NSURL URLWithString:components[2]]Name:@"Blank" Album:@"Album" Artist:@"Unknown"];
-                    [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
                     [self.currentPlayer.tracks addObject:addedTrack]; //Add to back
                     [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
                 }
             }
         }
-        
-        
     }
+    */
     
 }
 
@@ -228,7 +273,7 @@
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
     NSString* username = @"christopher.vanderschuere@gmail.com";
     [delegate.websocketRequestQueue addOperationWithBlock:^{
-        [delegate.ws publish:@"NextTrack" toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+        [delegate.ws publish:@{@"command": @"nextTrack"} toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
     }];
 }
 
@@ -238,13 +283,13 @@
 
     if ([self.playPauseButton.titleLabel.text isEqualToString:@"Play"]) {
         [delegate.websocketRequestQueue addOperationWithBlock:^{
-            [delegate.ws publish:@"PlayTrack" toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+            [delegate.ws publish:@{@"command": @"playTrack"} toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
         }];
         [self.playPauseButton setTitle:@"Pause" forState:UIControlStateNormal];
     }
     else{
         [delegate.websocketRequestQueue addOperationWithBlock:^{
-            [delegate.ws publish:@"PauseTrack" toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+            [delegate.ws publish:@{@"command": @"pauseTrack"} toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
         }];
         [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
     }
@@ -274,9 +319,13 @@
         AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
         NSString* username = @"christopher.vanderschuere@gmail.com";
         
-        //TODO: Use new api format
         [delegate.websocketRequestQueue addOperationWithBlock:^{
-            [delegate.ws publish:[NSString stringWithFormat:@"AddTrack,%@,%@",trackVC.selectedTrack.service,trackVC.selectedTrack.url]toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+            //Create message
+            NSDictionary *addedTrackMessage = @{@"command": @"addTrack",
+                                                @"data":@[[trackVC.selectedTrack dictionaryWithValuesForKeys:@[@"trackName",@"artistName",@"albumName",@"url",@"service"]]]
+                                                };
+            
+            [delegate.ws publish:addedTrackMessage toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
         }];
     }
     
