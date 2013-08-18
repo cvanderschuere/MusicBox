@@ -53,7 +53,9 @@ type MusicBoxTrack struct{
 
 func main() {
 	runtime.GOMAXPROCS(2) // Used to regulate main thread managment with libspotify (might not be needed)
-	
+
+	log.Info("Name: "+deviceName)
+		
 	client := turnpike.NewClient()
 	
 	//Connect socket between server port and local port
