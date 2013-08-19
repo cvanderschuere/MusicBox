@@ -13,11 +13,11 @@ Used to modify the queue
 --
 
 Message sent to add array of tracks to all listeners
-GET /addTrack
-< 200
-< Content-Type: application/json
-{  "command":"addTrack"
-   "data": [
+PUT /addTrack
+> Content-Type: application/json
+{  
+    "command":"addTrack"
+    "data": [
         {
             "url": "http://www.example.com/123", 
             "trackName":"Get Lucky", 
@@ -27,6 +27,7 @@ GET /addTrack
         }
     ] 
 }
+< 200
 
 --
 Control Commands
@@ -34,26 +35,29 @@ Control Commands
 Isssued to control music box playback
 --
 
-GET /playTrack
-< 200
-< Content-Type: application/json
+PUT /playTrack
+> Content-Type: application/json
 {  
     "command":"playTrack"
 }
-
-GET /pauseTrack
 < 200
-< Content-Type: application/json
+
+
+PUT /pauseTrack
+> Content-Type: application/json
 {  
     "command":"pauseTrack"
 }
-
-GET /nextTrack
 < 200
-< Content-Type: application/json
+
+
+PUT /nextTrack
+> Content-Type: application/json
 {  
     "command":"nextTrack"
 }
+< 200
+
 
 GET /endOfTrack
 < 200
@@ -61,6 +65,7 @@ GET /endOfTrack
 {  
     "command":"endOfTrack"
 }
+
 
 --
 RPC Calls
@@ -72,17 +77,21 @@ Used to poll server for static information
 Make call to baseURL/players with args username,password to recieve array of avaliable player names
 GET /players
 < 200
+< Content-Type: application/json
 [
     "playerName1",
     "playerName2"
 ]
 
+
 Make call to baseURL/currentQueueRequest with args username,password,playerTitle to recieve statusUpdate message. This call returns nothing but a statusUpdate message from the box will follow on usual topic
-GET /currentQueueRequest
-< 200
+PUT /currentQueueRequest
+> Content-Type: application/json
 {
     nil
 }
+< 200
+
 
 --
 Queue Managment 
@@ -92,6 +101,7 @@ Notice capital letters to track properties (due to shortcut in go; might change 
 --
 
 
+Response to currentQueueRequest
 GET statusUpdate
 < 200
 {   "command":"statusUpdate"
