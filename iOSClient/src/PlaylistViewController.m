@@ -167,63 +167,7 @@
         [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
     }
     
-    /*
-    //Queue update
-    if ([topicUri isEqualToString:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,deviceName]]&& [object isKindOfClass:[NSArray class]]) {
-        NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
-        for(NSDictionary *item in object){
-            //FIXME
-            [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]Name:@"Blank" Album:@"Album" Artist:@"Blank"]];
-        }
-        
-        self.currentPlayer.tracks = recievedTracks;
-    }
-    //Status update
-    else if ([topicUri isEqualToString:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,deviceName]]&& [object isKindOfClass:[NSDictionary class]]) {
-        NSDictionary* statusObject = (NSDictionary*) object;
-        
-        //Play/Pause
-        self.currentPlayer.playing = [[statusObject objectForKey:@"isPlaying"] boolValue];
-        [self.playPauseButton setTitle:self.currentPlayer.playing?@"Pause":@"Play" forState:UIControlStateNormal];
-        
-        //Queue
-        if (![[statusObject objectForKey:@"queue"] isKindOfClass:[NSNull class]]) {
-            NSArray *queue = (NSArray*) [statusObject objectForKey:@"queue"];
-            if (queue.count>0) {
-                NSMutableArray *recievedTracks = [NSMutableArray arrayWithCapacity:[object count]];
-                for(NSDictionary *item in queue){
-                    // FIXME Album & artist name
-                    [recievedTracks addObject:[MusicBoxTrack trackWithService:item[@"Service"] Url:[NSURL URLWithString:item[@"URL"]]Name:@"Blank" Album:@"Album" Artist:@"Unknown"]];
-                }
-                self.currentPlayer.tracks = recievedTracks;
-            }
-        }
-    }
-    else if ([object isKindOfClass:[NSString class]]){
-        //Split string into components
-        NSArray* components = [object componentsSeparatedByString:@","];
-        if (components.count >0) {
-            //Determine recieved command
-            if ([components[0] isEqualToString:@"PlayTrack"]) {
-                //Update display
-                [self.playPauseButton setTitle:@"Pause" forState:UIControlStateNormal];
-            }
-            else if ([components[0] isEqualToString:@"PauseTrack"]) {
-                //Update display
-                [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
-            }
-            else if ([components[0] isEqualToString:@"AddTrack"]){
-                if (components.count >=3 ) {
-                    //FIXME artist & album name
-                    MusicBoxTrack* addedTrack = [MusicBoxTrack trackWithService:components[1] Url:[NSURL URLWithString:components[2]]Name:@"Blank" Album:@"Album" Artist:@"Unknown"];
-                    [self.currentPlayer.tracks addObject:addedTrack]; //Add to back
-                    [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
-                }
-            }
-        }
-    }
-    */
-    
+       
 }
 
 #pragma mark RPC Response
@@ -232,6 +176,7 @@
 }
 - (void) onError:(NSString *)errorUri description:(NSString *)errorDesc forCalledUri:(NSString *)callUri{
     NSLog(@"Error on RPC: %@",errorUri);
+    [self.refreshControl endRefreshing];
 }
 
 -(void) refreshPlaylist:(UIRefreshControl*)sender{    
@@ -264,6 +209,7 @@
     
     return cell;
 }
+/*
 #pragma mark Rotation Events
 -(void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
                                duration:(NSTimeInterval)duration{
@@ -279,7 +225,7 @@
         [self.collectionView reloadData];
     }
 }
-
+*/
 
 #pragma mark - UIStoryboard Segue Methods
 - (IBAction)nextPressed:(id)sender {

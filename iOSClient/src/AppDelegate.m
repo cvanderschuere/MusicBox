@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "PlaylistViewController.h"
 
 @implementation AppDelegate
 
@@ -16,7 +17,7 @@
     
     //Connect to websocket
     // if you want debug log set this to YES, default is NO
-    [MDWamp setDebug:YES];
+    [MDWamp setDebug:NO];
     
     self.ws = [[MDWamp alloc] initWithUrl:@"ws://ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080" delegate:self];
     
@@ -24,7 +25,7 @@
     [self.ws setShouldAutoreconnect:YES];
     
     // set number of times it tries to autoreconnect after a fail
-    [self.ws setAutoreconnectMaxRetries:2];
+    [self.ws setAutoreconnectMaxRetries:10];
     
     // set seconds between each reconnection try
     [self.ws setAutoreconnectDelay:5];
@@ -71,6 +72,9 @@
 - (void) onOpen{
     NSLog(@"Websocket is open");
     [self.websocketRequestQueue setSuspended:NO];
+    PlaylistViewController *playlistVC = (PlaylistViewController*) self.window.rootViewController;
+    [playlistVC.refreshControl endRefreshing];
+
 }
 - (void) onClose:(int)code reason:(NSString *)reason{
     NSLog(@"Websocket closed with reason: %@",reason);

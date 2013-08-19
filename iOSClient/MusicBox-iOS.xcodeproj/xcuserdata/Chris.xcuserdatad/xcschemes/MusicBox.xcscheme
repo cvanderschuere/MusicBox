@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "83ECA5F51704B9CE00E75B14"
-               BuildableName = "MusicBox-iOS.app"
+               BuildableName = "Music Box.app"
                BlueprintName = "MusicBox-iOS"
                ReferencedContainer = "container:MusicBox-iOS.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "83ECA5F51704B9CE00E75B14"
-            BuildableName = "MusicBox-iOS.app"
+            BuildableName = "Music Box.app"
             BlueprintName = "MusicBox-iOS"
             ReferencedContainer = "container:MusicBox-iOS.xcodeproj">
          </BuildableReference>
@@ -52,7 +52,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "83ECA5F51704B9CE00E75B14"
-            BuildableName = "MusicBox-iOS.app"
+            BuildableName = "Music Box.app"
             BlueprintName = "MusicBox-iOS"
             ReferencedContainer = "container:MusicBox-iOS.xcodeproj">
          </BuildableReference>
@@ -70,7 +70,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "83ECA5F51704B9CE00E75B14"
-            BuildableName = "MusicBox-iOS.app"
+            BuildableName = "Music Box.app"
             BlueprintName = "MusicBox-iOS"
             ReferencedContainer = "container:MusicBox-iOS.xcodeproj">
          </BuildableReference>
