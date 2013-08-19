@@ -7,13 +7,65 @@
 //
 
 #import "MusicBox.h"
+#define LastFMAPIKey @"600be92e4856b530ec9ffaef2906e5a6"
+
 
 @implementation MusicBoxTrack
-+(instancetype) trackWithService:(NSString*)serviceName Url:(NSURL*)url{
++(instancetype) trackWithService:(NSString*)serviceName Url:(NSString*)url Name:(NSString *)trackName Album:(NSString *)albumName Artist:(NSString *)artistName{
     MusicBoxTrack *newTrack = [[MusicBoxTrack alloc] init];
     newTrack.service = serviceName;
     newTrack.url = url;
+    newTrack.trackName = trackName;
+    newTrack.artistName = artistName;
+    newTrack.albumName = albumName;
+    
+    //Fetch Album artwork from last.fm (Do in background)
+       
+    //Encode as utf-8
+    NSString *escapedArtist = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
+                                                                                                    NULL,
+                                                                                                    (__bridge CFStringRef) artistName,
+                                                                                                    NULL,
+                                                                                                    CFSTR("!*'();:@&=+$,/?%#[]"),
+                                                                                                    kCFStringEncodingUTF8));
+    NSString *escapedAlbum = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
+                                                                                                    NULL,
+                                                                                                    (__bridge CFStringRef) albumName,
+                                                                                                    NULL,
+                                                                                                    CFSTR("!*'();:@&=+$,/?%#[]"),
+                                                                                                    kCFStringEncodingUTF8));
+    
+    //Load album artwork url
+    NSString *requestString = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=album.getInfo&format=json&api_key=%@&artist=%@&album=%@",LastFMAPIKey,escapedArtist,escapedAlbum];
+
+    
+    //Make request
+    NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:requestString]];
+   [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse * response, NSData * data, NSError * error) {
+       if (error) {
+           NSLog(@"Error(Last.fm):%@",error);
+       }
+       else{
+           //parse response
+           NSDictionary* responseDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
+           
+           //Get large image dict
+           NSDictionary *largeImageDict = [[responseDict[@"album"] objectForKey:@"image"] objectAtIndex:2];
+           newTrack.artworkURL = [NSURL URLWithString:[largeImageDict objectForKey:@"#text"]];
+       }
+   }];
+    
+       
     return newTrack;
+}
+
+- (BOOL) isEqual:(id)object{
+    if ([object isKindOfClass:[MusicBoxTrack class]]) {
+        MusicBoxTrack *compareTrack = (MusicBoxTrack*) object;
+        return [self.url isEqualToString:compareTrack.url];
+    }
+    else
+        return [super isEqual:object];
 }
 
 @end
@@ -24,65 +76,8 @@
     MusicBox *box = [[MusicBox alloc] init];
     box.title = name;
     box.tracks = [NSMutableArray array];
-    box.links = [NSMutableArray array];
     box.playing = false;
     return box;
-}
-
-
--(void)setTracksWithLinks:(NSMutableArray *)linkArray{
-    self.links = linkArray;
-    
-    [self.tracks removeAllObjects];
-    self.loaded = NO;
-    for(MusicBoxTrack *linkedTrack in self.links){
-        [SPTrack trackForTrackURL:linkedTrack.url inSession:[SPSession sharedSession] callback:^(SPTrack *track) {
-            [self.tracks addObject:track];
-            if (self.tracks.count == linkArray.count){
-                //Load all tracks
-                [SPAsyncLoading waitUntilLoaded:self.tracks timeout:10 then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
-                    //All tracks are loaded...load albums for artwork
-                    NSMutableArray* imageArray = [NSMutableArray arrayWithCapacity:self.tracks.count];
-                    for (SPTrack *track in loadedItems) {
-                        [track.album.cover startLoading];
-                        [imageArray addObject:track.album.cover];
-                    }
-                    
-                    //Load all albums
-                    [SPAsyncLoading waitUntilLoaded:imageArray timeout:10 then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
-                        NSLog(@"Loaded: %d Not-Loaded:%d",loadedItems.count,notLoadedItems.count);
-                        self.loaded = YES;
-                    }];
-                }];
-            }
-        }];
-    }
-}
-
-- (void) addTrackWithLink:(MusicBoxTrack*)link atIndex:(NSUInteger)idx{
-    [self.links insertObject:link atIndex:idx];
-    
-    self.loaded = NO;
-    [SPTrack trackForTrackURL:link.url inSession:[SPSession sharedSession] callback:^(SPTrack *track) {
-        [self.tracks insertObject:track atIndex:idx];
-        
-        [SPAsyncLoading waitUntilLoaded:track timeout:10 then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
-            if (loadedItems.count>0) {
-                SPTrack *track = loadedItems.lastObject;
-                
-                [SPAsyncLoading waitUntilLoaded:track.album.cover timeout:10 then:^(NSArray *loadedItems, NSArray *notLoadedItems) {
-                    self.loaded = YES;
-                }];
-            }
-        }];
-
-    }];
-    
-}
-- (void) removeTrackWithLink:(MusicBoxTrack*)link{
-    NSUInteger idx = [self.links indexOfObject:link];
-    [self.tracks removeObjectAtIndex:idx];
-    [self.links removeObjectAtIndex:idx];
 }
 
 @end

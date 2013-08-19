@@ -7,10 +7,13 @@
 //
 
 #import "TrackSearchViewController.h"
-#import "LiveSearch.h"
+#import "SpotifyTrack.h"
 
-@interface TrackSearchViewController ()
-@property (nonatomic, strong) LiveSearch* liveSearch;
+@interface TrackSearchViewController()
+
+@property (nonatomic,strong) NSMutableArray* resultsArray;
+@property (nonatomic, strong) RKResponseDescriptor *trackResponseDescriptor;
+
 @end
 
 @implementation TrackSearchViewController
@@ -19,11 +22,34 @@
 {
     [super viewDidLoad];
     
-    //Add observer for live search
-    [self addObserver:self forKeyPath:@"liveSearch.latestSearch.loaded" options:0 context:NULL];
+    //FIXME: allow scope changes
+    self.searchBar.selectedScopeButtonIndex = 2;
+    self.searchBar.showsScopeBar = NO;
+    
+    //Create object mappings
+    
+    //Album
+    RKObjectMapping *albumMapping = [RKObjectMapping mappingForClass:[SpotifyAlbum class]];
+    [albumMapping addAttributeMappingsFromDictionary:@{@"name": @"name",@"href":@"spotifyID"}];
+    
+    //Artist
+    RKObjectMapping *artistMapping = [RKObjectMapping mappingForClass:[SpotifyArtist class]];
+    [artistMapping addAttributeMappingsFromDictionary:@{@"name": @"name",@"href":@"spotifyID"}];
+
+    
+    //Track
+    RKObjectMapping *trackMapping = [RKObjectMapping mappingForClass:[SpotifyTrack class]];
+    [trackMapping addAttributeMappingsFromDictionary:@{@"name": @"name",@"href":@"spotifyID"}];
+    [trackMapping addRelationshipMappingWithSourceKeyPath:@"album" mapping:albumMapping];
+    [trackMapping addRelationshipMappingWithSourceKeyPath:@"artists" mapping:artistMapping];
+    
+
+    //Response Descriptor
+    NSIndexSet *statusCodes = RKStatusCodeIndexSetForClass(RKStatusCodeClassSuccessful); // Anything in 2xx
+    self.trackResponseDescriptor = [RKResponseDescriptor responseDescriptorWithMapping:trackMapping method:RKRequestMethodAny pathPattern:nil keyPath:@"tracks" statusCodes:statusCodes];
+    
 }
 - (void) dealloc{
-    [self removeObserver:self forKeyPath:@"liveSearch.latestSearch.loaded"];
 }
 
 - (void)didReceiveMemoryWarning
@@ -31,97 +57,63 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-- (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if ([keyPath hasPrefix:@"liveSearch"]) {
-        //Live search updated
-        
-        //Pick selected index based on top hit
-        if ([self.liveSearch.topHit isKindOfClass:[SPArtist class]]) {
-            [self.searchBar setSelectedScopeButtonIndex:0];
-        }
-        else if ([self.liveSearch.topHit isKindOfClass:[SPAlbum class]]){
-            [self.searchBar setSelectedScopeButtonIndex:1];
-        }
-        else if([self.liveSearch.topHit isKindOfClass:[SPTrack class]]){
-            [self.searchBar setSelectedScopeButtonIndex:2];
-        }
-        
-        //Update tableview accordingly
-        [self.results reloadData];
-    }
-    else
-        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
-}
 #pragma mark - UITableView Delegate
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
-    NSURL* url = nil;
-    switch (self.searchBar.selectedScopeButtonIndex) {
-        case 0: //Artist
-            url = [[self.liveSearch.topArtists objectAtIndex:indexPath.row] spotifyURL];
-            break;
-        case 1: //Album
-            url = [[self.liveSearch.topAlbums objectAtIndex:indexPath.row] spotifyURL];
-            break;
-        case 2: //Track
-            url = [[self.liveSearch.topTracks objectAtIndex:indexPath.row] spotifyURL];
-            break;
-        default:
-            break;
-    }
-    self.selectedTrack = [MusicBoxTrack trackWithService:@"Service" Url:url];
+    SpotifyTrack* track = self.resultsArray[indexPath.row];
+    
+    
+    self.selectedTrack = [MusicBoxTrack trackWithService:@"Spotify" Url:track.spotifyID Name:track.name Album:track.album.name Artist:[track.artists[0] name]];
     
     [self.searchBar resignFirstResponder];
     [self performSegueWithIdentifier:@"unwindSegue" sender:self];
 }
 #pragma mark - UITableView Datasource
 -(NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    switch (self.searchBar.selectedScopeButtonIndex) {
-        case 0: //Artist
-            return self.liveSearch.topArtists.count;
-            break;
-        case 1: //Album
-            return self.liveSearch.topAlbums.count;
-            break;
-        case 2: //Track
-            return self.liveSearch.topTracks.count;
-            break;
-        default:
-            return 0;
-            break;
-    }
+    return self.resultsArray.count;
 }
 -(UITableViewCell*) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:@"SearchCell" forIndexPath:indexPath];
+    
+    
     NSString *title = nil;
+    NSString *subtitle = nil;
     switch (self.searchBar.selectedScopeButtonIndex) {
-        case 0: //Artist
-            title = [[self.liveSearch.topArtists objectAtIndex:indexPath.row] name];
+        case 0:
+            title = @"Artist";
             break;
         case 1: //Album
-            title = [[self.liveSearch.topAlbums objectAtIndex:indexPath.row] name];
+            title = @"Album";
             break;
         case 2: //Track
-            title = [[self.liveSearch.topTracks objectAtIndex:indexPath.row] name];
+        {
+            SpotifyTrack *track = self.resultsArray[indexPath.row];
+            
+            title = track.name;
+            subtitle = track.album.name;
             break;
+        }
         default:
             break;
     }
     
     cell.textLabel.text = title;
+    cell.detailTextLabel.text = subtitle;
     return cell;
 }
 
 #pragma mark - UISearchBar Delegate
 
 -(void)searchBar:(UISearchBar *)searchBar selectedScopeButtonIndexDidChange:(NSInteger)selectedScope{
-    [self.results reloadData];
+    //[self.results reloadSections:[NSIndexSet indexSetWithIndex:0] withRowAnimation:UITableViewRowAnimationAutomatic];
 }
 - (void) searchBarCancelButtonClicked:(UISearchBar *)searchBar{
     [searchBar resignFirstResponder];
 }
 - (void) searchBarSearchButtonClicked:(UISearchBar *)searchBar{
+    [self searchForTrackWithName:searchBar.text];
+    
     [searchBar resignFirstResponder];
 }
 - (BOOL) searchBarShouldBeginEditing:(UISearchBar *)searchBar{
@@ -134,17 +126,31 @@
     return YES;
 }
 - (void) searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText{
-    if ([searchText isEqualToString:self.liveSearch.latestSearch.searchQuery] || searchText.length == 0)
+    if (searchText.length == 0)
 		return;
-	
-	SPSearch *newSearch = [SPSearch liveSearchWithSearchQuery:searchText
-													inSession:[SPSession sharedSession]];
-	
-	if (self.liveSearch == nil) {
-		self.liveSearch = [[LiveSearch alloc] initWithInitialSearch:newSearch];
-	} else {
-		self.liveSearch.latestSearch = newSearch;
-	}
+    
+    [self searchForTrackWithName:searchText];
+}
+
+- (void) searchForTrackWithName:(NSString*)searchText{
+    //Escape search string
+    NSString *escapedString = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
+                                                                                                    NULL,
+                                                                                                    (__bridge CFStringRef) searchText,
+                                                                                                    NULL,
+                                                                                                    CFSTR("!*'();:@&=+$,/?%#[]"),
+                                                                                                    kCFStringEncodingUTF8));
+
+    
+    NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://ws.spotify.com/search/1/track.json?q=%@",escapedString]]];
+    RKObjectRequestOperation *operation = [[RKObjectRequestOperation alloc] initWithRequest:request responseDescriptors:@[self.trackResponseDescriptor]];
+    [operation setCompletionBlockWithSuccess:^(RKObjectRequestOperation *operation, RKMappingResult *result) {
+        self.resultsArray = result.array.mutableCopy;
+        [self.results reloadData];
+    } failure:^(RKObjectRequestOperation *operation, NSError *error) {
+        NSLog(@"Failed with error: %@", [error localizedDescription]);
+    }];
+    [operation start];
 
 }
 @end

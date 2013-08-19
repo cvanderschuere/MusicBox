@@ -10,9 +10,15 @@
 
 @interface MusicBoxTrack : NSObject
 @property (nonatomic,strong) NSString *service;
-@property (nonatomic,strong) NSURL *url;
+@property (nonatomic,strong) NSString *url;
 
-+(instancetype) trackWithService:(NSString*)serviceName Url:(NSURL*)url;
+@property (nonatomic,strong) NSString *trackName;
+@property (nonatomic,strong) NSString *artistName;
+@property (nonatomic,strong) NSString *albumName;
+
+@property (nonatomic,strong) NSURL *artworkURL;
+
++(instancetype) trackWithService:(NSString*)serviceName Url:(NSString*)url Name:(NSString*)trackName Album:(NSString*)albumName Artist:(NSString*) artistName;
 @end
 
 
@@ -22,14 +28,9 @@
 @property BOOL playing;
 
 //track handling
-@property (nonatomic, strong) NSMutableArray *tracks; //Sp_track instances
-@property (nonatomic, strong) NSMutableArray *links; //Links in the form of MusicBoxTrack
-@property BOOL loaded;
+@property (nonatomic, strong) NSMutableArray *tracks; //MusicBoxTrack instances
 
 + (instancetype) musicBoxWithName:(NSString*) name;
 
--(void) setTracksWithLinks:(NSArray*)linkArray;
-- (void) addTrackWithLink:(MusicBoxTrack*)link atIndex:(NSUInteger)idx;
-- (void) removeTrackWithLink:(MusicBoxTrack*)link;
 
 @end

@@ -57,7 +57,9 @@
     [sender beginRefreshing];
     
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
-    [delegate.ws call:[NSString stringWithFormat:@"%@players",baseURL] withDelegate:self args:@"christopher.vanderschuere@gmail.com",@"Example Password", nil];
+    [delegate.websocketRequestQueue addOperationWithBlock:^{
+        [delegate.ws call:[NSString stringWithFormat:@"%@players",baseURL] withDelegate:self args:@"christopher.vanderschuere@gmail.com",@"Example Password", nil];
+    }];
 }
 
 #pragma mark Websocket Delegate
@@ -109,9 +111,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    MusicBox *selectedBox = [[MusicBox alloc] init];
-    selectedBox.title = self.players[indexPath.row];
-    self.selectedPlayer = selectedBox;
+    self.selectedPlayer = [MusicBox musicBoxWithName:self.players[indexPath.row]];
     [self performSegueWithIdentifier:@"unwindSeque" sender:nil];
 }
 
