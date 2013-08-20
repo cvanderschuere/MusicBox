@@ -17,9 +17,14 @@ func addSimilarSongs(baseTrack MusicBoxTrack, numToAdd uint){
 	songsToAdd := findSimilarSongsLastFM(baseTrack,numToAdd)
 	
 	//Send addTrack to all devices (including self) with new songs
-	for _,track := range songsToAdd{
-		fmt.Println(track)
+	data := make([](map[string]string),len(songsToAdd))
+	for i,song := range songsToAdd{
+		songDict := map[string]string{"trackName":song.TrackName, "albumName":song.AlbumName, "artistName":song.ArtistName, "service":song.Service, "url":song.URL}
+		data[i] = songDict
 	}
+	
+	addMsg := map[string]interface{}{"command":"addTrack", "data":data}
+	client.Publish(baseURL+username+"/"+deviceName,addMsg) 
 }
 
 //JSON structs 
@@ -81,7 +86,7 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 	
 	//Make track.getsimilar request (need at least 2 to force array return type & should give padding in case of unfound songs)
 	lastFMURL := baseURLLastFM + 
-			fmt.Sprintf("&artist=%s&track=%s&limit=%d",url.QueryEscape(baseTrack.ArtistName),url.QueryEscape(baseTrack.TrackName),numToAdd+5)
+			fmt.Sprintf("&artist=%s&track=%s&limit=%d",url.QueryEscape(baseTrack.ArtistName),url.QueryEscape(baseTrack.TrackName),(numToAdd+1)*5)
 	
 	log.Debug(lastFMURL)
 	resp,err := http.Get(lastFMURL)
@@ -104,18 +109,19 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 	//Convert to MusicBoxTracks (match to spotify)
 	for _,similarTrack := range responseObject.Similartracks.Track{
 		//Start concurrent update loop
-		go func(){			
+		go func(){
 			//Make EchoNest call to match artistName & trackName to spotifyID
 			echoURL := baseURLEchoNest + fmt.Sprintf("&artist=%s&title=%s",url.QueryEscape(similarTrack.Artist.Name),url.QueryEscape(similarTrack.Name))
 			response,error := http.Get(echoURL)
 			if error != nil {
 				// handle error
 				log.Error("EchoNest Error:%s",error)
+				return
 			}
-			
+		
 			bodyEcho, _ := ioutil.ReadAll(response.Body)
 			response.Body.Close()
-		
+	
 			//Unmarshal JSON
 			var responseObjectEcho echoSongSearchResponse
 			err = json.Unmarshal(bodyEcho,&responseObjectEcho)
@@ -123,22 +129,22 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 				log.Error("Json Error(Echo): %s",err)
 				return
 			}
-			
-			if len(responseObjectEcho.Response.Songs[0].Tracks) == 0{
+		
+			if len(responseObjectEcho.Response.Songs) == 0  || len(responseObjectEcho.Response.Songs[0].Tracks) == 0{
 				//Failed to find match
 				log.Error("Echo Nest Failed to find spotify URI")
 				return
 			}
-			
+		
 			//Extract spotify uri
 			spotifyURLEcho := responseObjectEcho.Response.Songs[0].Tracks[0].Foreign_id
 			spotifyURL := strings.Replace(spotifyURLEcho,"spotify-WW","spotify",1)
-			
+		
 			//Lookup spotify track for detailed info (track,artist,album)
 			response,error = http.Get(baseURLSpotifyLookup+spotifyURL)
 			bodySpotfy, _ := ioutil.ReadAll(response.Body)
 			response.Body.Close()		
-			
+		
 			//Unmarshal JSON
 			var responseSpotify spotifyTrackLookupResponse
 			err = json.Unmarshal(bodySpotfy,&responseSpotify)
@@ -146,9 +152,9 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 				log.Error("Json Error(Spotify): %s",err)
 				return
 			}
-			
+		
 			foundSpotifyTrack := responseSpotify.Track
-			
+		
 			//Form musicBoxTrack and pass on channel
 			newTrack := MusicBoxTrack{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,TrackName:foundSpotifyTrack.Name,Service:"Spotify",URL:spotifyURL}
 			returnChan<-newTrack

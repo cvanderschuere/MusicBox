@@ -12,6 +12,8 @@ import (
 const serverURL = "ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
 
+var client *turnpike.Client
+
 var log = lumber.NewConsoleLogger(lumber.TRACE)
 
 const(
@@ -38,6 +40,7 @@ const(
 	//Add more later
 )
 
+//Fields must be exported for JSON marshal
 type MusicBoxTrack struct{
 	Service string
 	URL		string
@@ -59,7 +62,7 @@ func main() {
 	// Prepare client
 	//	
 		
-	client := turnpike.NewClient()
+	client = turnpike.NewClient()
 	
 	//Connect socket between server port and local port
 	if err := client.Connect("ws://"+serverURL, "http://localhost:4040"); err != nil {
@@ -184,7 +187,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 				//Switch through command types
 				switch message["command"]{
 				case "addTrack":
-					data := message["data"].([]interface{})
+					data := message["data"].([]interface{}) // Need for interface due to interal marshaling in turnpike
 					
 					//Add all passed tracks
 					for _,trackDict := range data {
@@ -211,7 +214,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					//Queue must add recommendation to stay at minimum 2
 					if len(queue) == 1{
 						log.Trace("Finding similar songs to add")
-						go addSimilarSongs(queue[0],1)
+						go addSimilarSongs(queue[0],2)
 					}
 					
 					
@@ -241,8 +244,13 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					
 						isPlaying = true	
 						notiChan <- Notification{Kind:NextTrack,Content:next}
+						
+						//Make sure queue has enough recommendations
+						if len(queue) <= 2{
+							log.Trace("Finding similar songs to add")
+							go addSimilarSongs(queue[0],2)
+						}
 					}
-					//Else don't allow
 				//
 				//Internal Events
 				//
