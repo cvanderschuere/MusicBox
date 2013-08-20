@@ -20,7 +20,6 @@ const(
 )
 var deviceName,_ = os.Hostname()
 
-
 type Notification struct{
 	Kind NotificationType
 	Content interface{}
@@ -56,6 +55,10 @@ func main() {
 
 	log.Info("Name: "+deviceName)
 		
+	//
+	// Prepare client
+	//	
+		
 	client := turnpike.NewClient()
 	
 	//Connect socket between server port and local port
@@ -74,6 +77,10 @@ func main() {
 	client.Subscribe(baseURL+username+"/"+deviceName)
 	client.Subscribe(baseURL+username+"/"+deviceName+"/internal") //Also recieve music box exclusive events
 	
+	//
+	// Prepare music services
+	//
+	
 	//Login to services & music sink
 	controlChan := make(chan bool)
 	streamChan := alsa.Init(controlChan)
@@ -82,8 +89,13 @@ func main() {
 	ch := spotify.Login(username,password)
 	<-ch//Login sync	
 	
+	//
+	// Start main loop
+	//
+	
 	var endOfTrackChan <-chan bool
 	var err error
+	
 	
 	for{
 		select{
@@ -99,14 +111,13 @@ func main() {
 			switch update.Kind{
 			case AddedToQueue:
 				track := update.Content.(MusicBoxTrack)
-				
-				//If nothing playing...start it playing
 				log.Debug("Added Track: "+track.Service+" "+track.URL)
+				
 			case RemovedFromQueue:
 				//Should have to do nothing...unless is current track
-				track := update.Content.(MusicBoxTrack)
-				
+				track := update.Content.(MusicBoxTrack)	
 				log.Debug("Removed Track: "+track.Service+" "+track.URL)
+				
 			case PausedTrack:
 				//Send pause command				
 				log.Debug("Paused Track")
@@ -175,6 +186,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 				case "addTrack":
 					data := message["data"].([]interface{})
 					
+					//Add all passed tracks
 					for _,trackDict := range data {
 						track := trackDict.(map[string]interface{})
 						newTrack := MusicBoxTrack{Service:track["service"].(string),URL:track["url"].(string),TrackName:track["trackName"].(string),ArtistName:track["artistName"].(string),AlbumName:track["albumName"].(string)}
@@ -195,6 +207,14 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 							notiChan <- Notification{Kind:AddedToQueue,Content:newTrack} // Give chance to preload
 						}
 					}
+					
+					//Queue must add recommendation to stay at minimum 2
+					if len(queue) == 1{
+						log.Trace("Finding similar songs to add")
+						go addSimilarSongs(queue[0],1)
+					}
+					
+					
 				case "removeTrack":
 					//Format: [RemoveTrack ServiceName TrackName]
 						//trackToRemove := MusicBoxTrack{Service:command[1],URL:command[2]}
