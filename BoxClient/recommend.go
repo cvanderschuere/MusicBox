@@ -47,46 +47,38 @@ type lastFMArtist struct{
 	Name string
 }
 
-//Echonest
-type echoSongSearchResponse struct{
-	Response songSearchBody
-}
-type songSearchBody struct{
-	Songs []matchedSong
-}
-type matchedSong struct{
-	Tracks []foreignSongID
-}
-type foreignSongID struct{
-	Foreign_id string
-}
-
 //Spotify
-type spotifyTrackLookupResponse struct{
-	Track spotifyLookupTrack
+type spotifyTrackSearchResponse struct{
+	Tracks []spotifySearchTrack
 }
-type spotifyLookupTrack struct{
+type spotifySearchTrack struct{
 	Name string
-	Artists []spotifyLookupArtist
-	Album spotifyLookupAlbum
+	Href string
+	Artists []spotifySearchArtist
+	Album spotifySearchAlbum
 }
-type spotifyLookupArtist struct{
+type spotifySearchArtist struct{
 	Name string
+	Href string
 }
-type spotifyLookupAlbum struct{
+type spotifySearchAlbum struct{
 	Name string
+	Href string
+	Availability spotifySearchAvailability
+}
+type spotifySearchAvailability struct{
+	Territories string
 }
 
 const baseURLLastFM = "http://ws.audioscrobbler.com/2.0/?method=track.getsimilar&api_key=600be92e4856b530ec9ffaef2906e5a6&format=json" 
-const baseURLEchoNest = "http://developer.echonest.com/api/v4/song/search?api_key=MRVCCYJZYJ32THKA8&format=json&results=1&bucket=id:spotify-WW&bucket=tracks"
-const baseURLSpotifyLookup = "http://ws.spotify.com/lookup/1/.json?uri="
+const baseURLSpotifySearch = "http://ws.spotify.com/search/1/track.json?q="
 
 //Use Last.fm's track.getSimilar API to find songs
 func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTrack){
 	
 	//Make track.getsimilar request (need at least 2 to force array return type & should give padding in case of unfound songs)
 	lastFMURL := baseURLLastFM + 
-			fmt.Sprintf("&artist=%s&track=%s&limit=%d",url.QueryEscape(baseTrack.ArtistName),url.QueryEscape(baseTrack.TrackName),(numToAdd+1)*5)
+			fmt.Sprintf("&artist=%s&track=%s&limit=%d",url.QueryEscape(baseTrack.ArtistName),url.QueryEscape(baseTrack.TrackName),(numToAdd+1)*2)
 	
 	log.Debug(lastFMURL)
 	resp,err := http.Get(lastFMURL)
@@ -109,56 +101,7 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 	//Convert to MusicBoxTracks (match to spotify)
 	for _,similarTrack := range responseObject.Similartracks.Track{
 		//Start concurrent update loop
-		go func(){
-			//Make EchoNest call to match artistName & trackName to spotifyID
-			echoURL := baseURLEchoNest + fmt.Sprintf("&artist=%s&title=%s",url.QueryEscape(similarTrack.Artist.Name),url.QueryEscape(similarTrack.Name))
-			response,error := http.Get(echoURL)
-			if error != nil {
-				// handle error
-				log.Error("EchoNest Error:%s",error)
-				return
-			}
-		
-			bodyEcho, _ := ioutil.ReadAll(response.Body)
-			response.Body.Close()
-	
-			//Unmarshal JSON
-			var responseObjectEcho echoSongSearchResponse
-			err = json.Unmarshal(bodyEcho,&responseObjectEcho)
-			if err != nil {
-				log.Error("Json Error(Echo): %s",err)
-				return
-			}
-		
-			if len(responseObjectEcho.Response.Songs) == 0  || len(responseObjectEcho.Response.Songs[0].Tracks) == 0{
-				//Failed to find match
-				log.Error("Echo Nest Failed to find spotify URI")
-				return
-			}
-		
-			//Extract spotify uri
-			spotifyURLEcho := responseObjectEcho.Response.Songs[0].Tracks[0].Foreign_id
-			spotifyURL := strings.Replace(spotifyURLEcho,"spotify-WW","spotify",1)
-		
-			//Lookup spotify track for detailed info (track,artist,album)
-			response,error = http.Get(baseURLSpotifyLookup+spotifyURL)
-			bodySpotfy, _ := ioutil.ReadAll(response.Body)
-			response.Body.Close()		
-		
-			//Unmarshal JSON
-			var responseSpotify spotifyTrackLookupResponse
-			err = json.Unmarshal(bodySpotfy,&responseSpotify)
-			if err != nil {
-				log.Error("Json Error(Spotify): %s",err)
-				return
-			}
-		
-			foundSpotifyTrack := responseSpotify.Track
-		
-			//Form musicBoxTrack and pass on channel
-			newTrack := MusicBoxTrack{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,TrackName:foundSpotifyTrack.Name,Service:"Spotify",URL:spotifyURL}
-			returnChan<-newTrack
-		}()
+		go matchToSpotify(similarTrack,returnChan)
 	}
 	
 	var addedTracks []MusicBoxTrack
@@ -166,11 +109,50 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 	//Read in created tracks
 	for uint(len(addedTracks))<numToAdd{
 		newTrack := <-returnChan
-		
 		addedTracks = append(addedTracks,newTrack)
-		
 	}
 	
-	
 	return addedTracks
+}
+
+//Make search call to spotify with artist name & track name 
+//Return musicBoxTrack on chan if found
+func matchToSpotify(track lastFMTrack,resultChan chan MusicBoxTrack){
+	response,error := http.Get(baseURLSpotifySearch + url.QueryEscape(track.Artist.Name+" "+track.Name))
+	if error != nil {
+		// handle error
+		log.Error("Spotify Search Error:%s",error)
+		return
+	}
+
+	bodySpotify, _ := ioutil.ReadAll(response.Body)
+	response.Body.Close()
+
+	//Unmarshal JSON
+	var responseObject spotifyTrackSearchResponse
+	err := json.Unmarshal(bodySpotify,&responseObject)
+	if err != nil {
+		log.Error("Json Error(Spotify): %s",err)
+		return
+	}
+	
+	if len(responseObject.Tracks) == 0{
+		log.Error("Spotify found no matching tracks:",track.Artist.Name,track.Name)
+		return
+	}
+	
+	//Make assumption that top track returned by spotify is correct one
+
+	//Find track that is avaliable in us (making assumption that spotify returned a proper track)
+	var foundSpotifyTrack spotifySearchTrack
+	for _,spotifyTrack := range responseObject.Tracks{
+		if strings.Contains(spotifyTrack.Album.Availability.Territories,"US"){
+			foundSpotifyTrack = spotifyTrack
+			break
+		}
+	}
+
+	//Form musicBoxTrack and pass on channel(sync)
+	newTrack := MusicBoxTrack{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,TrackName:foundSpotifyTrack.Name,Service:"Spotify",URL:foundSpotifyTrack.Href}
+	resultChan<-newTrack
 }
