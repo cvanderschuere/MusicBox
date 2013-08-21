@@ -30,11 +30,14 @@
                                             <subviews>
                                                 <imageView userInteractionEnabled="NO" contentMode="redraw" image="music-note.jpg" translatesAutoresizingMaskIntoConstraints="NO" id="Gal-oP-IJl">
                                                     <constraints>
-                                                        <constraint firstAttribute="width" constant="248" type="user" id="mna-Rt-pdI"/>
                                                         <constraint firstAttribute="height" constant="161" type="user" id="qGT-kS-Taa"/>
+                                                        <constraint firstAttribute="width" constant="195" id="w0d-9h-unK"/>
                                                     </constraints>
                                                 </imageView>
                                                 <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="472" text="Someone that I used to know" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="8" adjustsLetterSpacingToFitWidth="YES" translatesAutoresizingMaskIntoConstraints="NO" id="QQP-fZ-xFJ">
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="35" id="4nq-0J-tFU"/>
+                                                    </constraints>
                                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
@@ -44,14 +47,12 @@
                                         </view>
                                         <constraints>
                                             <constraint firstItem="QQP-fZ-xFJ" firstAttribute="leading" secondItem="7Jc-yR-uSm" secondAttribute="leading" type="user" id="4Qq-yH-LyY"/>
-                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="bottom" secondItem="7Jc-yR-uSm" secondAttribute="bottom" type="user" id="7o7-pv-LJU"/>
-                                            <constraint firstItem="QQP-fZ-xFJ" firstAttribute="top" secondItem="Gal-oP-IJl" secondAttribute="bottom" constant="-1" type="user" id="9DU-Rs-hu7"/>
                                             <constraint firstItem="QQP-fZ-xFJ" firstAttribute="trailing" secondItem="7Jc-yR-uSm" secondAttribute="trailing" type="user" id="Bec-9M-nNy"/>
                                             <constraint firstItem="QQP-fZ-xFJ" firstAttribute="leading" secondItem="7Jc-yR-uSm" secondAttribute="leading" type="user" id="EXf-uN-uKa"/>
                                             <constraint firstAttribute="centerX" secondItem="QQP-fZ-xFJ" secondAttribute="centerX" type="user" id="Pii-BB-J7Z"/>
-                                            <constraint firstAttribute="centerX" secondItem="Gal-oP-IJl" secondAttribute="centerX" type="user" id="SPT-FJ-bCQ"/>
-                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="top" secondItem="7Jc-yR-uSm" secondAttribute="top" constant="-3" type="user" id="oGQ-EZ-iVv"/>
+                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="centerX" secondItem="QQP-fZ-xFJ" secondAttribute="centerX" type="default" id="TKv-zk-BPu"/>
                                             <constraint firstItem="QQP-fZ-xFJ" firstAttribute="bottom" secondItem="7Jc-yR-uSm" secondAttribute="bottom" type="user" id="tIf-1r-LIj"/>
+                                            <constraint firstItem="Gal-oP-IJl" firstAttribute="top" secondItem="7Jc-yR-uSm" secondAttribute="top" type="default" id="vmb-ZB-r68"/>
                                         </constraints>
                                         <connections>
                                             <outlet property="albumArt" destination="Gal-oP-IJl" id="Znw-Ol-WDY"/>
@@ -201,7 +202,7 @@
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="txN-pV-pUh">
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
-                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SearchCell" textLabel="wUc-Jz-6SI" style="IBUITableViewCellStyleDefault" id="DHM-Ga-NxI">
+                                    <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="SearchCell" textLabel="wUc-Jz-6SI" detailTextLabel="a6d-Yc-12G" style="IBUITableViewCellStyleSubtitle" id="DHM-Ga-NxI">
                                         <rect key="frame" x="0.0" y="22" width="320" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
@@ -209,8 +210,13 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" text="Title" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wUc-Jz-6SI">
-                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="20"/>
+                                                    <fontDescription key="fontDescription" type="boldSystem" pointSize="18"/>
                                                     <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                                    <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                                </label>
+                                                <label opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="left" text="Subtitle" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="a6d-Yc-12G">
+                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                    <color key="textColor" red="0.50196078431372548" green="0.50196078431372548" blue="0.50196078431372548" alpha="1" colorSpace="calibratedRGB"/>
                                                     <color key="highlightedColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                                 </label>
                                             </subviews>
@@ -223,7 +229,7 @@
                                     <outlet property="delegate" destination="8gu-Xd-IQF" id="Iuk-fd-TPt"/>
                                 </connections>
                             </tableView>
-                            <searchBar contentMode="redraw" showsScopeBar="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ssn-iI-DnS">
+                            <searchBar contentMode="redraw" translatesAutoresizingMaskIntoConstraints="NO" id="ssn-iI-DnS">
                                 <color key="tintColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                 <textInputTraits key="textInputTraits"/>
                                 <scopeButtonTitles>
@@ -348,6 +354,9 @@
         </class>
         <class className="UICollectionViewFlowLayout" superclassName="UICollectionViewLayout">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/UICollectionViewFlowLayout.h"/>
+        </class>
+        <class className="UICollectionViewLayout" superclassName="NSObject">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/UICollectionViewLayout.h"/>
         </class>
         <class className="UIStoryboardSegue" superclassName="NSObject">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/UIStoryboardSegue.h"/>

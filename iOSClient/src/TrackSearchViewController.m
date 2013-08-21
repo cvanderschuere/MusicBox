@@ -79,19 +79,18 @@
     
     NSString *title = nil;
     NSString *subtitle = nil;
+    //Always show track for now
     switch (self.searchBar.selectedScopeButtonIndex) {
         case 0:
             title = @"Artist";
-            break;
         case 1: //Album
             title = @"Album";
-            break;
         case 2: //Track
         {
             SpotifyTrack *track = self.resultsArray[indexPath.row];
             
             title = track.name;
-            subtitle = track.album.name;
+            subtitle = [track.artists[0] name];
             break;
         }
         default:
