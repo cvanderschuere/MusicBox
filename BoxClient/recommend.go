@@ -9,13 +9,17 @@ import(
 	"strings"
 )
 
-
 //Find `numToAdd` songs similar to `baseTrack` and send addTrack message with them
 func addSimilarSongs(baseTrack MusicBoxTrack, numToAdd uint){
 	
 	//Launch webrequest for similar songs
 	songsToAdd := findSimilarSongsLastFM(baseTrack,numToAdd)
 	
+	if len(songsToAdd) == 0{
+		log.Error("Found no similar songs")
+		return
+	}
+		
 	//Send addTrack to all devices (including self) with new songs
 	data := make([](map[string]string),len(songsToAdd))
 	for i,song := range songsToAdd{
@@ -78,7 +82,7 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 	
 	//Make track.getsimilar request (need at least 2 to force array return type & should give padding in case of unfound songs)
 	lastFMURL := baseURLLastFM + 
-			fmt.Sprintf("&artist=%s&track=%s&limit=%d",url.QueryEscape(baseTrack.ArtistName),url.QueryEscape(baseTrack.TrackName),(numToAdd+1)*2)
+			fmt.Sprintf("&artist=%s&track=%s&limit=%d",url.QueryEscape(baseTrack.ArtistName),url.QueryEscape(baseTrack.TrackName),(numToAdd)*5)
 	
 	log.Debug(lastFMURL)
 	resp,err := http.Get(lastFMURL)
@@ -94,12 +98,14 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 	err = json.Unmarshal(body,&responseObject)
 	if err != nil {
 			log.Error("Json Error: %s",err)
+			log.Trace(string(body))
 	}
 				
-	returnChan := make(chan MusicBoxTrack,numToAdd)	
+	returnChan := make(chan *MusicBoxTrack,numToAdd)	
 		
 	//Convert to MusicBoxTracks (match to spotify)
 	for _,similarTrack := range responseObject.Similartracks.Track{
+		
 		//Start concurrent update loop
 		go matchToSpotify(similarTrack,returnChan)
 	}
@@ -107,9 +113,15 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 	var addedTracks []MusicBoxTrack
 	
 	//Read in created tracks
-	for uint(len(addedTracks))<numToAdd{
+	for i:=0;i<len(responseObject.Similartracks.Track);i++{
 		newTrack := <-returnChan
-		addedTracks = append(addedTracks,newTrack)
+		if newTrack != nil{
+			addedTracks = append(addedTracks,*newTrack)
+		}
+	}
+		
+	if len(addedTracks)>int(numToAdd){
+		addedTracks = addedTracks[:numToAdd] //Pass only last numToAdd songs
 	}
 	
 	return addedTracks
@@ -117,11 +129,12 @@ func findSimilarSongsLastFM(baseTrack MusicBoxTrack, numToAdd uint)([]MusicBoxTr
 
 //Make search call to spotify with artist name & track name 
 //Return musicBoxTrack on chan if found
-func matchToSpotify(track lastFMTrack,resultChan chan MusicBoxTrack){
+func matchToSpotify(track lastFMTrack,resultChan chan *MusicBoxTrack){
 	response,error := http.Get(baseURLSpotifySearch + url.QueryEscape(track.Artist.Name+" "+track.Name))
 	if error != nil {
 		// handle error
 		log.Error("Spotify Search Error:%s",error)
+		resultChan<-nil
 		return
 	}
 
@@ -133,11 +146,13 @@ func matchToSpotify(track lastFMTrack,resultChan chan MusicBoxTrack){
 	err := json.Unmarshal(bodySpotify,&responseObject)
 	if err != nil {
 		log.Error("Json Error(Spotify): %s",err)
+		resultChan<-nil
 		return
 	}
 	
 	if len(responseObject.Tracks) == 0{
 		log.Error("Spotify found no matching tracks:",track.Artist.Name,track.Name)
+		resultChan<-nil
 		return
 	}
 	
@@ -153,6 +168,6 @@ func matchToSpotify(track lastFMTrack,resultChan chan MusicBoxTrack){
 	}
 
 	//Form musicBoxTrack and pass on channel(sync)
-	newTrack := MusicBoxTrack{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,TrackName:foundSpotifyTrack.Name,Service:"Spotify",URL:foundSpotifyTrack.Href}
+	newTrack := &MusicBoxTrack{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,TrackName:foundSpotifyTrack.Name,Service:"Spotify",URL:foundSpotifyTrack.Href}
 	resultChan<-newTrack
 }

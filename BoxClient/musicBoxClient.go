@@ -214,7 +214,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					//Queue must add recommendation to stay at minimum 2
 					if len(queue) == 1{
 						log.Trace("Finding similar songs to add")
-						go addSimilarSongs(queue[0],2)
+						go addSimilarSongs(queue[0],1)
 					}
 					
 					
@@ -248,7 +248,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 						//Make sure queue has enough recommendations
 						if len(queue) <= 2{
 							log.Trace("Finding similar songs to add")
-							go addSimilarSongs(queue[0],2)
+							go addSimilarSongs(queue[0],1)
 						}
 					}
 				//
