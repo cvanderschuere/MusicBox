@@ -17,6 +17,9 @@
 {
     // Override point for customization after application launch.
     
+    //Setup Testflight
+    [TestFlight takeOff:@"9bb727dd-5437-4e8b-b2eb-4a9508e74bb0"];
+    
     //Connect to websocket
     // if you want debug log set this to YES, default is NO
     [MDWamp setDebug:DEBUG_MESSAGES];

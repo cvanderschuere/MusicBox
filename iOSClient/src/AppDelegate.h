@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <MDWamp/MDWamp.h>
+#import "TestFlight.h"
 
 //Global (used in other parts of the app)
 const static NSString* baseURL = @"http://www.musicbox.com/";
