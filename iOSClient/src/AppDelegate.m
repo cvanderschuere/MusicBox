@@ -9,6 +9,8 @@
 #import "AppDelegate.h"
 #import "PlaylistViewController.h"
 
+#define DEBUG_MESSAGES NO
+
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -17,7 +19,7 @@
     
     //Connect to websocket
     // if you want debug log set this to YES, default is NO
-    [MDWamp setDebug:NO];
+    [MDWamp setDebug:DEBUG_MESSAGES];
     
     self.ws = [[MDWamp alloc] initWithUrl:@"ws://ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080" delegate:self];
     
@@ -78,7 +80,14 @@
 }
 - (void) onClose:(int)code reason:(NSString *)reason{
     NSLog(@"Websocket closed with reason: %@",reason);
-    UIAlertView *errorView = [[UIAlertView alloc] initWithTitle:@"Websocket Error" message:reason delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles: nil];
-    [errorView show];
+    
+    if (DEBUG_MESSAGES) {
+        UIAlertView *errorView = [[UIAlertView alloc] initWithTitle:@"Websocket Error" message:reason delegate:nil cancelButtonTitle:@"Dismiss" otherButtonTitles: nil];
+        [errorView show];
+    }
+    
+    PlaylistViewController *playlistVC = (PlaylistViewController*) self.window.rootViewController;
+    [playlistVC.refreshControl endRefreshing];
+
 }
 @end

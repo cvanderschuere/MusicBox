@@ -11,6 +11,8 @@
 		832A4E2D17BF1EB600C3277A /* SpotifyTrack.m in Sources */ = {isa = PBXBuildFile; fileRef = 832A4E2C17BF1EB600C3277A /* SpotifyTrack.m */; };
 		832A4E3217BF1ECB00C3277A /* SpotifyAlbum.m in Sources */ = {isa = PBXBuildFile; fileRef = 832A4E3117BF1ECB00C3277A /* SpotifyAlbum.m */; };
 		832A4E3517BF1EDA00C3277A /* SpotifyArtist.m in Sources */ = {isa = PBXBuildFile; fileRef = 832A4E3417BF1EDA00C3277A /* SpotifyArtist.m */; };
+		832F5A9417C83C2E00BD9D4B /* AppIcon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 832F5A9317C83C2E00BD9D4B /* AppIcon@2x.png */; };
+		832F5A9617C83C5E00BD9D4B /* AppIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 832F5A9517C83C5E00BD9D4B /* AppIcon.png */; };
 		834BF80A1708D8090005F8DB /* music-note.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 834BF8091708D8090005F8DB /* music-note.jpg */; };
 		835D938C17826653000EB969 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 835D938B17826653000EB969 /* QuartzCore.framework */; };
 		83799EFC177F6228008DCCC3 /* libicucore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 83799EFB177F6228008DCCC3 /* libicucore.dylib */; };
@@ -51,6 +53,8 @@
 		832A4E3117BF1ECB00C3277A /* SpotifyAlbum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpotifyAlbum.m; sourceTree = "<group>"; };
 		832A4E3317BF1EDA00C3277A /* SpotifyArtist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SpotifyArtist.h; sourceTree = "<group>"; };
 		832A4E3417BF1EDA00C3277A /* SpotifyArtist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpotifyArtist.m; sourceTree = "<group>"; };
+		832F5A9317C83C2E00BD9D4B /* AppIcon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon@2x.png"; path = "../AppIcon@2x.png"; sourceTree = "<group>"; };
+		832F5A9517C83C5E00BD9D4B /* AppIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = AppIcon.png; path = ../AppIcon.png; sourceTree = "<group>"; };
 		834BF8091708D8090005F8DB /* music-note.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "music-note.jpg"; sourceTree = "<group>"; };
 		835D938B17826653000EB969 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		83799EFB177F6228008DCCC3 /* libicucore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.dylib; path = usr/lib/libicucore.dylib; sourceTree = SDKROOT; };
@@ -126,6 +130,23 @@
 			name = "Spotify Objects";
 			sourceTree = "<group>";
 		};
+		832F5A8D17C83B6700BD9D4B /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				832F5A8E17C83B6C00BD9D4B /* Images */,
+			);
+			name = Media;
+			sourceTree = "<group>";
+		};
+		832F5A8E17C83B6C00BD9D4B /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				832F5A9517C83C5E00BD9D4B /* AppIcon.png */,
+				832F5A9317C83C2E00BD9D4B /* AppIcon@2x.png */,
+			);
+			name = Images;
+			sourceTree = "<group>";
+		};
 		83ECA5ED1704B9CE00E75B14 = {
 			isa = PBXGroup;
 			children = (
@@ -193,6 +214,7 @@
 		83ECA6001704B9CE00E75B14 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				832F5A8D17C83B6700BD9D4B /* Media */,
 				83ECA6011704B9CE00E75B14 /* MusicBox-iOS-Info.plist */,
 				83ECA6021704B9CE00E75B14 /* InfoPlist.strings */,
 				83ECA6051704B9CE00E75B14 /* main.m */,
@@ -263,6 +285,8 @@
 				83ECA6101704B9CE00E75B14 /* Default-568h@2x.png in Resources */,
 				83ECA6131704B9CE00E75B14 /* MainStoryboard_iPhone.storyboard in Resources */,
 				834BF80A1708D8090005F8DB /* music-note.jpg in Resources */,
+				832F5A9417C83C2E00BD9D4B /* AppIcon@2x.png in Resources */,
+				832F5A9617C83C5E00BD9D4B /* AppIcon.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
