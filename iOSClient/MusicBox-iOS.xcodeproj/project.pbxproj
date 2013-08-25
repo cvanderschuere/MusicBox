@@ -13,8 +13,6 @@
 		832A4E3517BF1EDA00C3277A /* SpotifyArtist.m in Sources */ = {isa = PBXBuildFile; fileRef = 832A4E3417BF1EDA00C3277A /* SpotifyArtist.m */; };
 		832F5A9417C83C2E00BD9D4B /* AppIcon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 832F5A9317C83C2E00BD9D4B /* AppIcon@2x.png */; };
 		832F5A9617C83C5E00BD9D4B /* AppIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = 832F5A9517C83C5E00BD9D4B /* AppIcon.png */; };
-		832F5A9A17C8454A00BD9D4B /* libTestFlight.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832F5A9917C8454A00BD9D4B /* libTestFlight.a */; };
-		832F5A9C17C8456C00BD9D4B /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 832F5A9B17C8456C00BD9D4B /* libz.dylib */; };
 		834BF80A1708D8090005F8DB /* music-note.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 834BF8091708D8090005F8DB /* music-note.jpg */; };
 		835D938C17826653000EB969 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 835D938B17826653000EB969 /* QuartzCore.framework */; };
 		83799EFC177F6228008DCCC3 /* libicucore.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 83799EFB177F6228008DCCC3 /* libicucore.dylib */; };
@@ -57,8 +55,6 @@
 		832A4E3417BF1EDA00C3277A /* SpotifyArtist.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SpotifyArtist.m; sourceTree = "<group>"; };
 		832F5A9317C83C2E00BD9D4B /* AppIcon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "AppIcon@2x.png"; path = "../AppIcon@2x.png"; sourceTree = "<group>"; };
 		832F5A9517C83C5E00BD9D4B /* AppIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = AppIcon.png; path = ../AppIcon.png; sourceTree = "<group>"; };
-		832F5A9917C8454A00BD9D4B /* libTestFlight.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libTestFlight.a; path = External/TestFlightSDK2.0.0/libTestFlight.a; sourceTree = "<group>"; };
-		832F5A9B17C8456C00BD9D4B /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
 		834BF8091708D8090005F8DB /* music-note.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "music-note.jpg"; sourceTree = "<group>"; };
 		835D938B17826653000EB969 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		83799EFB177F6228008DCCC3 /* libicucore.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.dylib; path = usr/lib/libicucore.dylib; sourceTree = SDKROOT; };
@@ -100,7 +96,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				832F5A9C17C8456C00BD9D4B /* libz.dylib in Frameworks */,
 				835D938C17826653000EB969 /* QuartzCore.framework in Frameworks */,
 				83799EFE177F6257008DCCC3 /* Security.framework in Frameworks */,
 				83DEC8BC1704CD2B00414A78 /* CFNetwork.framework in Frameworks */,
@@ -116,7 +111,6 @@
 				8382C2C81719E8C300EED999 /* MobileCoreServices.framework in Frameworks */,
 				839E4E6A1780FA3A00EBB519 /* MDWamp.framework in Frameworks */,
 				EAB24BC0E7EC4C9BBD5C43E0 /* libPods.a in Frameworks */,
-				832F5A9A17C8454A00BD9D4B /* libTestFlight.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -174,8 +168,6 @@
 		83ECA5F81704B9CE00E75B14 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				832F5A9B17C8456C00BD9D4B /* libz.dylib */,
-				832F5A9917C8454A00BD9D4B /* libTestFlight.a */,
 				835D938B17826653000EB969 /* QuartzCore.framework */,
 				839E4E691780FA3A00EBB519 /* MDWamp.framework */,
 				8382C2C71719E8C300EED999 /* MobileCoreServices.framework */,
@@ -445,7 +437,8 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/MusicBox-iOS-Prefix.pch";
 				INFOPLIST_FILE = "src/MusicBox-iOS-Info.plist";
-				LIBRARY_SEARCH_PATHS = (
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				"LIBRARY_SEARCH_PATHS[arch=*]" = (
 					"$(inherited)",
 					"\"$(SRCROOT)/External/TestFlightSDK2.0.0\"",
 				);
@@ -475,10 +468,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/MusicBox-iOS-Prefix.pch";
 				INFOPLIST_FILE = "src/MusicBox-iOS-Info.plist";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/External/TestFlightSDK2.0.0\"",
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-all_load",
