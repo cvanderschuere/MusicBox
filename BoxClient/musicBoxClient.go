@@ -7,6 +7,7 @@ import (
 	"github.com/cvanderschuere/alsa-go"
 	"runtime"
 	"os"
+	"os/signal"
 )
 
 const serverURL = "ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080"
@@ -92,6 +93,10 @@ func main() {
 	ch := spotify.Login(username,password)
 	<-ch//Login sync	
 	
+	//Register for signals
+	signalChan := make(chan os.Signal,1)
+	signal.Notify(signalChan)
+	
 	//
 	// Start main loop
 	//
@@ -99,9 +104,14 @@ func main() {
 	var endOfTrackChan <-chan bool
 	var err error
 	
-	
+	MAIN_LOOP:
 	for{
 		select{
+		case s := <-signalChan:
+			//Recieved signal
+			signal.Stop(signalChan)
+			log.Debug("Recieved Signal: ", s)
+			break MAIN_LOOP
 		case <-endOfTrackChan:
 			//Pass message that track is over
 			log.Trace("Recieved on end of track chan")
