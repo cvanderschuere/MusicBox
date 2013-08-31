@@ -24,7 +24,7 @@
     // if you want debug log set this to YES, default is NO
     [MDWamp setDebug:DEBUG_MESSAGES];
     
-    self.ws = [[MDWamp alloc] initWithUrl:@"ws://ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080" delegate:self];
+    self.ws = [[MDWamp alloc] initWithUrl:@"ws://ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080" delegate:self];
     
     // set if MDWAMP should automatically try to reconnect after a network fail default YES
     [self.ws setShouldAutoreconnect:YES];
