@@ -10,7 +10,7 @@ import (
 	"os/signal"
 )
 
-const serverURL = "ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080"
+const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
 
 var client *turnpike.Client
