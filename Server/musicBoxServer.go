@@ -4,20 +4,20 @@ import (
 	"code.google.com/p/go.net/websocket"
 	"log"
 	"net/http"
-	"github.com/cvanderschuere/turnpike"
+	//"github.com/cvanderschuere/turnpike"
 	"postmaster"
 	//"turnpike" //Local Dev
 )
 
 //Global
-var server *turnpike.Server
+var server *postmaster.Server
 
 const(
 	baseURL = "http://www.musicbox.com/"
 )
 
 func main() {
-	server = turnpike.NewServer()
+	server = postmaster.NewServer()
 	
 	//Setup RPC Functions (probably not the right way to do this)
 	server.RegisterRPC(baseURL+"currentQueueRequest",queueRequest)
@@ -25,7 +25,7 @@ func main() {
 	//	server.RegisterRPC(baseURL+"user/status",userUpdate)
 	//	server.RegisterRPC(baseURL+"player/status",playerUpdate)
 	
-	http.Handle("/", websocket.Handler(turnpike.HandleWebsocket(server)))
+	http.Handle("/", websocket.Handler(postmaster.HandleWebsocket(server)))
 	
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
@@ -33,7 +33,7 @@ func main() {
 }
 
 //RPC Handler of form: res, err = f(id, msg.ProcURI, msg.CallArgs...)
-func queueRequest(id, url string, args ...interface{})(interface{},error){
+func queueRequest(id postmaster.ConnectionID, url string, args ...interface{})(interface{},*postmaster.RPCError){
 	//Format: [username password(hashed) deviceName]
 	username := args[0].(string)
 	//password := args[1].(string)
@@ -54,7 +54,7 @@ func queueRequest(id, url string, args ...interface{})(interface{},error){
 }
 
 //Return music box device names for given user (need auth down the line)
-func boxRequest(id,url string, args ...interface{})(interface{},error){
+func boxRequest(id postmaster.ConnectionID,url string, args ...interface{})(interface{},*postmaster.RPCError){
 	//Format: [username password(hashed)]
 	//username := args[0].(string)
 	//password := args[1].(string)
