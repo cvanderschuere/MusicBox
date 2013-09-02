@@ -11,6 +11,7 @@ import (
 	"github.com/crowdmob/goamz/aws"
 	"github.com/crowdmob/goamz/dynamodb"
 	"strings"
+	"sort"
 )
 
 //Global
@@ -47,6 +48,8 @@ func main() {
 }
 
 var dynamoDBServer *dynamodb.Server
+var usersTable *dynamodb.Table
+var musicBoxesTable *dynamodb.Table
 
 func setupAWS()(error){
 	//Sign in to AWS
@@ -59,14 +62,18 @@ func setupAWS()(error){
 	dynamoDBServer = &dynamodb.Server{auth, aws.USWest2}
 		
 	//Users
-	primary := dynamodb.NewStringAttribute("username", "")
+	primary := dynamodb.NewStringAttribute("Username", "")
 	key := dynamodb.PrimaryKey{primary, nil}
 	usersTable = dynamoDBServer.NewTable("Users",key)	
+	
+	//MusicBoxes
+	primary = dynamodb.NewStringAttribute("ID", "")
+	key = dynamodb.PrimaryKey{primary, nil}
+	musicBoxesTable = dynamoDBServer.NewTable("MusicBoxes",key)	
 
 	return nil
 }
 
-var usersTable *dynamodb.Table
 
 //Verfiy the identify of incoming connection (Accept:nil, Reject: error) sends 403 on error
 func VerifyConnection(config *websocket.Config, req *http.Request) (err error){	
@@ -162,9 +169,48 @@ func queueRequest(id postmaster.ConnectionID,username string, url string, args .
 //Return music box device names for given user (need auth down the line)
 func boxRequest(id postmaster.ConnectionID,username string,url string, args ...interface{})(interface{},*postmaster.RPCError){	
 	
-	//Simulate for  now
-	players := []string{"Awolnation","Beatles","Coldplay","Deadmau5"}
+	var boxes []BoxItem
 	
+	//Look up music box ids for user
+	if item, err := usersTable.GetItem(&dynamodb.Key{HashKey: username}); err == nil{
+		userObj := &UserItem{}
+
+		err := dynamodb.UnmarshalAttributes(&item, userObj)
+		if err != nil {
+			err2 := &postmaster.RPCError{URI:url,Description:"Unmarshal Error",Details:""}
+			return nil,err2
+		}
+						
+		//Batch lookup ids for music boxes
+		for _,id := range userObj.MusicBoxes{
+			boxObj := &BoxItem{}
+			
+			//Get music box
+			if box, err3 := musicBoxesTable.GetItem(&dynamodb.Key{HashKey: id}); err3 == nil{
+				boxErr := dynamodb.UnmarshalAttributes(&box, boxObj)
+				if boxErr != nil {
+					boxErr2 := &postmaster.RPCError{URI:url,Description:"Unmarshal Error",Details:""}
+					return nil,boxErr2
+				}
+			}
+			
+			boxes = append(boxes,*boxObj)
+		}
+		
+	}else{
+		err2 := &postmaster.RPCError{URI:url,Description:"Get error:invalid user",Details:""}
+		return nil, err2
+	}
+	
+	// FIXME Limit response to match old api
+	var players sort.StringSlice;
+	for _,box := range boxes{
+		players = append(players,box.DeviceName)
+	}
+	
+	//Sort
+	players.Sort() 
+		
 	return players,nil
 }
 

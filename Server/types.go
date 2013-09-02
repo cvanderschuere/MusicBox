@@ -7,3 +7,16 @@ type UserItem struct{
 	
 	MusicBoxes []string
 }
+
+type BoxItem struct{
+	ID	string
+	User string
+	DeviceName string
+	Location	string
+	Theme	string
+	
+	//Dynamic stats
+	Playing 	int64
+	Queue []string
+	
+}
