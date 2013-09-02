@@ -141,11 +141,9 @@ func InterceptMessage(id postmaster.ConnectionID, msg postmaster.PublishMsg)(boo
 //
 
 //RPC Handler of form: res, err = f(id, msg.ProcURI, msg.CallArgs...)
-func queueRequest(id postmaster.ConnectionID, url string, args ...interface{})(interface{},*postmaster.RPCError){
-	//Format: [username password(hashed) deviceName]
-	username := args[0].(string)
-	//password := args[1].(string)
-	deviceName := args[2].(string)
+func queueRequest(id postmaster.ConnectionID,username string, url string, args ...interface{})(interface{},*postmaster.RPCError){
+	//Format: [deviceName]
+	deviceName := args[0].(string)
 	
 	//Recieved request for queue...for now just pass on to music box
 	
@@ -162,10 +160,7 @@ func queueRequest(id postmaster.ConnectionID, url string, args ...interface{})(i
 }
 
 //Return music box device names for given user (need auth down the line)
-func boxRequest(id postmaster.ConnectionID,url string, args ...interface{})(interface{},*postmaster.RPCError){
-	//Format: [username password(hashed)]
-	//username := args[0].(string)
-	//password := args[1].(string)
+func boxRequest(id postmaster.ConnectionID,username string,url string, args ...interface{})(interface{},*postmaster.RPCError){	
 	
 	//Simulate for  now
 	players := []string{"Awolnation","Beatles","Coldplay","Deadmau5"}
