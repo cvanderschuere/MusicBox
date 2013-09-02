@@ -27,10 +27,10 @@
     if (_currentPlayer) {        
         [delegate.websocketRequestQueue addOperationWithBlock:^(){
             //Unsubscribe to updates
-            [delegate.ws unsubscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,_currentPlayer.title]];
+            [delegate.ws unsubscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,_currentPlayer.title]];
             
             //Subscribe to new topic
-            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,currentPlayer.title] withDelegate:self];
+            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,currentPlayer.title] withDelegate:self];
             
             //Request tracks of previous player
             [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:username,password,currentPlayer.title, nil];
@@ -41,7 +41,7 @@
         //Just subscribe
         [delegate.websocketRequestQueue addOperationWithBlock:^(){
             //Subscribe to new topic
-            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,currentPlayer.title] withDelegate:self];
+            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,currentPlayer.title] withDelegate:self];
             
             //Request tracks of previous player
             [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:username,password,currentPlayer.title, nil];
@@ -113,7 +113,7 @@
         return;
     }
     
-    //Form: baseURL+username+"/"+deviceName+"/currentQueue"
+    //Form: baseURL+"/"+deviceName+"/currentQueue"
     //Follow api as define in apiary.io blueprint
     
     if ([[object objectForKey:@"command"] isEqualToString:@"statusUpdate"]) {
@@ -232,7 +232,7 @@
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
     NSString* username = @"christopher.vanderschuere@gmail.com";
     [delegate.websocketRequestQueue addOperationWithBlock:^{
-        [delegate.ws publish:@{@"command": @"nextTrack"} toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+        [delegate.ws publish:@{@"command": @"nextTrack"} toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.title] excludeMe:YES];
     }];
     
     //Animate deletion (only if not only song left)
@@ -252,13 +252,13 @@
 
     if ([self.playPauseButton.titleLabel.text isEqualToString:@"Play"]) {
         [delegate.websocketRequestQueue addOperationWithBlock:^{
-            [delegate.ws publish:@{@"command": @"playTrack"} toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+            [delegate.ws publish:@{@"command": @"playTrack"} toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.title] excludeMe:YES];
         }];
         [self.playPauseButton setTitle:@"Pause" forState:UIControlStateNormal];
     }
     else{
         [delegate.websocketRequestQueue addOperationWithBlock:^{
-            [delegate.ws publish:@{@"command": @"pauseTrack"} toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+            [delegate.ws publish:@{@"command": @"pauseTrack"} toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.title] excludeMe:YES];
         }];
         [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
     }
@@ -294,7 +294,7 @@
                                                 @"data":@[[trackVC.selectedTrack dictionaryWithValuesForKeys:@[@"trackName",@"artistName",@"albumName",@"url",@"service"]]]
                                                 };
             
-            [delegate.ws publish:addedTrackMessage toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,username,self.currentPlayer.title] excludeMe:YES];
+            [delegate.ws publish:addedTrackMessage toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.title] excludeMe:YES];
         }];
     }
     

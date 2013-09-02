@@ -25,8 +25,8 @@
     [MDWamp setDebug:DEBUG_MESSAGES];
     
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"ws://ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"]];
-    [request addValue:@"cvanderschuere" forHTTPHeaderField:@"musicbox-username"];
-    [request addValue:@"exampleSessionID" forHTTPHeaderField:@"musicbox-session-id"];
+    [request addValue:@"christopher.vanderschuere@gmail.com" forHTTPHeaderField:@"musicbox-username"];
+    [request addValue:@"HryV3rtCBEBdvjW7fcTjKA" forHTTPHeaderField:@"musicbox-session-id"];
     
     self.ws = [[MDWamp alloc] initWithURLRequest:request delegate:self];
     
