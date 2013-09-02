@@ -10,6 +10,7 @@ import (
 	"postmaster"
 	"github.com/crowdmob/goamz/aws"
 	"github.com/crowdmob/goamz/dynamodb"
+	"strings"
 )
 
 //Global
@@ -90,6 +91,10 @@ func VerifyConnection(config *websocket.Config, req *http.Request) (err error){
 				return fmt.Errorf("Invalid sessionID")
 			}
 			
+			//Need to pass username information on to handler (Somewhat of a hack; better options welcome)
+			config.Header = make(map[string][]string)
+			config.Header.Set("musicbox-username",username)
+						
 			return nil	//Verified connection	
 		}else{
 			return fmt.Errorf("Invalid username")
@@ -101,9 +106,39 @@ func VerifyConnection(config *websocket.Config, req *http.Request) (err error){
 
 //Intercept wamp events (Allow:True, Reject:False)
 func InterceptMessage(id postmaster.ConnectionID, msg postmaster.PublishMsg)(bool){
+	//Filter out base url and split into components
+	uri := strings.Replace(msg.TopicURI,baseURL,"",1)
+	args := strings.Split(uri,"/")
+	
+	username := args[0]
+	
+	data,ok := msg.Event.(map[string]interface{}) //cast
+	
+	if !ok{
+		log.Print("Doesn't follow correct formate")
+		return false
+	}
+	
+	//Switch through command types
+	switch data["command"]{
+	case "addTrack":
+	case "removeTrack":
+	case "playTrack":
+	case "pauseTrack":
+	case "stopTrack":
+	case "nextTrack":
+	default:
+			log.Print("Unknown Command:",data["command"])
+	}
+		
+	fmt.Println(username,data)	
+		
 	return true
 }
 
+//
+// RPC Han
+//
 
 //RPC Handler of form: res, err = f(id, msg.ProcURI, msg.CallArgs...)
 func queueRequest(id postmaster.ConnectionID, url string, args ...interface{})(interface{},*postmaster.RPCError){
