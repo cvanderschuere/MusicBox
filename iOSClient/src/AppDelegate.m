@@ -9,7 +9,7 @@
 #import "AppDelegate.h"
 #import "PlaylistViewController.h"
 
-#define DEBUG_MESSAGES NO
+#define DEBUG_MESSAGES YES
 
 @implementation AppDelegate
 
@@ -24,7 +24,11 @@
     // if you want debug log set this to YES, default is NO
     [MDWamp setDebug:DEBUG_MESSAGES];
     
-    self.ws = [[MDWamp alloc] initWithUrl:@"ws://ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080" delegate:self];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"ws://ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"]];
+    [request addValue:@"cvanderschuere" forHTTPHeaderField:@"musicbox-username"];
+    [request addValue:@"exampleSessionID" forHTTPHeaderField:@"musicbox-session-id"];
+    
+    self.ws = [[MDWamp alloc] initWithURLRequest:request delegate:self];
     
     // set if MDWAMP should automatically try to reconnect after a network fail default YES
     [self.ws setShouldAutoreconnect:YES];
