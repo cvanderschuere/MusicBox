@@ -56,43 +56,47 @@ func setupAWS()(error){
 	}
 
 	dynamoDBServer = &dynamodb.Server{auth, aws.USWest2}
-
-	tables, err := dynamoDBServer.ListTables()
-
-	if err != nil {
-		return err
-	}
-	
-	log.Print(tables)
-	
-	//Create tables
+		
+	//Users
 	primary := dynamodb.NewStringAttribute("username", "")
 	key := dynamodb.PrimaryKey{primary, nil}
-	usersTable = dynamoDBServer.NewTable(tables[0],key)
-	
-	userTableStats,err := usersTable.DescribeTable()
-	if err != nil{
-		log.Fatal(err)
-	}else{
-		log.Printf("%s(%s): %d",userTableStats.TableName,userTableStats.TableStatus,userTableStats.ItemCount)
-	}
+	usersTable = dynamoDBServer.NewTable("Users",key)	
 
 	return nil
 }
 
 var usersTable *dynamodb.Table
 
-//Verfiy the identify of incoming connection (Accept:true, Reject: false)
+//Verfiy the identify of incoming connection (Accept:nil, Reject: error) sends 403 on error
 func VerifyConnection(config *websocket.Config, req *http.Request) (err error){	
 
+	//Get header information to auth connection
 	username := req.Header.Get("musicbox-username")
 	sessionID := req.Header.Get("musicbox-session-id")
+	
+	//Verify if accurate information
 	if username != "" && sessionID != ""{
-		log.Printf("Username: %s SessionID: %s\n",username,sessionID)
-		return nil
-	}else{
-		return fmt.Errorf("Invalid identification")
-	}	
+		//Get user information from database
+		if item, err := usersTable.GetItem(&dynamodb.Key{HashKey: username}); err == nil{
+			userObj := &UserItem{}
+
+			err := dynamodb.UnmarshalAttributes(&item, userObj)
+			if err != nil {
+				return fmt.Errorf("Error with object unmarshelling")
+			}
+			
+			//Compare session id to verify accuracy
+			if userObj.SessionID != sessionID{
+				return fmt.Errorf("Invalid sessionID")
+			}
+			
+			return nil	//Verified connection	
+		}else{
+			return fmt.Errorf("Invalid username")
+		}
+	}
+	
+	return fmt.Errorf("Invalid identification")
 }
 
 //Intercept wamp events (Allow:True, Reject:False)
