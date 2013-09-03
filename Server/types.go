@@ -12,11 +12,30 @@ type BoxItem struct{
 	ID	string
 	User string
 	DeviceName string
-	Location	string
+	Location	[]string
 	Theme	string
 	
 	//Dynamic stats
 	Playing 	int64
-	Queue []string
+}
+
+
+// Moment.us
+
+type DiscoverResult struct{
+	Data []MomentusTrack
+}
+
+type MomentusTrack struct{
+	Title string
 	
+	//Links
+	Artist MomentusArtist
+	Album MomentusAlbum
+}
+type MomentusArtist struct{
+	Name string
+}
+type MomentusAlbum struct{
+	Name string
 }

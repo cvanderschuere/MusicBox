@@ -12,6 +12,9 @@ import (
 	"github.com/crowdmob/goamz/dynamodb"
 	"strings"
 	"sort"
+	"net/url"
+	"io/ioutil"
+	"encoding/json"
 )
 
 //Global
@@ -36,6 +39,7 @@ func main() {
 	//Setup RPC Functions (probably not the right way to do this)
 	server.RegisterRPC(baseURL+"currentQueueRequest",queueRequest)
 	server.RegisterRPC(baseURL+"players",boxRequest)
+	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
 	//	server.RegisterRPC(baseURL+"user/status",userUpdate)
 	//	server.RegisterRPC(baseURL+"player/status",playerUpdate)
 	
@@ -205,12 +209,103 @@ func boxRequest(id postmaster.ConnectionID,username string,url string, args ...i
 	// FIXME Limit response to match old api
 	var players sort.StringSlice;
 	for _,box := range boxes{
-		players = append(players,box.DeviceName)
+		players = append(players,box.ID)
 	}
 	
 	//Sort
 	players.Sort() 
 		
 	return players,nil
+}
+
+
+func recommendSongs(id postmaster.ConnectionID,username string,uri string, args ...interface{})(interface{},*postmaster.RPCError){	
+	//Look up music box with ID
+	boxID,ok := args[0].(string)
+	if !ok{
+		//Incorrect format
+		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format",Details:""}
+	}
+	
+	box,err := lookupMusicBox(boxID)
+	if err != nil{
+		return nil,err
+	}
+	
+	user,err2 := lookupUser(username)
+	if err2 != nil{
+		return nil,err2
+	}else if box.User != user.Username{
+		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid boxID",Details:""}
+	}
+	
+	//Make Moment.us request based on box information
+	fmt.Println(box)
+	
+	v := url.Values{}
+	v.Set("access_token", user.SessionID)
+	v.Set("current_context[date]","2013-09-03T03:09:31Z")
+	v.Set("current_context[location][lng]",box.Location[0])
+	v.Set("current_context[location][lat]",box.Location[1])
+	query := v.Encode()
+
+	resp,errGet := http.Get("https://api.wearemoment.us/v1/songs/discover?"+query)
+	if errGet != nil {
+		// handle error
+		fmt.Println("Moment.us Error:%s",err)
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+		
+	//Unmarshal JSON
+	var responseObject DiscoverResult
+	errJson := json.Unmarshal(body,&responseObject)
+	if errJson != nil {
+			fmt.Println("Json Error: %s",err)
+			fmt.Println(string(body))
+			return nil, nil
+	}
+	
+	for _,track := range responseObject.Data{
+		fmt.Println(track)
+	}
+	
+	return nil,nil
+}
+
+
+func lookupMusicBox(id string)(*BoxItem,*postmaster.RPCError){
+	boxObj := &BoxItem{}
+	
+	//Get music box
+	if box, err3 := musicBoxesTable.GetItem(&dynamodb.Key{HashKey: id}); err3 == nil{
+		boxErr := dynamodb.UnmarshalAttributes(&box, boxObj)
+		if boxErr != nil {
+			boxErr2 := &postmaster.RPCError{URI:"",Description:"Unmarshal Error",Details:""}
+			return nil,boxErr2
+		}else{
+			return boxObj,nil
+		}
+	}else{
+		err2 := &postmaster.RPCError{URI:"",Description:"Invalid BoxID",Details:""}
+		return nil, err2
+	}
+}
+
+func lookupUser(username string)(*UserItem,*postmaster.RPCError){
+	if item, err := usersTable.GetItem(&dynamodb.Key{HashKey: username}); err == nil{
+		userObj := &UserItem{}
+
+		err := dynamodb.UnmarshalAttributes(&item, userObj)
+		if err != nil {
+			err2 := &postmaster.RPCError{URI:"",Description:"Unmarshal Error",Details:""}
+			return nil,err2
+		}else{
+			return userObj,nil
+		}
+	}else{
+		err2 := &postmaster.RPCError{URI:"",Description:"Get error:invalid user",Details:""}
+		return nil, err2
+	}
 }
 
