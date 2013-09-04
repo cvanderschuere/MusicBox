@@ -15,6 +15,7 @@ import (
 	"net/url"
 	"io/ioutil"
 	"encoding/json"
+	"github.com/iand/spotify"
 )
 
 //Global
@@ -256,7 +257,7 @@ func recommendSongs(id postmaster.ConnectionID,username string,uri string, args 
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-		
+				
 	//Unmarshal JSON
 	var responseObject DiscoverResult
 	errJson := json.Unmarshal(body,&responseObject)
@@ -266,11 +267,44 @@ func recommendSongs(id postmaster.ConnectionID,username string,uri string, args 
 			return nil, nil
 	}
 	
+	var tracks []*TrackItem
+	c := spotify.New() //Spotify client
+	
+	Recommend_Loop:
 	for _,track := range responseObject.Data{
-		fmt.Println(track)
+		//Turn Momemtus track into TrackItem
+		t := &TrackItem{}
+		t.Title = track.Title
+		t.ArtistName = track.Artist.Name
+		t.AlbumName = track.Album.Name
+		if len(track.Artist.Image) > 0{
+			t.ArtworkURL = track.Artist.Image[0].Content
+		}
+		
+		//Look up on spotify
+		if r,e := c.SearchTracks(t.Title+" "+t.ArtistName,0); e == nil{
+			
+			//Make sure results returned
+			if r.Info.TotalResults > 0{
+				Result_Loop:
+				for _,track := range r.Tracks{
+					t.ProviderID = track.URI
+					break Result_Loop
+				}
+			}else{
+				fmt.Println("Spotify error: no matching track")
+				continue Recommend_Loop
+			}
+			
+		}else{
+			fmt.Println("Spotify error: ",e)
+			continue Recommend_Loop
+		}
+		
+		tracks = append(tracks,t)
 	}
 	
-	return nil,nil
+	return tracks,nil
 }
 
 

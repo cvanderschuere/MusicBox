@@ -19,9 +19,21 @@ type BoxItem struct{
 	Playing 	int64
 }
 
+type TrackItem struct{
+	Title string
+	ArtistName string
+	AlbumName	string
+	ArtworkURL	string
+	
+	//Track info
+	ProviderID	string
+	
+	//Storage info
+	CompositeID	string //username:BoxID
+	Date	string  //Date played for accounting purposes
+}
 
 // Moment.us
-
 type DiscoverResult struct{
 	Data []MomentusTrack
 }
@@ -35,7 +47,13 @@ type MomentusTrack struct{
 }
 type MomentusArtist struct{
 	Name string
+	Image []MomentusImage
 }
 type MomentusAlbum struct{
 	Name string
+	Image []MomentusImage
+}
+type MomentusImage struct{
+	Size string
+	Content string
 }
