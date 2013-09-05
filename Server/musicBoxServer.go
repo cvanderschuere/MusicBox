@@ -87,8 +87,10 @@ func VerifyConnection(config *websocket.Config, req *http.Request) (err error){
 	username := req.Header.Get("musicbox-username")
 	sessionID := req.Header.Get("musicbox-session-id")
 	
+	boxID := req.Header.Get("musicbox-box-id")
+	
 	//Verify if accurate information
-	if username != "" && sessionID != ""{
+	if username != "" && sessionID != "" {
 		//Get user information from database
 		if item, err := usersTable.GetItem(&dynamodb.Key{HashKey: username}); err == nil{
 			userObj := &UserItem{}
@@ -111,6 +113,24 @@ func VerifyConnection(config *websocket.Config, req *http.Request) (err error){
 		}else{
 			return fmt.Errorf("Invalid username")
 		}
+	}else if boxID != ""{
+		//Sign in as music box
+		if box,_ := lookupMusicBox(boxID); box != nil{
+			//Find user account info
+			if user,_ := lookupUser(box.User); user != nil{
+				//Use account information for this user
+				config.Header = make(map[string][]string)
+				config.Header.Set("musicbox-username",user.Username)
+				
+				fmt.Println("MusicBoxConnected(%s):%s",boxID,user.Username)
+				return nil
+			}else{
+				return fmt.Errorf("No user associated to this music box")
+			}
+		}else{
+			return fmt.Errorf("invalid music box id")
+		}
+		
 	}
 	
 	return fmt.Errorf("Invalid identification")
@@ -219,7 +239,7 @@ func boxRequest(id postmaster.ConnectionID,username string,url string, args ...i
 	return players,nil
 }
 
-
+// Args format [boxid]
 func recommendSongs(id postmaster.ConnectionID,username string,uri string, args ...interface{})(interface{},*postmaster.RPCError){	
 	//Look up music box with ID
 	boxID,ok := args[0].(string)
