@@ -107,6 +107,9 @@ func main() {
 	// Start main loop
 	//
 	
+	//Make call for inital songs
+	go recommendSongs(4)
+	
 	var endOfTrackChan <-chan bool
 	var err error
 	
@@ -230,7 +233,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					//Queue must add recommendation to stay at minimum 2
 					if len(queue) == 1{
 						log.Trace("Finding similar songs to add")
-						go addSimilarSongs(queue[0],1)
+						go recommendSongs(3)
 					}
 					
 					
@@ -262,9 +265,9 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 						notiChan <- Notification{Kind:NextTrack,Content:next}
 						
 						//Make sure queue has enough recommendations
-						if len(queue) <= 2{
+						if len(queue) <= 1{
 							log.Trace("Finding similar songs to add")
-							go addSimilarSongs(queue[0],1)
+							go recommendSongs(1)
 						}
 					}
 				//
@@ -289,6 +292,25 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					client.PublishExcludeMe(baseURL+username+"/"+deviceName,responseMessage)
 				}
 				
+			case turnpike.CallResultMsg:
+				message := event.(turnpike.CallResultMsg)
+				if message.CallID == "recommendSongs"{
+					tracks := message.Result.([]interface{})
+					
+					log.Info("Adding %d recommendations to queue",len(tracks))
+					
+					for _,m := range tracks{
+						track := m.(map[string]interface{})
+						
+						t := MusicBoxTrack{TrackName:track["Title"].(string), ArtistName:track["ArtistName"].(string),AlbumName:track["AlbumName"].(string),URL:track["ProviderID"].(string),Service:"Spotify"}
+						queue = append(queue,t)					
+					}	
+					
+					if !isPlaying && len(queue) > 0{
+						notiChan <- Notification{Kind:NextTrack,Content:queue[0]} // Start initial playback
+					}			
+			}				
+				
 			default:
 				log.Warn("Recieved Unknown type")
 			}
@@ -309,6 +331,11 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					queue = nil
 					isPlaying = false
 				}
+				
+				if len(queue) < 2{
+					go recommendSongs(3) //Add radio never ending playlist
+				}
+				
 				//Publish event
 				msg := map[string]string{
 					"command":"endOfTrack",
