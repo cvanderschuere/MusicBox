@@ -1,6 +1,7 @@
 package main
 
 import (
+	"code.google.com/p/go.net/websocket"
 	"github.com/cvanderschuere/turnpike"
 	"github.com/jcelliott/lumber"
 	"github.com/cvanderschuere/spotify-go"
@@ -12,6 +13,8 @@ import (
 
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
+
+const musicBoxID = "musicBoxID2"
 
 var client *turnpike.Client
 
@@ -57,7 +60,7 @@ type MusicBoxTrack struct{
 func main() {
 	runtime.GOMAXPROCS(2) // Used to regulate main thread managment with libspotify (might not be needed)
 
-	log.Info("Name: "+deviceName)
+	log.Info("Name: "+deviceName+"ID: "+musicBoxID)
 		
 	//
 	// Prepare client
@@ -66,7 +69,10 @@ func main() {
 	client = turnpike.NewClient()
 	
 	//Connect socket between server port and local port
-	if err := client.Connect("ws://"+serverURL, "http://localhost:4040"); err != nil {
+	config,_ := websocket.NewConfig("ws://"+serverURL,"http://localhost:4040")
+	config.Header.Add("musicbox-box-id",musicBoxID)
+	
+	if err := client.ConnectConfig(config); err != nil {
 		log.Error("Error connecting: ", err)
 		return
 	}
