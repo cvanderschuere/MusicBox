@@ -16,6 +16,7 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"github.com/iand/spotify"
+	"time"
 )
 
 //Global
@@ -265,7 +266,9 @@ func recommendSongs(id postmaster.ConnectionID,username string,uri string, args 
 	
 	v := url.Values{}
 	v.Set("access_token", user.SessionID)
-	v.Set("current_context[date]","2013-09-03T03:09:31Z")
+	
+	//2006-01-02T15:04:05Z time format layout time.RFC3339
+	v.Set("current_context[date]",time.Now().Format(time.RFC3339))
 	v.Set("current_context[location][lng]",box.Location[0])
 	v.Set("current_context[location][lat]",box.Location[1])
 	query := v.Encode()
@@ -308,8 +311,10 @@ func recommendSongs(id postmaster.ConnectionID,username string,uri string, args 
 			if r.Info.TotalResults > 0{
 				Result_Loop:
 				for _,track := range r.Tracks{
-					t.ProviderID = track.URI
-					break Result_Loop
+					if strings.Contains(track.Album.Availability.Territories,"US"){
+						t.ProviderID = track.URI
+						break Result_Loop
+					}
 				}
 			}else{
 				fmt.Println("Spotify error: no matching track")
