@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"os"
 	"os/signal"
+	"time"
 )
 
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
@@ -82,6 +83,9 @@ func main() {
 	
 	//Launch Event handler
 	go eventHandler(client,updateChan)
+	
+	//Launch pinger to keep websocket open (ELB has 60 second timeout)
+	go pingClient(client)
 	
 	//Subscribe as appropriate
 	client.Subscribe(baseURL+username+"/"+deviceName)
@@ -161,7 +165,7 @@ func main() {
 				log.Debug("Play Next Track: "+track.URL)
 				
 				item := &spotify.SpotifyItem{Url:track.URL}
-				err,endOfTrackChan = spotify.Play(item,streamChan)
+				endOfTrackChan,err = spotify.Play(item,streamChan)
 				if err != nil{
 					log.Error("Error playing track: "+err.Error())
 				}
@@ -346,3 +350,12 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 		}
 	}
 }
+
+func pingClient(client *turnpike.Client){
+	t := time.Tick(50 * time.Second)
+	
+	for _ = range t{
+		client.PublishExcludeMe(baseURL+"ping","blank")
+	}
+}
+
