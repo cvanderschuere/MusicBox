@@ -36,14 +36,14 @@ func main() {
 	server = postmaster.NewServer()
 
 	//Customize server functionality
+	server.GetAuthSecret = lookupUserSessionID
+	server.GetAuthPermissions = getUserPremissions
 	server.MessageToPublish = InterceptMessage
+	server.OnAuthenticated = userConnected
 	
 	//Setup RPC Functions (probably not the right way to do this)
-	server.RegisterRPC(baseURL+"currentQueueRequest",queueRequest)
 	server.RegisterRPC(baseURL+"players",boxRequest)
 	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
-	//	server.RegisterRPC(baseURL+"user/status",userUpdate)
-	//	server.RegisterRPC(baseURL+"player/status",playerUpdate)
 	
     s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: VerifyConnection}
 	http.Handle("/", s)
@@ -56,6 +56,7 @@ func main() {
 var dynamoDBServer *dynamodb.Server
 var usersTable *dynamodb.Table
 var musicBoxesTable *dynamodb.Table
+var trackHistoryTable *dynamodb.Table
 
 func setupAWS()(error){
 	//Sign in to AWS
@@ -76,6 +77,12 @@ func setupAWS()(error){
 	primary = dynamodb.NewStringAttribute("ID", "")
 	key = dynamodb.PrimaryKey{primary, nil}
 	musicBoxesTable = dynamoDBServer.NewTable("MusicBoxes",key)	
+	
+	//Track History
+	primary = dynamodb.NewStringAttribute("CompositeID", "")
+	rangeKey := dynamodb.NewStringAttribute("Date", "")
+	key = dynamodb.PrimaryKey{primary, rangeKey}
+	trackHistoryTable = dynamoDBServer.NewTable("TrackHistory",key)	
 
 	return nil
 }
@@ -83,6 +90,8 @@ func setupAWS()(error){
 
 //Verfiy the identify of incoming connection (Accept:nil, Reject: error) sends 403 on error
 func VerifyConnection(config *websocket.Config, req *http.Request) (err error){	
+	fmt.Println("Verifing connection")
+	return nil
 
 	//Get header information to auth connection
 	username := req.Header.Get("musicbox-username")
@@ -138,7 +147,7 @@ func VerifyConnection(config *websocket.Config, req *http.Request) (err error){
 }
 
 //Intercept wamp events (Allow:True, Reject:False)
-func InterceptMessage(id postmaster.ConnectionID, msg postmaster.PublishMsg)(bool){
+func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bool){
 	//Filter out base url and split into components
 	uri := strings.Replace(msg.TopicURI,baseURL,"",1)
 	args := strings.Split(uri,"/")
@@ -148,7 +157,7 @@ func InterceptMessage(id postmaster.ConnectionID, msg postmaster.PublishMsg)(boo
 	data,ok := msg.Event.(map[string]interface{}) //cast
 	
 	if !ok{
-		log.Print("Doesn't follow correct formate")
+		log.Print("Message doesn't follow correct format: ignoring")
 		return false
 	}
 	
@@ -160,6 +169,33 @@ func InterceptMessage(id postmaster.ConnectionID, msg postmaster.PublishMsg)(boo
 	case "pauseTrack":
 	case "stopTrack":
 	case "nextTrack":
+	case "startedTrack":
+		log.Print("Track Started")
+		//Parse recieved track
+		d := data["data"].(map[string]interface{})
+		
+		track := d["track"].(map[string]interface{})
+		t := TrackItem{ProviderID:track["ProviderID"].(string),Title:track["Title"].(string),ArtistName:track["ArtistName"].(string),AlbumName:track["AlbumName"].(string),ArtworkURL:track["ArtworkURL"].(string)}
+		
+		deviceID := d["deviceID"].(string)
+		
+		//Create aws item
+		atts := []dynamodb.Attribute{
+			*dynamodb.NewStringAttribute("Title",t.Title),
+			*dynamodb.NewStringAttribute("ArtistName",t.ArtistName),
+			//*dynamodb.NewStringAttribute("AlbumName",t.AlbumName), //Moment.us doesn't always provide this
+			//*dynamodb.NewStringAttribute("ArtworkURL",t.ArtworkURL), //Moment.us doesn't always provide this
+			*dynamodb.NewStringAttribute("ProviderID",t.ProviderID),
+		}
+								
+		//Add track to database for this user:musicbox
+		if _,err := trackHistoryTable.PutItem(username+":"+deviceID,time.Now().UTC().Format(time.RFC822Z),atts); err != nil{
+			log.Print(err.Error())
+		}else{
+			log.Print("Put New track")
+		}
+		
+		
 	default:
 			log.Print("Unknown Command:",data["command"])
 	}
@@ -170,35 +206,17 @@ func InterceptMessage(id postmaster.ConnectionID, msg postmaster.PublishMsg)(boo
 }
 
 //
-// RPC Han
+// RPC Handlers
 //
 
-//RPC Handler of form: res, err = f(id, msg.ProcURI, msg.CallArgs...)
-func queueRequest(id postmaster.ConnectionID,username string, url string, args ...interface{})(interface{},*postmaster.RPCError){
-	//Format: [deviceName]
-	deviceName := args[0].(string)
-	
-	//Recieved request for queue...for now just pass on to music box
-	
-	//This will forward an event on a private channel to the music box
-	//The music box will then publish a typical CurrentQueue update to everyone
-	statusMsg := map[string]string{
-		"command":"statusUpdate",
-	}
-	
-	server.SendEvent(baseURL+username+"/"+deviceName+"/internal",statusMsg);
-	
-	//No response necessary
-	return nil,nil
-}
 
 //Return music box device names for given user (need auth down the line)
-func boxRequest(id postmaster.ConnectionID,username string,url string, args ...interface{})(interface{},*postmaster.RPCError){	
+func boxRequest(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){	
 	
 	var boxes []BoxItem
 	
 	//Look up music box ids for user
-	if item, err := usersTable.GetItem(&dynamodb.Key{HashKey: username}); err == nil{
+	if item, err := usersTable.GetItem(&dynamodb.Key{HashKey: conn.Username}); err == nil{
 		userObj := &UserItem{}
 
 		err := dynamodb.UnmarshalAttributes(&item, userObj)
@@ -241,7 +259,7 @@ func boxRequest(id postmaster.ConnectionID,username string,url string, args ...i
 }
 
 // Args format [boxid]
-func recommendSongs(id postmaster.ConnectionID,username string,uri string, args ...interface{})(interface{},*postmaster.RPCError){	
+func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){	
 	//Look up music box with ID
 	boxID,ok := args[0].(string)
 	if !ok{
@@ -254,7 +272,7 @@ func recommendSongs(id postmaster.ConnectionID,username string,uri string, args 
 		return nil,err
 	}
 	
-	user,err2 := lookupUser(username)
+	user,err2 := lookupUser(conn.Username)
 	if err2 != nil{
 		return nil,err2
 	}else if box.User != user.Username{
@@ -366,5 +384,46 @@ func lookupUser(username string)(*UserItem,*postmaster.RPCError){
 		err2 := &postmaster.RPCError{URI:"",Description:"Get error:invalid user",Details:""}
 		return nil, err2
 	}
+}
+
+//
+// Auth
+//
+
+func lookupUserSessionID(authKey string)(string,error){
+	fmt.Println("Lookup user: "+authKey);
+	
+	user,err := lookupUser(authKey)
+	if err == nil{
+		return user.SessionID,nil
+	}else{
+		return "",errors.New("Can't find user")
+	}
+}
+
+func getUserPremissions(authKey string,authExtra map[string]interface{})(postmaster.Permissions,error){
+	
+	p := postmaster.Permissions{
+		RPC:map[string]postmaster.RPCPermission{
+			baseURL+"currentQueueRequest":true,
+			baseURL+"players":true,
+			baseURL+"recommendSongs":true,
+		},
+		PubSub:map[string]postmaster.PubSubPermission{
+		},
+	}
+	user,err := lookupUser(authKey)
+	if err == nil{
+		//Add pubSub for all music boxes
+		for _,boxID := range user.MusicBoxes{
+			p.PubSub[baseURL+boxID] = postmaster.PubSubPermission{true,true}
+		}
+	}
+	
+	return p,nil
+}
+
+func userConnected(authKey string, permission postmaster.Permissions){
+	
 }
 
