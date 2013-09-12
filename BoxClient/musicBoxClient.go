@@ -21,6 +21,8 @@ const musicBoxID = "musicBoxID2"
 const WAMP_BASE_URL = "http://api.wamp.ws/"
 const WAMP_PROCEDURE_URL = WAMP_BASE_URL+"procedure#"
 var authWait = make(chan bool,1)
+var boxUsername string
+var boxSessionID string
 
 var client *turnpike.Client
 
@@ -100,12 +102,8 @@ func main() {
 	// Authenticate
 	//
 	
-	m := map[string]string{
-		"device-type":"musicbox-v1"
-	}
-	
-	
-	client.Call("authreq",WAMP_PROCEDURE_URL+"authreq",musicBoxID,m)
+	//Start session (lookup user & auth)
+	client.Call("startSession",baseURL+"musicbox/startSession",musicBoxID)
 	
 	//Wait until authenticated
 	isAuth := <-authWait
@@ -122,8 +120,7 @@ func main() {
 	go pingClient(client)
 	
 	//Subscribe as appropriate
-	client.Subscribe(baseURL+username+"/"+deviceName)
-	client.Subscribe(baseURL+username+"/"+deviceName+"/internal") //Also recieve music box exclusive events
+	client.Subscribe(baseURL+boxUsername+"/"+musicBoxID)
 	
 	//
 	// Prepare music services
@@ -206,7 +203,7 @@ func main() {
 						"track":track,
 					},
 				}
-				client.PublishExcludeMe(baseURL+username+"/"+deviceName,msg) //Let others know track has started playing
+				client.PublishExcludeMe(baseURL+username+"/"+musicBoxID,msg) //Let others know track has started playing
 				
 				item := &spotify.SpotifyItem{Url:track.ProviderID}
 				endOfTrackChan,err = spotify.Play(item,streamChan)
@@ -270,7 +267,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 							playMsg := map[string]string{
 								"command":"playTrack",
 							}
-							client.PublishExcludeMe(baseURL+username+"/"+deviceName,playMsg) //Let others know track is playing
+							client.PublishExcludeMe(baseURL+username+"/"+musicBoxID,playMsg) //Let others know track is playing
 						}else{
 							//Append
 							queue = append(queue,newTrack)
@@ -323,7 +320,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 				//
 				case "QueueRequest":
 					//Publish queue update...only music box responds to this but all client should recieve CurrentQueue
-					client.PublishExcludeMe(baseURL+username+"/"+deviceName,queue)
+					client.PublishExcludeMe(baseURL+username+"/"+musicBoxID,queue)
 				case "statusUpdate":
 					//Send back map of current status values: title,isPlaying,queue
 					response := map[string]interface{}{
@@ -337,7 +334,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 						"data": response,
 					}
 					
-					client.PublishExcludeMe(baseURL+username+"/"+deviceName,responseMessage)
+					client.PublishExcludeMe(baseURL+username+"/"+musicBoxID,responseMessage)
 				}
 				
 			case turnpike.CallResultMsg:
@@ -359,10 +356,22 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					if !isPlaying && len(queue) > 0{
 						notiChan <- Notification{Kind:NextTrack,Content:queue[0]} // Start initial playback
 					}	
+				case "startSession":
+					user := message.Result.(map[string]interface{})
+					boxUsername = user["username"].(string)
+					boxSessionID = user["sessionID"].(string)
+	
+					client.Call("authreq",WAMP_PROCEDURE_URL+"authreq",username)
 				case "authreq":
 					//Recieve challenge
-					log.Info(string(message.Result))
+					ch,ok := message.Result.(string)
+					if !ok{
+						log.Error("Incorrect response type")
+					}
 					
+					//Calculate & send signature
+					sig := authSignature([]byte(ch),boxSessionID,nil)
+					client.Call("auth",WAMP_PROCEDURE_URL+"auth",sig)
 					
 				case "auth":
 					//Recieve permission information
@@ -371,6 +380,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 			default:
 				log.Warn("Recieved Unknown type")
 			}
+		}
 			
 		case update,ok := <-notiChan:
 			if ok && update.Kind == EndOfTrack{
@@ -398,7 +408,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					"command":"endOfTrack",
 				}
 				
-				client.PublishExcludeMe(baseURL+username+"/"+deviceName,msg)
+				client.PublishExcludeMe(baseURL+username+"/"+musicBoxID,msg)
 			}
 		}
 	}
