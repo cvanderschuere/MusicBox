@@ -45,7 +45,8 @@ func main() {
 	server.RegisterRPC(baseURL+"players",boxRequest)
 	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
 	server.RegisterUnauthRPC(baseURL+"user/startSession",startSession)
-	
+	server.RegisterUnauthRPC(baseURL+"musicbox/startSession",startSessionBox)
+		
     s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: VerifyConnection}
 	http.Handle("/", s)
 	
@@ -375,6 +376,27 @@ func startSession(conn *postmaster.Connection,uri string, args ...interface{})(i
 	}
 	
 }
+func startSessionBox(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
+	//lookup musicbox
+	box,err := lookupMusicBox(args[0].(string))	
+	if err != nil{
+		//Do something
+		return nil,nil
+	}
+	
+	//Lookup user
+	user,err := lookupUser(box.User)
+	if err != nil{
+		return nil,err
+	}
+	
+	res := map[string]string{
+		"username":user.Username,
+		"sessionID":user.SessionID,
+	}
+	
+	return res,nil
+}
 
 func lookupMusicBox(id string)(*BoxItem,*postmaster.RPCError){
 	boxObj := &BoxItem{}
@@ -439,9 +461,9 @@ func getUserPremissions(authKey string,authExtra map[string]interface{})(postmas
 	}
 	user,err := lookupUser(authKey)
 	if err == nil{
-		//Add pubSub for all music boxes
+		//Add pubSub for all music boxes [base+username+boxid]
 		for _,boxID := range user.MusicBoxes{
-			p.PubSub[baseURL+boxID] = postmaster.PubSubPermission{true,true}
+			p.PubSub[baseURL+authKey+"/"+boxID] = postmaster.PubSubPermission{true,true}
 		}
 	}
 	
