@@ -17,6 +17,11 @@ const baseURL = "http://www.musicbox.com/"
 
 const musicBoxID = "musicBoxID2"
 
+//Auth info
+const WAMP_BASE_URL = "http://api.wamp.ws/"
+const WAMP_PROCEDURE_URL = WAMP_BASE_URL+"procedure#"
+var authWait = make(chan bool,1)
+
 var client *turnpike.Client
 
 var log = lumber.NewConsoleLogger(lumber.TRACE)
@@ -83,6 +88,28 @@ func main() {
 	
 	//Launch Event handler
 	go eventHandler(client,updateChan)
+	
+	//
+	// Authenticate
+	//
+	
+	m := map[string]string{
+		"device-type":"musicbox-v1"
+	}
+	
+	
+	client.Call("authreq",WAMP_PROCEDURE_URL+"authreq",musicBoxID,m)
+	
+	//Wait until authenticated
+	isAuth := <-authWait
+	if !isAuth{
+		log.Error("Failed auth")
+		return
+	}
+	
+	//
+	// Connection authenticated
+	//
 	
 	//Launch pinger to keep websocket open (ELB has 60 second timeout)
 	go pingClient(client)
@@ -298,7 +325,9 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 				
 			case turnpike.CallResultMsg:
 				message := event.(turnpike.CallResultMsg)
-				if message.CallID == "recommendSongs"{
+				
+				switch message.CallID {
+				case "recommendSongs":
 					tracks := message.Result.([]interface{})
 					
 					log.Info("Adding %d recommendations to queue",len(tracks))
@@ -312,9 +341,16 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					
 					if !isPlaying && len(queue) > 0{
 						notiChan <- Notification{Kind:NextTrack,Content:queue[0]} // Start initial playback
-					}			
-			}				
-				
+					}	
+				case "authreq":
+					//Recieve challenge
+					log.Info(string(message.Result))
+					
+					
+				case "auth":
+					//Recieve permission information
+					authWait<-true
+						
 			default:
 				log.Warn("Recieved Unknown type")
 			}

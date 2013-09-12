@@ -44,6 +44,7 @@ func main() {
 	//Setup RPC Functions (probably not the right way to do this)
 	server.RegisterRPC(baseURL+"players",boxRequest)
 	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
+	server.RegisterUnauthRPC(baseURL+"user/startSession",startSession)
 	
     s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: VerifyConnection}
 	http.Handle("/", s)
@@ -350,6 +351,30 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 	return tracks,nil
 }
 
+// Used as a login
+func startSession(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
+	searchUser := args[0].(map[string]interface{})
+	
+	user,err := lookupUser(searchUser["username"].(string))
+	if err != nil{
+		return nil,err
+	}
+	
+	//Check password
+	if user.Password == searchUser["password"].(string){
+		//send back session id
+		res := map[string]string{
+			"username":user.Username,
+			"sessionID":user.SessionID,
+		}
+		
+		return res,nil
+		
+	}else{
+		return nil,nil
+	}
+	
+}
 
 func lookupMusicBox(id string)(*BoxItem,*postmaster.RPCError){
 	boxObj := &BoxItem{}
@@ -424,6 +449,9 @@ func getUserPremissions(authKey string,authExtra map[string]interface{})(postmas
 }
 
 func userConnected(authKey string, permission postmaster.Permissions){
+	fmt.Println("Connected user: "+authKey)
+	
 	
 }
+
 

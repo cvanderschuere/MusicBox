@@ -15,27 +15,6 @@ func recommendSongs(numToAdd uint){
 	if err := client.Call("recommendSongs",baseURL+"recommendSongs",musicBoxID); err != nil{
 		fmt.Println(err.Error())
 	}
-	
-	
-	/*
-		//Launch webrequest for similar songs
-		songsToAdd := findSimilarSongsLastFM(baseTrack,numToAdd)
-	
-		if len(songsToAdd) == 0{
-			log.Error("Found no similar songs")
-			return
-		}
-		
-		//Send addTrack to all devices (including self) with new songs
-		data := make([](map[string]string),len(songsToAdd))
-		for i,song := range songsToAdd{
-			songDict := map[string]string{"trackName":song.TrackName, "albumName":song.AlbumName, "artistName":song.ArtistName, "service":song.Service, "url":song.URL}
-			data[i] = songDict
-		}
-	
-		addMsg := map[string]interface{}{"command":"addTrack", "data":data}
-		client.Publish(baseURL+username+"/"+deviceName,addMsg) 
-	*/
 }
 
 
