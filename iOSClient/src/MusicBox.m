@@ -71,12 +71,12 @@
 @end
 
 @implementation MusicBox
-
-+ (instancetype) musicBoxWithName:(NSString*) name{
++ (instancetype) musicBoxWithDictionary:(NSDictionary*) dict{
     MusicBox *box = [[MusicBox alloc] init];
-    box.title = name;
-    box.tracks = [NSMutableArray array];
-    box.playing = false;
+    box.User = dict[@"User"];
+    box.DeviceName = dict[@"DeviceName"];
+    box.Theme = dict[@"Theme"];
+    
     return box;
 }
 

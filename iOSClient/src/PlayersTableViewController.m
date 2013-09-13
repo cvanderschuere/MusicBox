@@ -58,7 +58,7 @@
     
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
     [delegate.websocketRequestQueue addOperationWithBlock:^{
-        [delegate.ws call:[NSString stringWithFormat:@"%@players",baseURL] withDelegate:self args:@"christopher.vanderschuere@gmail.com",@"Example Password", nil];
+        [delegate.ws call:[NSString stringWithFormat:@"%@players",baseURL] withDelegate:self args:nil];
     }];
 }
 
@@ -67,11 +67,29 @@
     if ([callUri isEqualToString:[NSString stringWithFormat:@"%@players",baseURL]]) {
         if ([result isKindOfClass:[NSArray class]]) {
             NSLog(@"Result: %@", result);
-            self.players = (NSArray*) result;
+            NSArray* boxIDs = (NSArray*) result;
             
-            [self.tableView reloadData];
-            [self.refreshControl endRefreshing];
+            AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
+            [delegate.websocketRequestQueue addOperationWithBlock:^{
+                [delegate.ws call:[NSString stringWithFormat:@"%@boxDetails",baseURL] withDelegate:self args:boxIDs, nil];
+            }];
         }
+    }
+    else if([callUri isEqualToString:[NSString stringWithFormat:@"%@boxDetails",baseURL]]){
+        NSLog(@"Result: %@", result);
+        
+        
+        NSMutableArray* playerObjs = [NSMutableArray array];
+        for (NSString *key in result) {
+            [playerObjs addObject:[MusicBox musicBoxWithDictionary:result[key]]];
+        }
+        
+        self.players = playerObjs;
+        
+        //Use this information to populate table
+        [self.tableView reloadData];
+        [self.refreshControl endRefreshing];
+
     }
 }
 - (void) onError:(NSString *)errorUri description:(NSString*)errorDesc forCalledUri:(NSString *)callUri{
@@ -101,7 +119,7 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
     
     // Configure the cell...
-    cell.textLabel.text = self.players[indexPath.row];
+    cell.textLabel.text = [self.players[indexPath.row] DeviceName];
     
     return cell;
 }
@@ -111,7 +129,7 @@
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    self.selectedPlayer = [MusicBox musicBoxWithName:self.players[indexPath.row]];
+    self.selectedPlayer = self.players[indexPath.row];
     [self performSegueWithIdentifier:@"unwindSeque" sender:nil];
 }
 

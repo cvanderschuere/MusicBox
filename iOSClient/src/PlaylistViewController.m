@@ -19,33 +19,28 @@
 
 - (void) setCurrentPlayer:(MusicBox *)currentPlayer{
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
-    NSString* username = @"christopher.vanderschuere@gmail.com";
-    NSString* password = @"Example";
-
     
     //Cleanup from previous
     if (_currentPlayer) {        
         [delegate.websocketRequestQueue addOperationWithBlock:^(){
             //Unsubscribe to updates
-            [delegate.ws unsubscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,_currentPlayer.title]];
+            [delegate.ws unsubscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,_currentPlayer.ID]];
             
             //Subscribe to new topic
-            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,currentPlayer.title] withDelegate:self];
+            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,currentPlayer.ID] withDelegate:self];
             
-            //Request tracks of previous player
-            [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:username,password,currentPlayer.title, nil];
-
+            // TODO: Add queue request
+            
         }];
     }
     else{
         //Just subscribe
         [delegate.websocketRequestQueue addOperationWithBlock:^(){
             //Subscribe to new topic
-            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,currentPlayer.title] withDelegate:self];
+            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,currentPlayer.ID] withDelegate:self];
             
-            //Request tracks of previous player
-            [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:username,password,currentPlayer.title, nil];
-
+            // TODO: Add queue request
+            
         }];
     }
     
@@ -53,12 +48,12 @@
     
     //Update top bottom
     if (_currentPlayer)
-        self.playerButton.title = _currentPlayer.title;
+        self.playerButton.title = _currentPlayer.DeviceName;
     else
         self.playerButton.title = @"Select Player";
         
     //Save for later
-    [[NSUserDefaults standardUserDefaults] setValue:_currentPlayer.title forKey:@"previousPlayer"];
+    [[NSUserDefaults standardUserDefaults] setValue:_currentPlayer.ID forKey:@"previousPlayer"];
     [[NSUserDefaults standardUserDefaults]synchronize];
     
     //Refresh screen
@@ -81,12 +76,14 @@
     
     [self.refreshControl beginRefreshing];
     
-    //Refresh UI for previously selected player
+    //FIXME Refresh UI for previously selected player
+    /*
     NSString* previousPlayerTitle = [[NSUserDefaults standardUserDefaults] valueForKey:@"previousPlayer"];
     if (previousPlayerTitle) {
         //Create player
         self.currentPlayer = [MusicBox musicBoxWithName:previousPlayerTitle];
     }
+     */
 }
 - (void) observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if ([keyPath isEqualToString:@"artworkURL"]) {
@@ -120,7 +117,7 @@
         NSDictionary *data = [object objectForKey:@"data"];
         
         //Play/Pause
-        self.currentPlayer.playing = [[data objectForKey:@"isPlaying"] boolValue];
+        //FIXME self.currentPlayer.playing = [[data objectForKey:@"isPlaying"] boolValue];
         [self.playPauseButton setTitle:self.currentPlayer.playing?@"Pause":@"Play" forState:UIControlStateNormal];
         
         //Queue: merge
@@ -183,7 +180,7 @@
     //Refresh tracks of previous player
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
     [delegate.websocketRequestQueue addOperationWithBlock:^(){
-        [delegate.ws call:[NSString stringWithFormat:@"%@currentQueueRequest",baseURL] withDelegate:self args:@"christopher.vanderschuere@gmail.com",@"ExamplePassword",self.currentPlayer.title, nil];
+        // TODO: Add queue request
     }];
 }
 #pragma mark - UICollectionView Datasource methods
@@ -232,7 +229,7 @@
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
     NSString* username = @"christopher.vanderschuere@gmail.com";
     [delegate.websocketRequestQueue addOperationWithBlock:^{
-        [delegate.ws publish:@{@"command": @"nextTrack"} toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.title] excludeMe:YES];
+        [delegate.ws publish:@{@"command": @"nextTrack"} toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.ID] excludeMe:YES];
     }];
     
     //Animate deletion (only if not only song left)
@@ -252,13 +249,13 @@
 
     if ([self.playPauseButton.titleLabel.text isEqualToString:@"Play"]) {
         [delegate.websocketRequestQueue addOperationWithBlock:^{
-            [delegate.ws publish:@{@"command": @"playTrack"} toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.title] excludeMe:YES];
+            [delegate.ws publish:@{@"command": @"playTrack"} toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.ID] excludeMe:YES];
         }];
         [self.playPauseButton setTitle:@"Pause" forState:UIControlStateNormal];
     }
     else{
         [delegate.websocketRequestQueue addOperationWithBlock:^{
-            [delegate.ws publish:@{@"command": @"pauseTrack"} toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.title] excludeMe:YES];
+            [delegate.ws publish:@{@"command": @"pauseTrack"} toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.ID] excludeMe:YES];
         }];
         [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
     }
@@ -268,7 +265,7 @@
     //Set current Player base upon selected player...could have been done with a delegate
     MusicBox *selectedBox = [sender.sourceViewController selectedPlayer]; //Only title is passed right now
     
-    if (selectedBox && ![selectedBox.title isEqualToString:self.currentPlayer.title]) {
+    if (selectedBox && ![selectedBox.ID isEqualToString:self.currentPlayer.ID]) {
         self.currentPlayer = selectedBox;
     }
     
@@ -294,7 +291,7 @@
                                                 @"data":@[[trackVC.selectedTrack dictionaryWithValuesForKeys:@[@"trackName",@"artistName",@"albumName",@"url",@"service"]]]
                                                 };
             
-            [delegate.ws publish:addedTrackMessage toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.title] excludeMe:YES];
+            [delegate.ws publish:addedTrackMessage toTopic:[NSString stringWithFormat:@"%@%@",baseURL,self.currentPlayer.ID] excludeMe:YES];
         }];
     }
     
