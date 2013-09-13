@@ -13,6 +13,7 @@ func getUserPremissions(authKey string,authExtra map[string]interface{})(postmas
 			baseURL+"currentQueueRequest":true,
 			baseURL+"players":true,
 			baseURL+"recommendSongs":true,
+			baseURL+"boxDetails":true,
 		},
 		PubSub:map[string]postmaster.PubSubPermission{
 		},

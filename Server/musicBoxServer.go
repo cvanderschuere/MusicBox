@@ -31,6 +31,9 @@ func main() {
 	//Setup RPC Functions - defined in rpc.go
 	server.RegisterRPC(baseURL+"players",boxRequest)
 	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
+	server.RegisterRPC(baseURL+"boxDetails",getMusicBoxDetails)
+	
+	//Unauth rpc
 	server.RegisterUnauthRPC(baseURL+"user/startSession",startSession)
 	server.RegisterUnauthRPC(baseURL+"musicbox/startSession",startSessionBox)
 		

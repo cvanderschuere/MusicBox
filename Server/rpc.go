@@ -12,6 +12,7 @@ import(
 	"time"
 	"net/http"
 	"strings"
+	"errors"
 )
 
 //Return music box device names for given user (need auth down the line)
@@ -198,4 +199,40 @@ func startSessionBox(conn *postmaster.Connection,uri string, args ...interface{}
 	}
 	
 	return res,nil
+}
+
+//Used to get more information about a music box
+//args [ musicBoxId[] ]
+func getMusicBoxDetails(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
+	if len(args) != 1{
+		return nil,nil //Not corrent information
+	}
+	
+	idList := args[0].([]interface{})
+
+	boxes := make(map[string]interface{}) //*BoxItem or error
+	
+	for _,boxID := range idList{
+		//Lookup musicbox
+		if id,ok := boxID.(string); ok {
+			if box,err := lookupMusicBox(id); err == nil{
+				//Match with username
+				if box.User == conn.Username{
+					//return box
+					boxes[id] = box
+				
+				}else{
+					boxes[id] = errors.New("No box exists for this user")
+				}
+			}else{
+				boxes[id] = errors.New("No box exists")
+			}
+	
+		}else{
+			boxes[id] = errors.New("Incorrect arg type")
+		}
+	}
+	
+	return boxes,nil
+	
 }
