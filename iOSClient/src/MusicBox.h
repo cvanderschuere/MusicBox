@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 
 @interface MusicBoxTrack : NSObject
-@property (nonatomic,strong) NSString *service;
 @property (nonatomic,strong) NSString *url;
 
 @property (nonatomic,strong) NSString *trackName;
@@ -18,7 +17,7 @@
 
 @property (nonatomic,strong) NSURL *artworkURL;
 
-+(instancetype) trackWithService:(NSString*)serviceName Url:(NSString*)url Name:(NSString*)trackName Album:(NSString*)albumName Artist:(NSString*) artistName;
++(instancetype) trackWithDict:(NSDictionary*)dict;
 @end
 
 

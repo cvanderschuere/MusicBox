@@ -24,10 +24,10 @@
     if (_currentPlayer) {        
         [delegate.websocketRequestQueue addOperationWithBlock:^(){
             //Unsubscribe to updates
-            [delegate.ws unsubscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,_currentPlayer.ID]];
+            [delegate.ws unsubscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,_currentPlayer.User,_currentPlayer.ID]];
             
             //Subscribe to new topic
-            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,currentPlayer.ID] withDelegate:self];
+            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,_currentPlayer.User,currentPlayer.ID] withDelegate:self];
             
             // TODO: Add queue request
             
@@ -37,7 +37,7 @@
         //Just subscribe
         [delegate.websocketRequestQueue addOperationWithBlock:^(){
             //Subscribe to new topic
-            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@",baseURL,currentPlayer.ID] withDelegate:self];
+            [delegate.ws subscribeTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,_currentPlayer.User,currentPlayer.ID] withDelegate:self];
             
             // TODO: Add queue request
             
@@ -98,6 +98,7 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
 #pragma mark WAMP event 
 - (void) onEvent:(NSString *)topicUri eventObject:(id)object{
     NSLog(@"Recieved Event:%@",object);
@@ -127,7 +128,7 @@
 
             if (queue.count>0) {
                 for(NSDictionary *track in queue){
-                    MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"Service"] Url:track[@"URL"] Name:track[@"TrackName"] Album:track[@"AlbumName"]Artist: track[@"ArtistName"]];
+                    MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithDict:track];
                     
                     NSUInteger index = [self.currentPlayer.tracks indexOfObject:addedTrack];
                     if (index == NSNotFound) {
@@ -148,7 +149,7 @@
     else if ([[object objectForKey:@"command"] isEqualToString:@"addTrack"]){
         NSArray *tracks = [object objectForKey:@"data"];
         for (NSDictionary* track in tracks) {
-            MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithService:track[@"service"] Url:track[@"url"] Name:track[@"trackName"] Album:track[@"albumName"]Artist: track[@"artistName"]];
+            MusicBoxTrack * addedTrack = [MusicBoxTrack trackWithDict:track];
             
             [self.currentPlayer.tracks addObject:addedTrack];
             [addedTrack addObserver:self forKeyPath:@"artworkURL" options:NSKeyValueObservingOptionNew context:NULL];
@@ -163,8 +164,12 @@
     else if ([[object objectForKey:@"command"] isEqualToString:@"pauseTrack"]){
         [self.playPauseButton setTitle:@"Play" forState:UIControlStateNormal];
     }
+    else if ([[object objectForKey:@"command"] isEqualToString:@"startedTrack"]){
+        MusicBoxTrack* track =  [MusicBoxTrack trackWithDict:[object[@"data"] objectForKey:@"track"]];
+        [self.currentPlayer.tracks addObject:track];
+        [self.collectionView reloadData];
+    }
     
-       
 }
 
 #pragma mark RPC Response

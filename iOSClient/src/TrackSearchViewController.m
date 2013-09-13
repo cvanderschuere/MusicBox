@@ -63,8 +63,10 @@
     
     SpotifyTrack* track = self.resultsArray[indexPath.row];
     
+    //FIXME
+    NSDictionary *dict = [NSDictionary dictionary];
     
-    self.selectedTrack = [MusicBoxTrack trackWithService:@"Spotify" Url:track.spotifyID Name:track.name Album:track.album.name Artist:[track.artists[0] name]];
+    self.selectedTrack = [MusicBoxTrack trackWithDict:dict];
     
     [self.searchBar resignFirstResponder];
     [self performSegueWithIdentifier:@"unwindSegue" sender:self];

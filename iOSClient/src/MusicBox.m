@@ -11,51 +11,22 @@
 
 
 @implementation MusicBoxTrack
-+(instancetype) trackWithService:(NSString*)serviceName Url:(NSString*)url Name:(NSString *)trackName Album:(NSString *)albumName Artist:(NSString *)artistName{
++(instancetype) trackWithDict:(NSDictionary *)dict{
+    NSLog(@"New Track Dict:%@",dict);
     MusicBoxTrack *newTrack = [[MusicBoxTrack alloc] init];
-    newTrack.service = serviceName;
-    newTrack.url = url;
-    newTrack.trackName = trackName;
-    newTrack.artistName = artistName;
-    newTrack.albumName = albumName;
+    newTrack.trackName = dict[@"Title"];
+    newTrack.artistName = dict[@"ArtistName"];
+    newTrack.albumName = dict[@"AlbumName"];
     
-    //Fetch Album artwork from last.fm (Do in background)
-       
-    //Encode as utf-8
-    NSString *escapedArtist = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
-                                                                                                    NULL,
-                                                                                                    (__bridge CFStringRef) artistName,
-                                                                                                    NULL,
-                                                                                                    CFSTR("!*'();:@&=+$,/?%#[]"),
-                                                                                                    kCFStringEncodingUTF8));
-    NSString *escapedAlbum = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
-                                                                                                    NULL,
-                                                                                                    (__bridge CFStringRef) albumName,
-                                                                                                    NULL,
-                                                                                                    CFSTR("!*'();:@&=+$,/?%#[]"),
-                                                                                                    kCFStringEncodingUTF8));
+    newTrack.url = dict[@"ProviderID"];
     
-    //Load album artwork url
-    NSString *requestString = [NSString stringWithFormat:@"http://ws.audioscrobbler.com/2.0/?method=album.getInfo&format=json&api_key=%@&artist=%@&album=%@",LastFMAPIKey,escapedArtist,escapedAlbum];
+    //Artwork
+    NSString* urlString = dict[@"ArtworkURL"];
+    if (![urlString isEqualToString:@""]) {
+        newTrack.artworkURL = [NSURL URLWithString:urlString];
+    }
 
-    
-    //Make request
-    NSURLRequest* request = [NSURLRequest requestWithURL:[NSURL URLWithString:requestString]];
-   [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse * response, NSData * data, NSError * error) {
-       if (error) {
-           NSLog(@"Error(Last.fm):%@",error);
-       }
-       else{
-           //parse response
-           NSDictionary* responseDict = [NSJSONSerialization JSONObjectWithData:data options:0 error:NULL];
-           
-           //Get large image dict
-           NSDictionary *largeImageDict = [[responseDict[@"album"] objectForKey:@"image"] objectAtIndex:2];
-           newTrack.artworkURL = [NSURL URLWithString:[largeImageDict objectForKey:@"#text"]];
-       }
-   }];
-    
-       
+ 
     return newTrack;
 }
 
@@ -76,6 +47,11 @@
     box.User = dict[@"User"];
     box.DeviceName = dict[@"DeviceName"];
     box.Theme = dict[@"Theme"];
+    box.ID = dict[@"ID"];
+    
+    box.playing = [dict[@"Playing"] boolValue];
+    
+    box.tracks = [NSMutableArray array];
     
     return box;
 }
