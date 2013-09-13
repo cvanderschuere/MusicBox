@@ -7,9 +7,6 @@ import (
 	"postmaster"
 )
 
-//Global
-var server *postmaster.Server
-
 const(
 	baseURL = "http://www.musicbox.com/"
 )
@@ -22,7 +19,7 @@ func main() {
 		return
 	}
 	
-	server = postmaster.NewServer()
+	server := postmaster.NewServer()
 
 	//Assign auth callbacks - defined in auth.go
 	server.GetAuthSecret = lookupUserSessionID
