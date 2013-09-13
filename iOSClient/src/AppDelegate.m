@@ -10,6 +10,8 @@
 #import "PlaylistViewController.h"
 
 #define DEBUG_MESSAGES YES
+#define username @"christopher.vanderschuere@gmail.com"
+#define sessionID @"HryV3rtCBEBdvjW7fcTjKA"
 
 @implementation AppDelegate
 
@@ -25,8 +27,6 @@
     [MDWamp setDebug:DEBUG_MESSAGES];
     
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:[NSURL URLWithString:@"ws://ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"]];
-    [request addValue:@"christopher.vanderschuere@gmail.com" forHTTPHeaderField:@"musicbox-username"];
-    [request addValue:@"HryV3rtCBEBdvjW7fcTjKA" forHTTPHeaderField:@"musicbox-session-id"];
     
     self.ws = [[MDWamp alloc] initWithURLRequest:request delegate:self];
     
@@ -76,15 +76,35 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
-
 #pragma mark MDWamp Delegate
 - (void) onOpen{
+    [self.ws authReqWithAppKey:username andExtra:nil];
+   
+}
+- (void) onAuthReqWithAnswer:(NSString *)answer
+{
+    [self.ws authSignChallenge:answer withSecret:sessionID];
+}
+- (void) onAuthSignWithSignature:(NSString *)signature
+{
+    [self.ws authWithSignature:signature];
+}
+
+// then you have these callbakcs
+- (void) onAuthWithAnswer:(NSString *)answer{
+    NSLog(@"Authenticated");
+    
     NSLog(@"Websocket is open");
     [self.websocketRequestQueue setSuspended:NO];
     PlaylistViewController *playlistVC = (PlaylistViewController*) self.window.rootViewController;
     [playlistVC.refreshControl endRefreshing];
-
+    
 }
+- (void) onAuthFailForCall:(NSString *)procCall withError:(NSError *)error{
+    NSLog(@"Auth Fail:%@ %@",procCall,error);
+}
+
+
 - (void) onClose:(int)code reason:(NSString *)reason{
     NSLog(@"Websocket closed with reason: %@",reason);
     
