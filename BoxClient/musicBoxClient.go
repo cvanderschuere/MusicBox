@@ -2,10 +2,10 @@ package main
 
 import (
 	"code.google.com/p/go.net/websocket"
-	"github.com/cvanderschuere/turnpike"
 	"github.com/jcelliott/lumber"
 	"github.com/cvanderschuere/spotify-go"
 	"github.com/cvanderschuere/alsa-go"
+	"github.com/cvanderschuere/turnpike"
 	"runtime"
 	"os"
 	"os/signal"

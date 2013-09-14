@@ -1,5 +1,9 @@
 package main
 
+import(
+	"github.com/cvanderschuere/turnpike"
+)
+
 //Decoded event into music box instruction
 //This is the only function allowed to add/remove from the upcoming queue
 func eventHandler(client *turnpike.Client, notiChan chan Notification){
