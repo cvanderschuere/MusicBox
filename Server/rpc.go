@@ -239,7 +239,10 @@ func getMusicBoxDetails(conn *postmaster.Connection,uri string, args ...interfac
 //Used to get information about track history
 //args [musicboxID returnLimit pivotData(RFC3339)] (pivotDate is such that `returnLimit` items after `pivotDate` are returned)
 func getTrackHistory(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
-	
+	if len(args) == 0{
+		return nil,nil //Must provide musicboxiD
+	}	
+
 	var date string
 	if len(args)>2{
 		//Should do error checking by making sure it converts
@@ -260,14 +263,15 @@ func getTrackHistory(conn *postmaster.Connection,uri string, args ...interface{}
 		fmt.Println(err)
 		return nil,nil
 	}else{
-		limit := args[1].(int)
-		
-		//limit the return elements
-		res = res[len(res)-limit:]
-		
-		var tracks []*TrackItem
-		for _,track := range res{
-			tracks = append(tracks,trackItemFromMap(track))
+		if len(args) > 1 {
+			limit := args[1].(int)
+			//limit the return elements
+			res = res[len(res)-limit:]
+		}
+
+		tracks := make([]*TrackItem,len(res))
+		for i,track := range res{
+			tracks[i] = trackItemFromMap(track)
 		}
 		
 		return tracks,nil

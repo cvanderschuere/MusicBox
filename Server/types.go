@@ -2,6 +2,7 @@ package main
 
 import(
 	"github.com/crowdmob/goamz/dynamodb"
+	"fmt"
 )
 
 type UserItem struct{
@@ -33,19 +34,21 @@ type TrackItem struct{
 	ProviderID	string
 	
 	//Storage info
-	CompositeID	string //username:BoxID
+	CompositeID	string `json:",omitempty"` //username:BoxID
 	Date	string  //Date played for accounting purposes
 }
 
 func trackItemFromMap(data map[string]*dynamodb.Attribute)(*TrackItem){
-	t := new(TrackItem)
-	
-	t.Title = data["Title"].Value
-	t.ArtistName = data["ArtistName"].Value
-	t.AlbumName = data["AlbumName"].Value
-	t.ArtworkURL = data["ArtworkURL"].Value
-	t.ProviderID = data["ProviderID"].Value
-	t.Date = data["Date"].Value
+	fmt.Println(data)
+
+	t := &TrackItem{
+		Title: data["Title"].Value,
+		ArtistName: data["ArtistName"].Value,
+		//AlbumName: data["AlbumName"].Value,
+		//ArtworkURL: data["ArtworkURL"].Value,
+		ProviderID: data["ProviderID"].Value,
+		Date: data["Date"].Value,
+	}
 	
 	return t
 }
