@@ -29,6 +29,7 @@ func getUserPremissions(authKey string,authExtra map[string]interface{})(postmas
 	return p,nil
 }
 
-func userConnected(authKey string, permission postmaster.Permissions){
+func userConnected(authKey string, authExtra map[string]interface{}, permission postmaster.Permissions){
 	fmt.Println("Connected user: "+authKey)
+	fmt.Println(authExtra)
 }

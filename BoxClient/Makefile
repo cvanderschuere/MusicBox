@@ -1,2 +1,2 @@
 default:
-	go build musicBoxClient.go  recommend.go crypto.go
+	go build musicBoxClient.go recommend.go crypto.go events.go
