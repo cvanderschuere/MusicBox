@@ -15,7 +15,7 @@ import(
 	"errors"
 )
 
-//Return music box device names for given user (need auth down the line)
+//Args [none] (uses conn Username)
 func boxRequest(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){	
 	
 	var boxes []BoxItem
@@ -201,7 +201,7 @@ func startSessionBox(conn *postmaster.Connection,uri string, args ...interface{}
 	return res,nil
 }
 
-//Used to get more information about a music box
+//Used to get more information about a music box or array of music boxes
 //args [ musicBoxId[] ]
 func getMusicBoxDetails(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
 	if len(args) != 1{
@@ -233,6 +233,43 @@ func getMusicBoxDetails(conn *postmaster.Connection,uri string, args ...interfac
 		}
 	}
 	
-	return boxes,nil
+	return boxes,nil	
+}
+
+//Used to get information about track history
+//args [musicboxID returnLimit pivotData(RFC3339)] (pivotDate is such that `returnLimit` items after `pivotDate` are returned)
+func getTrackHistory(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
 	
+	var date string
+	if len(args)>2{
+		//Should do error checking by making sure it converts
+		date = args[2].(string)
+	}else{
+		date = time.Now().UTC().Format(time.RFC3339) //Use today as default
+	}
+	
+	//Query table
+	comps := []dynamodb.AttributeComparison{
+		*dynamodb.NewEqualStringAttributeComparison("CompositeID",conn.Username+":"+args[0].(string)), //Composite ID
+		*dynamodb.NewStringAttributeComparison("Date",dynamodb.COMPARISON_LESS_THAN_OR_EQUAL,date),
+	}
+	
+	res,err := trackHistoryTable.Query(comps)
+	
+	if err != nil{
+		fmt.Println(err)
+		return nil,nil
+	}else{
+		limit := args[1].(int)
+		
+		//limit the return elements
+		res = res[len(res)-limit:]
+		
+		var tracks []*TrackItem
+		for _,track := range res{
+			tracks = append(tracks,trackItemFromMap(track))
+		}
+		
+		return tracks,nil
+	}	
 }

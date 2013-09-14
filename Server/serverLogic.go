@@ -52,7 +52,7 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 		}
 								
 		//Add track to database for this user:musicbox
-		if _,err := trackHistoryTable.PutItem(username+":"+deviceID,time.Now().UTC().Format(time.RFC822Z),atts); err != nil{
+		if _,err := trackHistoryTable.PutItem(username+":"+deviceID,time.Now().UTC().Format(time.RFC3339),atts); err != nil{
 			log.Print(err.Error())
 		}else{
 			log.Print("Put New track")

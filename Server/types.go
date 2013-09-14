@@ -1,5 +1,9 @@
 package main
 
+import(
+	"github.com/crowdmob/goamz/dynamodb"
+)
+
 type UserItem struct{
 	Username string
 	Password string `json:",omitempty"` //Allows use of same struct for send/recieve
@@ -31,6 +35,19 @@ type TrackItem struct{
 	//Storage info
 	CompositeID	string //username:BoxID
 	Date	string  //Date played for accounting purposes
+}
+
+func trackItemFromMap(data map[string]*dynamodb.Attribute)(*TrackItem){
+	t := new(TrackItem)
+	
+	t.Title = data["Title"].Value
+	t.ArtistName = data["ArtistName"].Value
+	t.AlbumName = data["AlbumName"].Value
+	t.ArtworkURL = data["ArtworkURL"].Value
+	t.ProviderID = data["ProviderID"].Value
+	t.Date = data["Date"].Value
+	
+	return t
 }
 
 // Moment.us
