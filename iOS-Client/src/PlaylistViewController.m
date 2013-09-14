@@ -174,7 +174,11 @@
 
 #pragma mark RPC Response
 - (void) onResult:(id)result forCalledUri:(NSString *)callUri{
-    //NOTHING TO DO YET
+    if ([callUri isEqualToString:[NSString stringWithFormat:@"%@%@",baseURL,@"trackHistory"]]) {
+        [self.refreshControl endRefreshing];
+        NSLog(@"Result:%@",result);
+    }
+
 }
 - (void) onError:(NSString *)errorUri description:(NSString *)errorDesc forCalledUri:(NSString *)callUri{
     NSLog(@"Error on RPC: %@",errorUri);
@@ -186,6 +190,7 @@
     AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
     [delegate.websocketRequestQueue addOperationWithBlock:^(){
         // TODO: Add queue request
+        [delegate.ws call:[NSString stringWithFormat:@"%@%@",baseURL,@"trackHistory"] withDelegate:self args:self.currentPlayer.ID, nil];
     }];
 }
 #pragma mark - UICollectionView Datasource methods

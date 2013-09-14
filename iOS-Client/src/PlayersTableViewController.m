@@ -66,7 +66,7 @@
 - (void) onResult:(id)result forCalledUri:(NSString *)callUri{
     if ([callUri isEqualToString:[NSString stringWithFormat:@"%@players",baseURL]]) {
         if ([result isKindOfClass:[NSArray class]]) {
-            NSLog(@"Result: %@", result);
+            //NSLog(@"Result: %@", result);
             NSArray* boxIDs = (NSArray*) result;
             
             AppDelegate* delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
@@ -76,8 +76,7 @@
         }
     }
     else if([callUri isEqualToString:[NSString stringWithFormat:@"%@boxDetails",baseURL]]){
-        NSLog(@"Result: %@", result);
-        
+        //NSLog(@"Result: %@", result);
         
         NSMutableArray* playerObjs = [NSMutableArray array];
         for (NSString *key in result) {
