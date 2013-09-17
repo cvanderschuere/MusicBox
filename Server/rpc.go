@@ -156,6 +156,7 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 }
 
 // Used as a login
+//Args [map[username,password]]
 func startSession(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
 	searchUser := args[0].(map[string]interface{})
 	

@@ -77,6 +77,21 @@
 }
 
 #pragma mark MDWamp Delegate
+/*
+- (void) onOpen{
+    NSLog(@"Websocket is open");
+    [self.ws authWithKey:username Secret:sessionID Extra:nil Success:^(NSString *answer) {
+        NSLog(@"Authenticated");
+        
+        [self.websocketRequestQueue setSuspended:NO];
+        PlaylistViewController *playlistVC = (PlaylistViewController*) self.window.rootViewController;
+        [playlistVC.refreshControl endRefreshing];
+    } Error:^(NSString *procCall, NSString *errorURI, NSString *errorDetails) {
+        NSLog(@"Auth Fail:%@ %@",procCall,errorDetails);
+    }];
+}
+*/
+
 - (void) onOpen{
     [self.ws authReqWithAppKey:username andExtra:nil];
    
@@ -103,7 +118,6 @@
 - (void) onAuthFailForCall:(NSString *)procCall withError:(NSError *)error{
     NSLog(@"Auth Fail:%@ %@",procCall,error);
 }
-
 
 - (void) onClose:(int)code reason:(NSString *)reason{
     NSLog(@"Websocket closed with reason: %@",reason);
