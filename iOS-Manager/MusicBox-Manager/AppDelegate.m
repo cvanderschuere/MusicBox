@@ -14,10 +14,6 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
-
-    
-    //Connect to websocket
-    [self connectToWebSocket];
     
     return YES;
 }
@@ -50,6 +46,7 @@
 }
 
 -(void) connectToWebSocket{
+    
     // if you want debug log set this to YES, default is NO
     [MDWamp setDebug:DEBUG_MESSAGES];
     

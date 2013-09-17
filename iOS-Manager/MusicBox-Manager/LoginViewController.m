@@ -30,18 +30,24 @@
 {
     [super viewDidLoad];
     
-    [self.navigationController setNavigationBarHidden:YES];
+}
+
+- (void) viewWillAppear:(BOOL)animated{    
     
-	// Do any additional setup after loading the view.
+    //Connect to websocket
+    AppDelegate * delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
+    [delegate connectToWebSocket];
+    
+    
+    //
+    // Update screen
+    //
     
     [self updateBuildInformation];
-    
     
     //Add login information for now
     self.usernameTextField.text = @"christopher.vanderschuere@gmail.com";
     self.passwordTextField.text = @"testPassword";
-    
-    
 }
 
 - (void) updateBuildInformation{
