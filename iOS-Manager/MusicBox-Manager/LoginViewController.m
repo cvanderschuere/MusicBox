@@ -100,6 +100,9 @@
         //Prepare destination with user
         MainViewController* mainVC = (MainViewController*) segue.destinationViewController;
         [mainVC setCurrentUser:user];
+        
+        AppDelegate *delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
+        mainVC.ws = delegate.ws;
     }
     
 }

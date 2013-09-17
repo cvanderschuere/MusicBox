@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		83385A4717E81E37005F5676 /* Device.m in Sources */ = {isa = PBXBuildFile; fileRef = 83385A4617E81E37005F5676 /* Device.m */; };
+		83385A4917E81EC4005F5676 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83385A4817E81EC4005F5676 /* CoreLocation.framework */; };
+		83385A4C17E820D1005F5676 /* Track.m in Sources */ = {isa = PBXBuildFile; fileRef = 83385A4B17E820D1005F5676 /* Track.m */; };
+		83385A4F17E82656005F5676 /* DeviceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83385A4E17E82656005F5676 /* DeviceCell.m */; };
+		83385A5317E82A62005F5676 /* TrackCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83385A5217E82A62005F5676 /* TrackCell.m */; };
 		8391DBE517E51FBF0023BBB1 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8391DBE417E51FBF0023BBB1 /* UIKit.framework */; };
 		8391DBE717E51FBF0023BBB1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8391DBE617E51FBF0023BBB1 /* Foundation.framework */; };
 		8391DBE917E51FBF0023BBB1 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8391DBE817E51FBF0023BBB1 /* CoreGraphics.framework */; };
@@ -29,6 +34,15 @@
 
 /* Begin PBXFileReference section */
 		66550182A21547AE8C3896AD /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		83385A4517E81E37005F5676 /* Device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Device.h; sourceTree = "<group>"; };
+		83385A4617E81E37005F5676 /* Device.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Device.m; sourceTree = "<group>"; };
+		83385A4817E81EC4005F5676 /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
+		83385A4A17E820D1005F5676 /* Track.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Track.h; sourceTree = "<group>"; };
+		83385A4B17E820D1005F5676 /* Track.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Track.m; sourceTree = "<group>"; };
+		83385A4D17E82656005F5676 /* DeviceCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceCell.h; sourceTree = "<group>"; };
+		83385A4E17E82656005F5676 /* DeviceCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceCell.m; sourceTree = "<group>"; };
+		83385A5117E82A62005F5676 /* TrackCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackCell.h; sourceTree = "<group>"; };
+		83385A5217E82A62005F5676 /* TrackCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrackCell.m; sourceTree = "<group>"; };
 		8391DBE117E51FBF0023BBB1 /* MusicBox-Manager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MusicBox-Manager.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8391DBE417E51FBF0023BBB1 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8391DBE617E51FBF0023BBB1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -61,6 +75,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83385A4917E81EC4005F5676 /* CoreLocation.framework in Frameworks */,
 				8391DC1117E537540023BBB1 /* Security.framework in Frameworks */,
 				8391DC0F17E537480023BBB1 /* CFNetwork.framework in Frameworks */,
 				8391DC0D17E5373A0023BBB1 /* libicucore.dylib in Frameworks */,
@@ -75,6 +90,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		83385A5017E8265B005F5676 /* UI Elements */ = {
+			isa = PBXGroup;
+			children = (
+				83385A4D17E82656005F5676 /* DeviceCell.h */,
+				83385A4E17E82656005F5676 /* DeviceCell.m */,
+				83385A5117E82A62005F5676 /* TrackCell.h */,
+				83385A5217E82A62005F5676 /* TrackCell.m */,
+			);
+			path = "UI Elements";
+			sourceTree = "<group>";
+		};
 		8391DBD817E51FBF0023BBB1 = {
 			isa = PBXGroup;
 			children = (
@@ -96,6 +122,7 @@
 		8391DBE317E51FBF0023BBB1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				83385A4817E81EC4005F5676 /* CoreLocation.framework */,
 				8391DC0A17E5371F0023BBB1 /* MDWamp.framework */,
 				8391DBE417E51FBF0023BBB1 /* UIKit.framework */,
 				8391DBE617E51FBF0023BBB1 /* Foundation.framework */,
@@ -119,6 +146,7 @@
 				8391DC1E17E800340023BBB1 /* MainViewController.m */,
 				8391DC1C17E7FDDC0023BBB1 /* Data Types */,
 				8391DBFC17E51FBF0023BBB1 /* MainStoryboard.storyboard */,
+				83385A5017E8265B005F5676 /* UI Elements */,
 				8391DBEB17E51FBF0023BBB1 /* Supporting Files */,
 			);
 			path = "MusicBox-Manager";
@@ -143,6 +171,10 @@
 			children = (
 				8391DC1917E7FDD70023BBB1 /* User.h */,
 				8391DC1A17E7FDD70023BBB1 /* User.m */,
+				83385A4517E81E37005F5676 /* Device.h */,
+				83385A4617E81E37005F5676 /* Device.m */,
+				83385A4A17E820D1005F5676 /* Track.h */,
+				83385A4B17E820D1005F5676 /* Track.m */,
 			);
 			path = "Data Types";
 			sourceTree = "<group>";
@@ -248,11 +280,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83385A4C17E820D1005F5676 /* Track.m in Sources */,
 				8391DBF117E51FBF0023BBB1 /* main.m in Sources */,
+				83385A5317E82A62005F5676 /* TrackCell.m in Sources */,
 				8391DBF517E51FBF0023BBB1 /* AppDelegate.m in Sources */,
 				8391DC1817E7F5900023BBB1 /* LoginViewController.m in Sources */,
+				83385A4717E81E37005F5676 /* Device.m in Sources */,
 				8391DC1B17E7FDD70023BBB1 /* User.m in Sources */,
 				8391DC1F17E800340023BBB1 /* MainViewController.m in Sources */,
+				83385A4F17E82656005F5676 /* DeviceCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
