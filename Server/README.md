@@ -17,4 +17,6 @@ RPC
 	
 ### Unauthorized
 *	user/startSession
+	-	args:[map{username,password}]
+	-	return:map{username,sessionID}
 *	musicbox/startSession
