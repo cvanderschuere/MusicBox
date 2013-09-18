@@ -71,10 +71,21 @@
     [self.ws connect];
 }
 
+- (void) pingWebsocket{
+    if (self.ws.isConnected) {
+        [self.ws publish:@"ping" toTopic:@"ping"];
+    }
+}
+
 #pragma mark MDWamp Delegate
 - (void) onOpen{
     [self.websocketRequestQueue setSuspended:NO];
     NSLog(@"Websocket is open");
+    
+    //make sure it stays open
+    self.pingTimer = [NSTimer timerWithTimeInterval:30 target:self selector:@selector(pingWebsocket) userInfo:nil repeats:YES];
+    [[NSRunLoop currentRunLoop] addTimer:self.pingTimer forMode:NSDefaultRunLoopMode];
+    
 }
 - (void) onClose:(int)code reason:(NSString *)reason{
     NSLog(@"Websocket closed with reason: %@",reason);

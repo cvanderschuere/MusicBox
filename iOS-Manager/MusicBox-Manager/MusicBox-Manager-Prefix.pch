@@ -13,4 +13,5 @@
     #import <Foundation/Foundation.h>
     #import <MDWamp/MDWamp.h>
     #import <CoreLocation/CoreLocation.h>
+    #import <AFNetworking/AFNetworking.h>
 #endif

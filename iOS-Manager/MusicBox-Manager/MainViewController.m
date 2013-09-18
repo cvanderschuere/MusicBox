@@ -10,6 +10,7 @@
 #import "AppDelegate.h" //for baseURL
 #import "DeviceCell.h"
 #import "TrackCell.h"
+#import <UIImageView+AFNetworking.h>
 
 @interface MainViewController ()
 
@@ -84,7 +85,29 @@
             NSLog(@"Error getting tracks:%@",errorDescription);
         } args:self.selectedDevice.identifier, nil];
         
+        
+        /*
+        [self.ws call:[NSString stringWithFormat:@"%@recommendSongs",baseURL] success:^(NSString *callURI, id result) {
+            for (NSDictionary* track in result) {
+                NSLog(@"Track:%@",track);
+                NSDictionary* startedTrack = @{@"command": @"startedTrack",
+                                               @"data":@{@"track": track,
+                                                         @"deviceID":self.selectedDevice.identifier
+                                                         }
+                                               };
+                
+                [self.ws publish:startedTrack toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,self.currentUser.username,self.selectedDevice.identifier]];
+            }
+        
+        } error:^(NSString *callURI, NSString *errorURI, NSString *errorDescription) {
+            
+        } args:self.selectedDevice.identifier, nil];
+        */
+        
     }else if(collectionView == self.trackCollectionView){
+        
+        //Do something
+  
         
     }
 }
@@ -110,6 +133,10 @@
         Track* track = self.selectedDevice.tracks[indexPath.row];
         cell.trackLabel.text = track.trackName;
         cell.artistLabel.text = track.artistName;
+        if (track.artworkURL) {
+            [cell.artworkImageView setImageWithURL:track.artworkURL placeholderImage:[UIImage imageNamed:@"music-note.jpg"]];
+        }
+        cell.artworkImageView.layer.cornerRadius = 6.0f;
         
         return cell;
 

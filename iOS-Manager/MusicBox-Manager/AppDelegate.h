@@ -18,6 +18,8 @@ const static NSString* baseURL = @"http://www.musicbox.com/";
 @property (nonatomic, strong) NSOperationQueue *websocketRequestQueue;
 @property (nonatomic, strong) MDWamp *ws;
 
+@property (nonatomic, strong) NSTimer* pingTimer;
+
 
 
 #pragma mark - Websocket methods

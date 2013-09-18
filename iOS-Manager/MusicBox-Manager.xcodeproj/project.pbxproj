@@ -12,6 +12,7 @@
 		83385A4C17E820D1005F5676 /* Track.m in Sources */ = {isa = PBXBuildFile; fileRef = 83385A4B17E820D1005F5676 /* Track.m */; };
 		83385A4F17E82656005F5676 /* DeviceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83385A4E17E82656005F5676 /* DeviceCell.m */; };
 		83385A5317E82A62005F5676 /* TrackCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83385A5217E82A62005F5676 /* TrackCell.m */; };
+		83385A5817E934E7005F5676 /* music-note.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 83385A5717E934E7005F5676 /* music-note.jpg */; };
 		8391DBE517E51FBF0023BBB1 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8391DBE417E51FBF0023BBB1 /* UIKit.framework */; };
 		8391DBE717E51FBF0023BBB1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8391DBE617E51FBF0023BBB1 /* Foundation.framework */; };
 		8391DBE917E51FBF0023BBB1 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8391DBE817E51FBF0023BBB1 /* CoreGraphics.framework */; };
@@ -43,6 +44,7 @@
 		83385A4E17E82656005F5676 /* DeviceCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceCell.m; sourceTree = "<group>"; };
 		83385A5117E82A62005F5676 /* TrackCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackCell.h; sourceTree = "<group>"; };
 		83385A5217E82A62005F5676 /* TrackCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrackCell.m; sourceTree = "<group>"; };
+		83385A5717E934E7005F5676 /* music-note.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "music-note.jpg"; sourceTree = "<group>"; };
 		8391DBE117E51FBF0023BBB1 /* MusicBox-Manager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MusicBox-Manager.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8391DBE417E51FBF0023BBB1 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8391DBE617E51FBF0023BBB1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -101,6 +103,14 @@
 			path = "UI Elements";
 			sourceTree = "<group>";
 		};
+		83385A5617E934E7005F5676 /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				83385A5717E934E7005F5676 /* music-note.jpg */,
+			);
+			path = Media;
+			sourceTree = "<group>";
+		};
 		8391DBD817E51FBF0023BBB1 = {
 			isa = PBXGroup;
 			children = (
@@ -141,6 +151,7 @@
 				8391DBF317E51FBF0023BBB1 /* AppDelegate.h */,
 				8391DBF417E51FBF0023BBB1 /* AppDelegate.m */,
 				8391DC1617E7F5900023BBB1 /* LoginViewController.h */,
+				83385A5617E934E7005F5676 /* Media */,
 				8391DC1717E7F5900023BBB1 /* LoginViewController.m */,
 				8391DC1D17E800340023BBB1 /* MainViewController.h */,
 				8391DC1E17E800340023BBB1 /* MainViewController.m */,
@@ -235,6 +246,7 @@
 				8391DBEF17E51FBF0023BBB1 /* InfoPlist.strings in Resources */,
 				8391DBF717E51FBF0023BBB1 /* Default.png in Resources */,
 				8391DBF917E51FBF0023BBB1 /* Default@2x.png in Resources */,
+				83385A5817E934E7005F5676 /* music-note.jpg in Resources */,
 				8391DBFB17E51FBF0023BBB1 /* Default-568h@2x.png in Resources */,
 				8391DBFE17E51FBF0023BBB1 /* MainStoryboard.storyboard in Resources */,
 			);
@@ -382,6 +394,11 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MusicBox-Manager/MusicBox-Manager-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"${PODS_ROOT}/Headers\"",
+					"\"${PODS_ROOT}/Headers/AFNetworking\"",
+					"\"${PODS_ROOT}/Headers/TestFlightSDK\"",
+				);
 				INFOPLIST_FILE = "MusicBox-Manager/MusicBox-Manager-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -398,6 +415,11 @@
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "MusicBox-Manager/MusicBox-Manager-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"\"${PODS_ROOT}/Headers\"",
+					"\"${PODS_ROOT}/Headers/AFNetworking\"",
+					"\"${PODS_ROOT}/Headers/TestFlightSDK\"",
+				);
 				INFOPLIST_FILE = "MusicBox-Manager/MusicBox-Manager-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;

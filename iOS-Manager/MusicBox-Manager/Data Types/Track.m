@@ -15,7 +15,7 @@
     newTrack.trackName = dict[@"Title"];
     newTrack.artistName = dict[@"ArtistName"];
     newTrack.albumName = dict[@"AlbumName"];
-    newTrack.artworkURL = dict[@"ArtworkURL"];
+    newTrack.artworkURL = [NSURL URLWithString:dict[@"ArtworkURL"]];
     //newTrack.date = dict[@"ArtworkURL"]; //Convert string to date
     return newTrack;
 }
