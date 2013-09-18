@@ -41,9 +41,8 @@ func boxRequest(conn *postmaster.Connection,url string, args ...interface{})(int
 					boxErr2 := &postmaster.RPCError{URI:url,Description:"Unmarshal Error",Details:""}
 					return nil,boxErr2
 				}
+				boxes = append(boxes,*boxObj) //Only append if exists
 			}
-			
-			boxes = append(boxes,*boxObj)
 		}
 		
 	}else{
@@ -122,9 +121,19 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 		t := &TrackItem{}
 		t.Title = track.Title
 		t.ArtistName = track.Artist.Name
-		t.AlbumName = track.Album.Name
-		if len(track.Artist.Image) > 0{
-			t.ArtworkURL = track.Artist.Image[0].Content
+		
+		if track.Album.Name != ""{
+			t.AlbumName = track.Album.Name
+			
+		}else{
+			t.AlbumName = "UNKNOWN"
+		}
+		
+		
+		if len(track.Album.Image) > 0{
+			t.ArtworkURL = track.Album.Image[0].Content
+		}else{
+			t.ArtworkURL = "UNKNOWN"
 		}
 		
 		//Look up on spotify

@@ -39,16 +39,18 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 		
 		track := d["track"].(map[string]interface{})
 		t := TrackItem{ProviderID:track["ProviderID"].(string),Title:track["Title"].(string),ArtistName:track["ArtistName"].(string),AlbumName:track["AlbumName"].(string),ArtworkURL:track["ArtworkURL"].(string)}
-		
+		fmt.Println(track)
 		deviceID := d["deviceID"].(string)
+		fmt.Println(deviceID)
+		
 		
 		//Create aws item
 		atts := []dynamodb.Attribute{
 			*dynamodb.NewStringAttribute("Title",t.Title),
 			*dynamodb.NewStringAttribute("ArtistName",t.ArtistName),
-			//*dynamodb.NewStringAttribute("AlbumName",t.AlbumName), //Moment.us doesn't always provide this
-			//*dynamodb.NewStringAttribute("ArtworkURL",t.ArtworkURL), //Moment.us doesn't always provide this
 			*dynamodb.NewStringAttribute("ProviderID",t.ProviderID),
+			*dynamodb.NewStringAttribute("AlbumName",t.AlbumName), //Moment.us doesn't always provide this
+			*dynamodb.NewStringAttribute("ArtworkURL",t.ArtworkURL), //Moment.us doesn't always provide this
 		}
 								
 		//Add track to database for this user:musicbox

@@ -44,8 +44,8 @@ func trackItemFromMap(data map[string]*dynamodb.Attribute)(*TrackItem){
 	t := &TrackItem{
 		Title: data["Title"].Value,
 		ArtistName: data["ArtistName"].Value,
-		//AlbumName: data["AlbumName"].Value,
-		//ArtworkURL: data["ArtworkURL"].Value,
+		AlbumName: data["AlbumName"].Value,
+		ArtworkURL: data["ArtworkURL"].Value,
 		ProviderID: data["ProviderID"].Value,
 		Date: data["Date"].Value,
 	}
