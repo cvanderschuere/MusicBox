@@ -11,6 +11,7 @@
 #import "DeviceCell.h"
 #import "TrackCell.h"
 #import <UIImageView+AFNetworking.h>
+#import "SettingsViewController.h"
 
 @interface MainViewController ()
 
@@ -48,6 +49,11 @@
                 [self.devices addObject:[Device deviceWithDict:result[key]]];
             }
             
+            //Sort by device name
+            [self.devices sortUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+                return [[obj1 deviceName] compare:[obj2 deviceName]];
+            }];
+            
             [self.deviceCollectionView reloadData];
             
         } error:^(NSString *callURI, NSString *errorURI, NSString *errorDescription) {
@@ -64,6 +70,14 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+#pragma mark - Segue
+- (void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
+    if ([segue.identifier isEqualToString:@"SettingsSegue"]) {
+        SettingsViewController* settingsVC = (SettingsViewController*) [segue.destinationViewController topViewController];
+        settingsVC.selectedDevice = self.selectedDevice;
+    }
+    
 }
 
 #pragma mark - UICollectionView Delegate
