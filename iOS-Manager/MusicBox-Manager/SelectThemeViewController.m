@@ -1,24 +1,28 @@
 //
-//  ModifySettingsViewController.m
+//  SelectThemeViewController.m
 //  MusicBox-Manager
 //
-//  Created by Chris Vanderschuere on 9/22/13.
+//  Created by Chris Vanderschuere on 9/24/13.
 //  Copyright (c) 2013 CDVConcepts. All rights reserved.
 //
 
-#import "ModifySettingsViewController.h"
+#import "SelectThemeViewController.h"
+#import "AppDelegate.h"
 
-@interface ModifySettingsViewController ()
+@interface SelectThemeViewController ()
+
+@property (nonatomic,strong) NSMutableArray* themes;
 
 @end
 
-@implementation ModifySettingsViewController
+@implementation SelectThemeViewController
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
     self = [super initWithStyle:style];
     if (self) {
         // Custom initialization
+        self.themes = [NSMutableArray array];
     }
     return self;
 }
@@ -32,6 +36,15 @@
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
     // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
+    AppDelegate *delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
+    [delegate.ws call:[baseURL stringByAppendingString:@"themes"] success:^(NSString *callURI, id result) {
+        self.themes = result;
+        
+        [self.tableView reloadData];
+    } error:^(NSString *callURI, NSString *errorURI, NSString *errorDescription) {
+        NSLog(@"Error:%@",errorDescription);
+    } args:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -39,7 +52,50 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+#pragma mark - Table view delegate
+- (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    if (![self.selectedTheme isEqual: self.themes[indexPath.row]]){
+        NSIndexPath *oldPath = [NSIndexPath indexPathForRow:[self.themes indexOfObject:self.selectedTheme] inSection:0];
+        self.selectedTheme = self.themes[indexPath.row];
+        [tableView reloadRowsAtIndexPaths:@[indexPath,oldPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+    }
+}
 
+#pragma mark - Table view data source
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+    // Return the number of sections.
+    return 1;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    // Return the number of rows in the section.
+    return self.themes.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    static NSString *CellIdentifier = @"themeCell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:CellIdentifier forIndexPath:indexPath];
+    
+    // Configure the cell...
+    
+    NSDictionary* theme = self.themes[indexPath.row];
+    
+    cell.textLabel.text = [theme objectForKey:@"Name"];
+    
+    
+    if ([[theme objectForKey:@"ThemeID"] isEqualToString:self.selectedTheme[@"ThemeID"]]) {
+        cell.accessoryType = UITableViewCellAccessoryCheckmark;
+    }
+    else{
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    
+    return cell;
+}
 
 /*
 // Override to support conditional editing of the table view.

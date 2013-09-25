@@ -21,7 +21,6 @@ const static NSString* baseURL = @"http://www.musicbox.com/";
 @property (nonatomic, strong) NSTimer* pingTimer;
 
 
-
 #pragma mark - Websocket methods
 -(void) connectToWebSocket;
 - (void)authenticateWebsocketWithUsername:(NSString*)username Password:(NSString*)password Callback:(void(^)(User* newUser,NSError* error))callback;

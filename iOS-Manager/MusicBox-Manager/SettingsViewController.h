@@ -14,8 +14,7 @@
 @property (nonatomic, weak) Device *selectedDevice;
 
 //Unwinds
-- (IBAction)unwindFromCancelledModification:(UIStoryboardSegue* ) segue;
-- (IBAction)unwindFromSavedModification:(UIStoryboardSegue* ) segue;
+- (IBAction)unwindFromThemeSelection:(UIStoryboardSegue* ) segue;
 
 //Actions
 - (IBAction)playerStatusChanged:(UIBarButtonItem *)sender;
@@ -27,5 +26,6 @@
 @property (weak, nonatomic) IBOutlet UILabel *weatherLabel;
 @property (weak, nonatomic) IBOutlet UILabel *keywordLabel;
 @property (weak, nonatomic) IBOutlet UISwitch *limitSongsSwitch;
+@property (weak, nonatomic) IBOutlet UILabel *themeLabel;
 
 @end

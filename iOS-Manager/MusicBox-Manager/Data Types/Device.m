@@ -18,6 +18,7 @@
     newDevice.deviceName = dict[@"DeviceName"];
     newDevice.identifier = dict[@"ID"];
     newDevice.theme = dict[@"Theme"];
+    newDevice.themeObj = dict[@"ThemeFull"];
     newDevice.user = dict[@"User"];
     
     NSArray *coords = dict[@"Location"];

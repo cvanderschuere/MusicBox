@@ -14,9 +14,12 @@
 @property (nonatomic,strong) NSString* user;
 @property (nonatomic,strong) NSString* deviceName;
 
+@property (nonatomic,strong) NSNumber *isPlaying; //yes (playing) / no (paused)
+
 //Moment.us information
 @property (nonatomic,strong) CLLocation* location;
 @property (nonatomic,strong) NSString* theme;
+@property (nonatomic,strong) NSDictionary* themeObj;
 
 @property (nonatomic,strong) NSArray* tracks; //array of Track*
 

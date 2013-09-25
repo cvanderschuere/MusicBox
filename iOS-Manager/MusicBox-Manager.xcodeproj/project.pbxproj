@@ -13,6 +13,7 @@
 		83385A4F17E82656005F5676 /* DeviceCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83385A4E17E82656005F5676 /* DeviceCell.m */; };
 		83385A5317E82A62005F5676 /* TrackCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 83385A5217E82A62005F5676 /* TrackCell.m */; };
 		83385A5817E934E7005F5676 /* music-note.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 83385A5717E934E7005F5676 /* music-note.jpg */; };
+		8382F87717F273AF00F7402D /* SelectThemeViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8382F87617F273AF00F7402D /* SelectThemeViewController.m */; };
 		8391DBE517E51FBF0023BBB1 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8391DBE417E51FBF0023BBB1 /* UIKit.framework */; };
 		8391DBE717E51FBF0023BBB1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8391DBE617E51FBF0023BBB1 /* Foundation.framework */; };
 		8391DBE917E51FBF0023BBB1 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8391DBE817E51FBF0023BBB1 /* CoreGraphics.framework */; };
@@ -31,7 +32,6 @@
 		8391DC1B17E7FDD70023BBB1 /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 8391DC1A17E7FDD70023BBB1 /* User.m */; };
 		8391DC1F17E800340023BBB1 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8391DC1E17E800340023BBB1 /* MainViewController.m */; };
 		83BA6F1F17EFD26500C7A8AE /* SettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83BA6F1E17EFD26500C7A8AE /* SettingsViewController.m */; };
-		83BA6F2217EFD27400C7A8AE /* ModifySettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83BA6F2117EFD27400C7A8AE /* ModifySettingsViewController.m */; };
 		8DD5D389A478439383630E8E /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 66550182A21547AE8C3896AD /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -47,6 +47,8 @@
 		83385A5117E82A62005F5676 /* TrackCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TrackCell.h; sourceTree = "<group>"; };
 		83385A5217E82A62005F5676 /* TrackCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TrackCell.m; sourceTree = "<group>"; };
 		83385A5717E934E7005F5676 /* music-note.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "music-note.jpg"; sourceTree = "<group>"; };
+		8382F87517F273AF00F7402D /* SelectThemeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectThemeViewController.h; sourceTree = "<group>"; };
+		8382F87617F273AF00F7402D /* SelectThemeViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectThemeViewController.m; sourceTree = "<group>"; };
 		8391DBE117E51FBF0023BBB1 /* MusicBox-Manager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MusicBox-Manager.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8391DBE417E51FBF0023BBB1 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8391DBE617E51FBF0023BBB1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -73,8 +75,6 @@
 		8391DC1E17E800340023BBB1 /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		83BA6F1D17EFD26500C7A8AE /* SettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsViewController.h; sourceTree = "<group>"; };
 		83BA6F1E17EFD26500C7A8AE /* SettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsViewController.m; sourceTree = "<group>"; };
-		83BA6F2017EFD27300C7A8AE /* ModifySettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ModifySettingsViewController.h; sourceTree = "<group>"; };
-		83BA6F2117EFD27400C7A8AE /* ModifySettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ModifySettingsViewController.m; sourceTree = "<group>"; };
 		EEDEB9B8BF424766A57427A8 /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -165,8 +165,8 @@
 				8391DBFC17E51FBF0023BBB1 /* MainStoryboard.storyboard */,
 				83BA6F1D17EFD26500C7A8AE /* SettingsViewController.h */,
 				83BA6F1E17EFD26500C7A8AE /* SettingsViewController.m */,
-				83BA6F2017EFD27300C7A8AE /* ModifySettingsViewController.h */,
-				83BA6F2117EFD27400C7A8AE /* ModifySettingsViewController.m */,
+				8382F87517F273AF00F7402D /* SelectThemeViewController.h */,
+				8382F87617F273AF00F7402D /* SelectThemeViewController.m */,
 				83385A5017E8265B005F5676 /* UI Elements */,
 				8391DBEB17E51FBF0023BBB1 /* Supporting Files */,
 			);
@@ -304,9 +304,9 @@
 			files = (
 				83385A4C17E820D1005F5676 /* Track.m in Sources */,
 				8391DBF117E51FBF0023BBB1 /* main.m in Sources */,
+				8382F87717F273AF00F7402D /* SelectThemeViewController.m in Sources */,
 				83385A5317E82A62005F5676 /* TrackCell.m in Sources */,
 				8391DBF517E51FBF0023BBB1 /* AppDelegate.m in Sources */,
-				83BA6F2217EFD27400C7A8AE /* ModifySettingsViewController.m in Sources */,
 				8391DC1817E7F5900023BBB1 /* LoginViewController.m in Sources */,
 				83385A4717E81E37005F5676 /* Device.m in Sources */,
 				8391DC1B17E7FDD70023BBB1 /* User.m in Sources */,

@@ -7,6 +7,8 @@
 //
 
 #import "SettingsViewController.h"
+#import "AppDelegate.h"
+#import "SelectThemeViewController.h"
 
 @interface SettingsViewController ()
 
@@ -31,7 +33,11 @@
     // self.clearsSelectionOnViewWillAppear = NO;
  
     // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    //self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    
+    
+    self.themeLabel.text = self.selectedDevice.themeObj[@"Name"];
+    
 }
 
 - (void)didReceiveMemoryWarning
@@ -43,39 +49,52 @@
 
 #pragma mark - Navigation
 
-
-- (IBAction)unwindFromCancelledModification:(UIStoryboardSegue* ) segue{
-    [self dismissViewControllerAnimated:YES completion:nil];
-}
-- (IBAction)unwindFromSavedModification:(UIStoryboardSegue* ) segue{
-    //Modify from changes
+- (void) unwindFromThemeSelection:(UIStoryboardSegue *)segue{
+    SelectThemeViewController* selectVC = (SelectThemeViewController*) segue.sourceViewController;
     
-    [self dismissViewControllerAnimated:YES completion:nil];
+    if (selectVC.selectedTheme) {
+        self.selectedDevice.themeObj = selectVC.selectedTheme;
+        self.selectedDevice.theme = selectVC.selectedTheme[@"ThemeID"];
+        self.themeLabel.text = selectVC.selectedTheme[@"Name"];
+        
+        //Publish notice of theme change
+        AppDelegate *del = (AppDelegate*) [UIApplication sharedApplication].delegate;
+        [del.ws publish:@{
+                          @"command":@"updateTheme",
+                          @"data":self.selectedDevice.themeObj
+                          }
+                toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,self.selectedDevice.user,self.selectedDevice.identifier]];
+    }
+    
 }
 
 // In a story board-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-    
-    if ([segue.identifier isEqualToString:@"ModifySegue"]) {
-
+    if ([segue.identifier isEqualToString:@"editTheme"]) {
+        SelectThemeViewController* selectVC = (SelectThemeViewController*) segue.destinationViewController;
+        selectVC.selectedTheme = self.selectedDevice.themeObj;
+        
     }
     
 }
 
-
 - (IBAction)playerStatusChanged:(UIBarButtonItem *)sender {
     if (sender.tag == 0) {
-        //Pause player
+        //Play player
+        
+        
+        //Create pause button
         UIBarButtonItem *pauseItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPause target:self action:@selector(playerStatusChanged:)];
         pauseItem.tintColor = [UIColor redColor];
         pauseItem.tag = 1;
         self.navigationItem.rightBarButtonItem = pauseItem;
         
     }else{
-        //Start player
+        //Pause player
+        
+        
+        //Create play button
         UIBarButtonItem *playItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(playerStatusChanged:)];
         playItem.tintColor = [UIColor greenColor];
         playItem.tag = 0;
