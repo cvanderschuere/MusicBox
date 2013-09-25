@@ -13,6 +13,7 @@ var dynamoDBServer *dynamodb.Server
 var usersTable *dynamodb.Table
 var musicBoxesTable *dynamodb.Table
 var trackHistoryTable *dynamodb.Table
+var themesTable *dynamodb.Table
 
 func setupAWS()(error){
 	//Sign in to AWS
@@ -39,6 +40,11 @@ func setupAWS()(error){
 	rangeKey := dynamodb.NewStringAttribute("Date", "")
 	key = dynamodb.PrimaryKey{primary, rangeKey}
 	trackHistoryTable = dynamoDBServer.NewTable("TrackHistory",key)	
+	
+	//Themes
+	primary = dynamodb.NewStringAttribute("ThemeID", "")
+	key = dynamodb.PrimaryKey{primary, nil}
+	themesTable = dynamoDBServer.NewTable("Themes",key)	
 
 	return nil
 }
@@ -57,6 +63,14 @@ func lookupMusicBox(id string)(*BoxItem,*postmaster.RPCError){
 			boxErr2 := &postmaster.RPCError{URI:"",Description:"Unmarshal Error",Details:""}
 			return nil,boxErr2
 		}else{
+			//Fill in theme information
+			themeObj := &ThemeItem{}
+			
+			theme, _ := themesTable.GetItem(&dynamodb.Key{HashKey:box["ThemeID"].Value})
+			dynamodb.UnmarshalAttributes(&theme, themeObj)
+			
+			boxObj.ThemeFull = themeObj;
+			
 			return boxObj,nil
 		}
 	}else{
@@ -91,4 +105,20 @@ func lookupUserSessionID(authKey string)(string,error){
 	}else{
 		return "",errors.New("Can't find user")
 	}
+}
+
+func getAllThemes()([]*ThemeItem,error){	
+	//Scan table for all items
+	res,_ := themesTable.Scan(nil)
+	
+	themes := make([]*ThemeItem,len(res))
+	for i,val := range res{
+		theme := &ThemeItem{}
+		dynamodb.UnmarshalAttributes(&val,theme)
+		
+		themes[i] = theme
+	}
+	
+	
+	return themes,nil
 }

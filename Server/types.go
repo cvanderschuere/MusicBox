@@ -19,6 +19,7 @@ type BoxItem struct{
 	DeviceName string
 	Location	[]string
 	Theme	string
+	ThemeFull *ThemeItem
 	
 	//Dynamic stats
 	Playing 	int64
@@ -52,6 +53,44 @@ func trackItemFromMap(data map[string]*dynamodb.Attribute)(*TrackItem){
 	
 	return t
 }
+
+type ThemeItem struct{
+	ThemeID string
+	Name	string
+	
+	//Moment.us specific
+	City string
+	DayOfWeek string
+	Keywords []string
+	Mood string
+	Time string
+	Weather string	
+}
+
+func themeItemFromMap(data map[string]interface{})(*ThemeItem){
+	t := &ThemeItem{
+		ThemeID: data["ThemeID"].(string),
+		Name: data["Name"].(string),
+		
+		City: data["City"].(string),
+		DayOfWeek: data["DayOfWeek"].(string),
+		Mood: data["Mood"].(string),
+		Time: data["Time"].(string),
+		Weather: data["Weather"].(string),
+	}
+	
+	//Cast keywords
+	keys := data["Keywords"].([]interface{})
+	keysNew := make([]string,len(keys))
+	for i,key := range keys{
+		keysNew[i] = key.(string)
+	}
+	t.Keywords = keysNew
+	
+	
+	return t
+}
+
 
 // Moment.us
 type DiscoverResult struct{

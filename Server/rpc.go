@@ -287,3 +287,15 @@ func getTrackHistory(conn *postmaster.Connection,uri string, args ...interface{}
 		return tracks,nil
 	}	
 }
+
+//Used to get list of avaliable themes
+//Args [none]
+func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
+	themes,err := getAllThemes()
+	if err != nil{
+		return nil, &postmaster.RPCError{URI:uri,Description:err.Error(),Details:""}
+	}
+	
+	return themes,nil
+}
+
