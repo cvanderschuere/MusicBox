@@ -17,6 +17,9 @@ RPC
 *	trackHistory
 	-	args: [musicboxID returnLimit pivotData(RFC3339)] (pivotDate is such that `returnLimit` items after `pivotDate` are returned)
 	-	return: [ map[AlbumName,ArtistName,ArtworkURL,Date,ProviderID,Title] ]
+*	themes
+	-	args: [none]
+	-	return: [ ThemeItem[] ]
 
 ### Unauthorized
 *	user/startSession
