@@ -60,6 +60,18 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 			log.Print("Put New track")
 		}
 		
+	case "updateTheme":
+		theme := themeItemFromMap(data["data"].(map[string]interface{}))
+		boxID := args[1]
+		
+		//Update box information with new theme
+		themeUpdate := []dynamodb.Attribute{*dynamodb.NewStringAttribute("ThemeID",theme.ThemeID)}
+		
+		_, err := musicBoxesTable.UpdateItem(&dynamodb.Key{HashKey: boxID},themeUpdate)
+		if err != nil{
+			log.Print(err.Error())
+		}
+		
 		
 	default:
 			log.Print("Unknown Command:",data["command"])

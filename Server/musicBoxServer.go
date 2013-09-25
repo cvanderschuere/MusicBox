@@ -33,6 +33,7 @@ func main() {
 	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
 	server.RegisterRPC(baseURL+"boxDetails",getMusicBoxDetails)
 	server.RegisterRPC(baseURL+"trackHistory",getTrackHistory)
+	server.RegisterRPC(baseURL+"themes",getThemes)
 	
 	//Unauth rpc
 	server.RegisterUnauthRPC(baseURL+"user/startSession",startSession)
