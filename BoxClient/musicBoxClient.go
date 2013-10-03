@@ -20,7 +20,7 @@ const musicBoxID = "musicBoxID2"
 //Auth info
 const WAMP_BASE_URL = "http://api.wamp.ws/"
 const WAMP_PROCEDURE_URL = WAMP_BASE_URL+"procedure#"
-var authWait = make(chan bool,1)
+var authWait = make(chan bool,1) //Used to block until authentication
 var boxUsername string
 var boxSessionID string
 

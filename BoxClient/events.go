@@ -137,8 +137,13 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					user := message.Result.(map[string]interface{})
 					boxUsername = user["username"].(string)
 					boxSessionID = user["sessionID"].(string)
+					
+					extra := map[string]interface{}{
+						"client-type":"musicBox-v1", //Used to diferentiate musicbox from other clients (ie Website)
+						"client-id":musicBoxID,
+					}
 	
-					client.Call("authreq",WAMP_PROCEDURE_URL+"authreq",boxUsername)
+					client.Call("authreq",WAMP_PROCEDURE_URL+"authreq",boxUsername,extra)
 				case "authreq":
 					//Recieve challenge
 					ch,ok := message.Result.(string)
