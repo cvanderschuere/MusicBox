@@ -228,8 +228,13 @@ func getMusicBoxDetails(conn *postmaster.Connection,uri string, args ...interfac
 			if box,err := lookupMusicBox(id); err == nil{
 				//Match with username
 				if box.User == conn.Username{
-					//return box
-					boxes[id] = box
+					//Convert box to map
+					m := map[string]interface{}{
+						"uri":baseURL+conn.Username+"/"+box.ID,
+						"box":box,
+					}
+					
+					boxes[id] = m
 				
 				}else{
 					boxes[id] = errors.New("No box exists for this user")
