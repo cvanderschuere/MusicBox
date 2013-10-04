@@ -13,7 +13,7 @@ RPC
 	-	return: [musicBoxID]
 *	boxDetails
 	-	args: [ musicBoxId[] ]
-	-	map[ musicboxID: map[uri , box:map[DeviceName,ID,Theme,Location[],Theme,User] ] ]
+	-	map[ musicboxID: map[uri , box:map[DeviceName,ID,Theme,Location[],Theme,User,Playing] ] ]
 *	trackHistory
 	-	args: [musicboxID returnLimit pivotData(RFC3339)] 
 		* `returnLimit` newest items are returned (-1 to ignore the limit)
