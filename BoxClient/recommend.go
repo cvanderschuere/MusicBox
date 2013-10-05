@@ -12,7 +12,12 @@ import(
 //Find `numToAdd` songs similar to `baseTrack` and send addTrack message with them
 func recommendSongs(numToAdd uint){
 	
-	if err := client.Call("recommendSongs",baseURL+"recommendSongs",musicBoxID); err != nil{
+	opts := map[string]interface{}{
+		"ID":musicBoxID,
+		"Count":5,
+	}
+	
+	if err := client.Call("recommendSongs",baseURL+"recommendSongs",opts); err != nil{
 		fmt.Println(err.Error())
 	}
 	
