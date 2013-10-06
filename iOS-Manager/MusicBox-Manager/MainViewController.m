@@ -46,7 +46,18 @@
         [self.ws call:[NSString stringWithFormat:@"%@boxDetails",baseURL] success:^(NSString *callURI, id result) {
             //Add box for each
             for (NSString* key in result) {
-                [self.devices addObject:[Device deviceWithDict:result[key]]];
+                Device* newDevice = [Device deviceWithDict:[result[key] objectForKey:@"box"]];
+                [self.devices addObject:newDevice];
+                
+                //Subscribe to updates if allowed
+                NSString* uri = [NSString stringWithFormat:@"%@%@/%@",baseURL,self.currentUser.username,newDevice.identifier];
+                NSDictionary* value = self.currentUser.pubSubPerms[uri];
+                if (value != nil && value[@"CanSubscribe"]) {
+                    //Subscribe to this update
+                    NSLog(@"Subscribed: %@",uri);
+                    [self.ws subscribeTopic:uri withDelegate:self];
+                }
+                
             }
             
             //Sort by device name
@@ -92,13 +103,13 @@
             for (NSDictionary* dict in result) {
                 [tracks addObject:[Track trackWithDict:dict]];
             }
-            self.selectedDevice.tracks = tracks;
+            
+            self.selectedDevice.tracks = [[tracks reverseObjectEnumerator] allObjects].mutableCopy;
             [self.trackCollectionView reloadData];
             
         } error:^(NSString *callURI, NSString *errorURI, NSString *errorDescription) {
             NSLog(@"Error getting tracks:%@",errorDescription);
-        } args:self.selectedDevice.identifier, nil];
-        
+        } args:@[self.selectedDevice.identifier,@15], nil];
         
         /*
         [self.ws call:[NSString stringWithFormat:@"%@recommendSongs",baseURL] success:^(NSString *callURI, id result) {
@@ -167,6 +178,61 @@
 - (UICollectionReusableView*) collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath{
     if (collectionView == self.trackCollectionView) {
         return [collectionView dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:@"trackHeader" forIndexPath:indexPath];
+    }else{
+        return nil;
+    }
+}
+
+#pragma mark - MDWampEventDelegate
+
+- (void) onEvent:(NSString *)topicUri eventObject:(id)object{
+    NSLog(@"Object: %@",object);
+    
+    if ([object isKindOfClass:[NSDictionary class]]) {
+        //Extract command && data
+        NSString* command = [object objectForKey:@"command"];
+        
+        //Switch between commands
+        if ([command isEqualToString:@"startedTrack"]) {
+            //Extract data
+            NSDictionary* data = [object objectForKey:@"data"];
+            NSString* deviceID = data[@"deviceID"];
+            
+            //Find device
+            Device* thisDevice = nil;
+            for (Device* device in self.devices) {
+                if ([device.identifier isEqualToString:deviceID]) {
+                    thisDevice = device;
+                    break;
+                }
+            }
+            
+            //Extract track
+            Track* newTrack = [Track trackWithDict:data[@"track"]];
+            
+            [thisDevice.tracks insertObject:newTrack atIndex:0];
+            [self.trackCollectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
+            
+            thisDevice.isPlaying = [NSNumber numberWithBool:true];
+            
+        }else if([command isEqualToString:@"playTrack"] || [command isEqualToString:@"pauseTrack"]){
+            NSArray* pathComps = [[NSURL URLWithString:topicUri] pathComponents];
+            
+            NSString* deviceID = pathComps[2];
+            
+            //Find device
+            Device* thisDevice = nil;
+            for (Device* device in self.devices) {
+                if ([device.identifier isEqualToString:deviceID]) {
+                    thisDevice = device;
+                    break;
+                }
+            }
+            
+            thisDevice.isPlaying = [NSNumber numberWithBool:[command isEqualToString:@"playTrack"]];
+        }
+        
+
     }
 }
 

@@ -10,7 +10,7 @@
 #import "User.h"
 #import "Device.h"
 
-@interface MainViewController : UIViewController <UICollectionViewDataSource,UICollectionViewDelegate>
+@interface MainViewController : UIViewController <MDWampEventDelegate,UICollectionViewDataSource,UICollectionViewDelegate>
 
 @property (nonatomic,strong) User *currentUser;
 @property (nonatomic,strong) MDWamp *ws;

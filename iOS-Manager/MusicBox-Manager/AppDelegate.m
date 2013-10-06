@@ -103,11 +103,19 @@
         NSString *sessionID = resultDict[@"sessionID"];
         
         //Authenticate websocket
-        [self.ws authWithKey:username Secret:sessionID Extra:nil Success:^(NSString *answer) {
+        [self.ws authWithKey:username Secret:sessionID Extra:nil Success:^(id answer) {
             NSLog(@"Authenticated");
+            
             User* newUser = [[User alloc] init];
             newUser.username = username;
             newUser.sessionID = sessionID;
+            
+            //Format permissions
+            if ([answer isKindOfClass:[NSDictionary class]]) {
+                newUser.pubSubPerms = answer[@"PubSub"];
+                newUser.rpcPerms = answer[@"RPC"];
+            }
+            
             callback(newUser,nil);
         } Error:^(NSString *procCall, NSString *errorURI, NSString *errorDetails) {
             NSLog(@"Auth Fail:%@ %@",procCall,errorDetails);

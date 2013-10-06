@@ -12,7 +12,7 @@
 
 + (instancetype) deviceWithDict:(NSDictionary*)dict{
     Device *newDevice = [[Device alloc] init];
-    newDevice.tracks = [NSArray array];
+    newDevice.tracks = [NSMutableArray array];
     
     //Load from dict
     newDevice.deviceName = dict[@"DeviceName"];
@@ -20,6 +20,7 @@
     newDevice.theme = dict[@"Theme"];
     newDevice.themeObj = dict[@"ThemeFull"];
     newDevice.user = dict[@"User"];
+    newDevice.isPlaying = dict[@"Playing"];
     
     NSArray *coords = dict[@"Location"];
     newDevice.location = [[CLLocation alloc] initWithLatitude:[coords[0] doubleValue] longitude:[coords[1] doubleValue]];

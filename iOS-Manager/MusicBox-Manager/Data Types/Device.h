@@ -21,7 +21,7 @@
 @property (nonatomic,strong) NSString* theme;
 @property (nonatomic,strong) NSDictionary* themeObj;
 
-@property (nonatomic,strong) NSArray* tracks; //array of Track*
+@property (nonatomic,strong) NSMutableArray* tracks; //array of Track*
 
 
 + (instancetype) deviceWithDict:(NSDictionary*)dict;

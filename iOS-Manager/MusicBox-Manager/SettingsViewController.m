@@ -37,6 +37,23 @@
     
     
     self.themeLabel.text = self.selectedDevice.themeObj[@"Name"];
+    self.deviceNameLabel.text = self.selectedDevice.deviceName;
+    
+    //Setup play/pause
+    if (self.selectedDevice.isPlaying.boolValue) {
+        //Create pause button
+        UIBarButtonItem *pauseItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPause target:self action:@selector(playerStatusChanged:)];
+        pauseItem.tintColor = [UIColor redColor];
+        pauseItem.tag = 1;
+        self.navigationItem.rightBarButtonItem = pauseItem;
+    }else{
+        //Create play button
+        UIBarButtonItem *playItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(playerStatusChanged:)];
+        playItem.tintColor = [UIColor greenColor];
+        playItem.tag = 0;
+        
+        self.navigationItem.rightBarButtonItem = playItem;
+    }
     
 }
 
@@ -80,9 +97,14 @@
 }
 
 - (IBAction)playerStatusChanged:(UIBarButtonItem *)sender {
+    AppDelegate *del = (AppDelegate*) [UIApplication sharedApplication].delegate;
+    
     if (sender.tag == 0) {
         //Play player
-        
+        [del.ws publish:@{
+                          @"command":@"playTrack",
+                          }
+                toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,self.selectedDevice.user,self.selectedDevice.identifier]];
         
         //Create pause button
         UIBarButtonItem *pauseItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPause target:self action:@selector(playerStatusChanged:)];
@@ -90,9 +112,14 @@
         pauseItem.tag = 1;
         self.navigationItem.rightBarButtonItem = pauseItem;
         
+        self.selectedDevice.isPlaying = @1;
+        
     }else{
         //Pause player
-        
+        [del.ws publish:@{
+                          @"command":@"pauseTrack",
+                          }
+                toTopic:[NSString stringWithFormat:@"%@%@/%@",baseURL,self.selectedDevice.user,self.selectedDevice.identifier]];
         
         //Create play button
         UIBarButtonItem *playItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemPlay target:self action:@selector(playerStatusChanged:)];
@@ -101,6 +128,7 @@
 
         self.navigationItem.rightBarButtonItem = playItem;
         
+        self.selectedDevice.isPlaying = @0;
     }
     
 }

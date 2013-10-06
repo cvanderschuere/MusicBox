@@ -15,4 +15,8 @@
 @property (nonatomic,strong) NSString* sessionID;
 
 
+//Permissions
+@property (nonatomic,strong) NSArray* rpcPerms;
+@property (nonatomic,strong) NSDictionary* pubSubPerms;
+
 @end
