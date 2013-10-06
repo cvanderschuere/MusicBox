@@ -25,6 +25,11 @@ type BoxItem struct{
 	Playing 	int64
 }
 
+const ( 
+    	PAUSED int64 = iota 
+        PLAYING int64 = iota 
+)
+
 type TrackItem struct{
 	Title string
 	ArtistName string

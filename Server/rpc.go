@@ -62,14 +62,18 @@ func boxRequest(conn *postmaster.Connection,url string, args ...interface{})(int
 	return players,nil
 }
 
-// Args format [boxid]
+// Args format {ID:musicBoxID,Count:numToAdd}
 func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){	
-	//Look up music box with ID
-	boxID,ok := args[0].(string)
+	//Get passed options
+	opts,ok := args[0].(map[string]interface{})
 	if !ok{
 		//Incorrect format
 		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format",Details:""}
 	}
+	
+	//Look up music box with ID
+	boxID := opts["ID"].(string)
+	requestedCount := int(opts["Count"].(float64))
 	
 	box,err := lookupMusicBox(boxID)
 	if err != nil{
@@ -84,13 +88,81 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 	}
 	
 	//Make Moment.us request based on box information
-	fmt.Println(box)
+	fmt.Println(box.Theme,box.ThemeFull)
 	
+	//Get theme item for this box
+	theme := box.ThemeFull //Already inlcuded in box lookup
+	
+	fmt.Println(theme)
+	
+	//Create recommendation request
 	v := url.Values{}
 	v.Set("access_token", user.SessionID)
 	
-	//2006-01-02T15:04:05Z time format layout time.RFC3339
-	v.Set("current_context[date]",time.Now().Format(time.RFC3339))
+	//
+	//Use theme to populate information
+	//
+	
+	//Weather
+	if theme.Weather == "AUTO:AUTO"{
+		//Find weather information for current location
+		
+		var condition string
+		var temperature string
+		
+		//
+		// Mock data
+		//
+		
+		condition = "overcast"
+		temperature = "20"
+		
+		//
+		// End fillin data
+		//
+		
+		v.Set("by[weather][condition]",condition)	
+		v.Set("by[weather][temperature]",temperature)			
+	}else{
+		//Use provided weather information
+		p := strings.Split(theme.Weather,":")
+		
+		v.Set("by[time_of_day][condition]",p[0])	
+		v.Set("by[weather][temperature]",p[1])			
+	}
+	
+	//Time of day []'Early Morning', 'Morning', 'Late Morning', 'Afternoon', 'Late Afternoon', 'Evening', 'Night', 'Late Night'] (required)
+	if theme.Time == "AUTO"{
+		//Use current time of day to determine value
+		var time string
+		
+		//
+		// Mock data
+		//
+		
+		time = "Afternoon"
+		//End Mock
+		
+		v.Set("by[time_of_day]",time)	
+	}else{
+		v.Set("by[time_of_day]",theme.Time)	
+	}
+	
+	//Mood ['Happy', 'Inspired', 'Tender', 'Nostalgic', 'Relaxed', 'Strong', 'Joyful', 'Tense', 'Sad'] (required)
+	v.Set("by[mood]",theme.Mood)
+	
+	//City (optional)
+	if theme.City != "AUTO"{
+		v.Set("by[city]",theme.City)	
+	}//Else do nothing
+	
+	//Keywords (optional)
+	if len(theme.Keywords)>0{
+		v.Set("by[keywords]",strings.Join(theme.Keywords,","))
+	}
+	
+	//Current Context (unchanged by theme)
+	v.Set("current_context[date]",time.Now().Format(time.RFC3339))//2006-01-02T15:04:05Z time format layout time.RFC3339
 	v.Set("current_context[location][lng]",box.Location[0])
 	v.Set("current_context[location][lat]",box.Location[1])
 	query := v.Encode()
@@ -161,6 +233,10 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 		tracks = append(tracks,t)
 	}
 	
+	if len(tracks) < requestedCount{
+		fmt.Println("Didn't meet request number");
+	}
+	
 	return tracks,nil
 }
 
@@ -195,7 +271,7 @@ func startSessionBox(conn *postmaster.Connection,uri string, args ...interface{}
 	if err != nil{
 		//Do something
 		return nil,nil
-	}
+	}	
 	
 	//Lookup user
 	user,err := lookupUser(box.User)
@@ -254,21 +330,58 @@ func getMusicBoxDetails(conn *postmaster.Connection,uri string, args ...interfac
 //Used to get information about track history
 //args [musicboxID returnLimit pivotData(RFC3339)] (pivotDate is such that `returnLimit` items after `pivotDate` are returned)
 func getTrackHistory(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
-	if len(args) == 0{
-		return nil,nil //Must provide musicboxiD
-	}	
-
+	
+	var compositeID string
+	var limitFloat float64 //Json is float by default
+	var limit int //keep into too...more useful
 	var date string
-	if len(args)>2{
-		//Should do error checking by making sure it converts
-		date = args[2].(string)
+	
+	if len(args) == 0{
+		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (No arguments)",Details:""}
 	}else{
-		date = time.Now().UTC().Format(time.RFC3339) //Use today as default
-	}
+		//Extract necessary information
+		a,ok := args[0].([]interface{})
+		if !ok{
+			return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (Message)",Details:""}
+		}
+		
+		//Make sure has enough objects
+		if len(a)<1{
+			return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (Not enough args)",Details:""}
+		}
+		
+		//ID
+		compositeID,ok = a[0].(string)
+		if !ok{
+			return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (ID)",Details:""}
+		}
+		
+		//Limit
+		if len(a)>1{
+			limitFloat,ok = a[1].(float64)
+			if !ok{
+				return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (limit)",Details:""}
+			}
+			limit = int(limitFloat)
+		}else{
+			limit = 0;
+		}
+		
+		//Date
+		if len(a)>2{
+			//Should do error checking by making sure it converts
+			date,ok = a[2].(string)
+			if !ok{
+				return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (date)",Details:""}
+			}
+		}else{
+			date = time.Now().UTC().Format(time.RFC3339) //Use today as default
+		}
+	}	
 	
 	//Query table
 	comps := []dynamodb.AttributeComparison{
-		*dynamodb.NewEqualStringAttributeComparison("CompositeID",conn.Username+":"+args[0].(string)), //Composite ID
+		*dynamodb.NewEqualStringAttributeComparison("CompositeID",conn.Username+":"+compositeID), //Composite ID
 		*dynamodb.NewStringAttributeComparison("Date",dynamodb.COMPARISON_LESS_THAN_OR_EQUAL,date),
 	}
 	
@@ -278,10 +391,11 @@ func getTrackHistory(conn *postmaster.Connection,uri string, args ...interface{}
 		fmt.Println(err)
 		return nil,nil
 	}else{
-		if len(args) > 1 {
-			limit := args[1].(int)
-			//limit the return elements
+		if limit > 0 && limit <= len(res) {
+			//limit the return elements to the last couple elements (first in array is oldest)
 			res = res[len(res)-limit:]
+		}else if limit > len(res){
+			res = nil
 		}
 
 		tracks := make([]*TrackItem,len(res))

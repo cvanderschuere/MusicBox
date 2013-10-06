@@ -6,6 +6,7 @@ import(
 	"errors"
 	"postmaster"
 	"fmt"
+	"strconv"
 )
 
 //Global database tables (setup in setupAWS())
@@ -106,6 +107,20 @@ func lookupUserSessionID(authKey string)(string,error){
 		return "",errors.New("Can't find user")
 	}
 }
+func lookupTheme(themeID string)(*ThemeItem,error){
+	if item, err := themesTable.GetItem(&dynamodb.Key{HashKey: themeID}); err == nil{
+		themeObj := &ThemeItem{}
+
+		err := dynamodb.UnmarshalAttributes(&item, themeObj)
+		if err != nil {
+			return nil,err
+		}else{
+			return themeObj,nil
+		}
+	}else{
+		return nil, err
+	}
+}
 
 func getAllThemes()([]*ThemeItem,error){	
 	//Scan table for all items
@@ -121,4 +136,17 @@ func getAllThemes()([]*ThemeItem,error){
 	
 	
 	return themes,nil
+}
+
+//
+// Update item
+//
+
+func setMusicBoxPlaying(musicBoxID string, playing int64)(error){
+
+	update := []dynamodb.Attribute{*dynamodb.NewNumericAttribute("Playing",strconv.FormatInt(playing,10))} 
+	musicBoxesTable.UpdateAttributes(&dynamodb.Key{HashKey: musicBoxID},update)
+	
+	return nil
+
 }

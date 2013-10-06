@@ -29,8 +29,15 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 	case "addTrack":
 	case "removeTrack":
 	case "playTrack":
+		if len(args) > 1{
+			setMusicBoxPlaying(args[1],PLAYING) //Set Playing = true
+		}
 	case "pauseTrack":
+		fallthrough //Same as stop
 	case "stopTrack":
+		if len(args) > 1{
+			setMusicBoxPlaying(args[1],PAUSED) //Set Playing = false
+		}
 	case "nextTrack":
 	case "startedTrack":
 		log.Print("Track Started")
@@ -42,7 +49,6 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 		fmt.Println(track)
 		deviceID := d["deviceID"].(string)
 		fmt.Println(deviceID)
-		
 		
 		//Create aws item
 		atts := []dynamodb.Attribute{
@@ -60,6 +66,9 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 			log.Print("Put New track")
 		}
 		
+		//Set playing to true
+		setMusicBoxPlaying(deviceID,PLAYING) //Set Playing = true
+		
 	case "updateTheme":
 		theme := themeItemFromMap(data["data"].(map[string]interface{}))
 		boxID := args[1]
@@ -67,7 +76,7 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 		//Update box information with new theme
 		themeUpdate := []dynamodb.Attribute{*dynamodb.NewStringAttribute("ThemeID",theme.ThemeID)}
 		
-		_, err := musicBoxesTable.UpdateItem(&dynamodb.Key{HashKey: boxID},themeUpdate)
+		_, err := musicBoxesTable.UpdateAttributes(&dynamodb.Key{HashKey: boxID},themeUpdate)
 		if err != nil{
 			log.Print(err.Error())
 		}
@@ -80,4 +89,30 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 	fmt.Println(username,data)	
 		
 	return true
+}
+
+//Called when a websocket is disconnected with the information of the authenticated client
+func clientDisconnected(authKey string,authExtra map[string]interface{}){
+	log.Print("Client Disconnected",authExtra)
+	
+	if authExtra != nil{
+		v,ok := authExtra["client-type"]
+		
+		if ok && v == "musicBox-v1"{			
+			setMusicBoxPlaying(authExtra["client-id"].(string),PAUSED)
+			
+			//Send message that device paused
+			b,err := lookupMusicBox(authExtra["client-id"].(string))
+			
+			if err == nil{
+				//Create paused command
+				msg := map[string]interface{}{
+					"command":"pauseTrack",
+				}
+				
+				server.PublishEvent(baseURL+b.User+"/"+b.ID, msg)
+			}
+		}
+	}
+	
 }

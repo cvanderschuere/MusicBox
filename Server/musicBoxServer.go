@@ -11,6 +11,9 @@ const(
 	baseURL = "http://www.musicbox.com/"
 )
 
+//Global
+var server *postmaster.Server
+
 func main() {
 	
 	//Setup AWS related services (DynamoDB)-defined in aws.go
@@ -19,12 +22,13 @@ func main() {
 		return
 	}
 	
-	server := postmaster.NewServer()
+	server = postmaster.NewServer()
 
 	//Assign auth callbacks - defined in auth.go
 	server.GetAuthSecret = lookupUserSessionID
 	server.GetAuthPermissions = getUserPremissions
 	server.OnAuthenticated = userConnected
+	server.OnDisconnect = clientDisconnected
 	
 	server.MessageToPublish = InterceptMessage //Defined in serverLogic.go
 	
