@@ -26,6 +26,7 @@ type BoxItem struct{
 }
 
 const ( 
+		OFFLINE int64 = iota
     	PAUSED int64 = iota 
         PLAYING int64 = iota 
 )

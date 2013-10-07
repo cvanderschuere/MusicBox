@@ -91,14 +91,16 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 	return true
 }
 
-//Called when a websocket is disconnected with the information of the authenticated client
-func clientDisconnected(authKey string,authExtra map[string]interface{}){
-	log.Print("Client Disconnected",authExtra)
-	
-	if authExtra != nil{
-		v,ok := authExtra["client-type"]
+
+//
+//User Lifecycle
+//
+
+func userConnected(authKey string, authExtra map[string]interface{}, permission postmaster.Permissions){	
+		v,ok := authExtra["client-type"] //Extract client information
 		
-		if ok && v == "musicBox-v1"{			
+		if ok && v == "musicBox-v1"{	
+			log.Print("Box Connected",authExtra)		
 			setMusicBoxPlaying(authExtra["client-id"].(string),PAUSED)
 			
 			//Send message that device paused
@@ -107,7 +109,34 @@ func clientDisconnected(authKey string,authExtra map[string]interface{}){
 			if err == nil{
 				//Create paused command
 				msg := map[string]interface{}{
-					"command":"pauseTrack",
+					"command":"boxConnected",
+				}
+				
+				server.PublishEvent(baseURL+b.User+"/"+b.ID, msg)
+				return
+			}
+		}else{
+		fmt.Println("Connected user: "+authKey)
+		}
+}
+
+//Called when a websocket is disconnected with the information of the authenticated client
+func clientDisconnected(authKey string,authExtra map[string]interface{}){
+	log.Print("Client Disconnected",authExtra)
+	
+	if authExtra != nil{
+		v,ok := authExtra["client-type"]
+		
+		if ok && v == "musicBox-v1"{			
+			setMusicBoxPlaying(authExtra["client-id"].(string),OFFLINE)
+			
+			//Send message that device paused
+			b,err := lookupMusicBox(authExtra["client-id"].(string))
+			
+			if err == nil{
+				//Create paused command
+				msg := map[string]interface{}{
+					"command":"boxDisconnected",
 				}
 				
 				server.PublishEvent(baseURL+b.User+"/"+b.ID, msg)

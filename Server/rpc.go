@@ -97,7 +97,7 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 	
 	//Create recommendation request
 	v := url.Values{}
-	v.Set("access_token", user.SessionID)
+	v.Set("access_token", user.SessionID) //Moment.us access token is same as user session id
 	
 	//
 	//Use theme to populate information
@@ -110,6 +110,7 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 		var condition string
 		var temperature string
 		
+		// TODO: Use actual weather conditions
 		//
 		// Mock data
 		//
@@ -127,7 +128,7 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 		//Use provided weather information
 		p := strings.Split(theme.Weather,":")
 		
-		v.Set("by[time_of_day][condition]",p[0])	
+		v.Set("by[weather][condition]",p[0])	
 		v.Set("by[weather][temperature]",p[1])			
 	}
 	
@@ -179,9 +180,9 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 	var responseObject DiscoverResult
 	errJson := json.Unmarshal(body,&responseObject)
 	if errJson != nil {
-			fmt.Println("Json Error: %s",err)
+			fmt.Println("Json Error: ",err)
 			fmt.Println(string(body))
-			return nil, nil
+			return []interface{}{}, nil
 	}
 	
 	var tracks []*TrackItem

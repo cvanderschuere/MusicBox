@@ -2,7 +2,6 @@ package main
 
 import(
 	"postmaster"
-	"fmt"
 )
 
 
@@ -28,9 +27,4 @@ func getUserPremissions(authKey string,authExtra map[string]interface{})(postmas
 	}
 	
 	return p,nil
-}
-
-func userConnected(authKey string, authExtra map[string]interface{}, permission postmaster.Permissions){
-	fmt.Println("Connected user: "+authKey)
-	fmt.Println(authExtra)
 }
