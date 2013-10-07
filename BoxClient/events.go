@@ -92,6 +92,10 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 							go recommendSongs(1)
 						}
 					}
+				case "updateTheme":
+					go recommendSongs(1)
+					queue = []TrackItem{}
+					
 				//
 				//Internal Events
 				//

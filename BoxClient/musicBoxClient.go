@@ -86,10 +86,14 @@ func main() {
 	//Connect socket between server port and local port
 	config,_ := websocket.NewConfig("ws://"+serverURL,"http://localhost:4040")
 	config.Header.Add("musicbox-box-id",musicBoxID)
-	
+
+
+	CONNECT:
+		
 	if err := client.ConnectConfig(config); err != nil {
 		log.Error("Error connecting: ", err)
-		return
+		time.Sleep(1)
+		goto CONNECT
 	}
 	
 	//Make instruction channel
