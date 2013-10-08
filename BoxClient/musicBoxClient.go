@@ -58,6 +58,7 @@ type TrackItem struct{
 	ArtistName string
 	AlbumName	string
 	ArtworkURL	string
+	Length	float64
 	
 	//Track info
 	ProviderID	string
@@ -67,6 +68,23 @@ type TrackItem struct{
 	Date	string  //Date played for accounting purposes
 }
 
+func trackItemFromMap(data map[string]interface{})(TrackItem){
+	
+	//Extract length
+	//l,_ := strconv.ParseFloat(data["Length"].(string),32)
+
+	t := TrackItem{
+		Title: data["Title"].(string),
+		ArtistName: data["ArtistName"].(string),
+		AlbumName: data["AlbumName"].(string),
+		ArtworkURL: data["ArtworkURL"].(string),
+		ProviderID: data["ProviderID"].(string),
+		Length: data["Length"].(float64),
+		Date: data["Date"].(string),
+	}
+	
+	return t
+}
 
 /*
 	Functions

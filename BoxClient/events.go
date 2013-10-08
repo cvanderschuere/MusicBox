@@ -33,7 +33,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					//Add all passed tracks
 					for _,trackDict := range data {
 						track := trackDict.(map[string]interface{})
-						newTrack := TrackItem{ProviderID:track["ProviderID"].(string),Title:track["Title"].(string),ArtistName:track["ArtistName"].(string),AlbumName:track["albumName"].(string)}
+						newTrack := trackItemFromMap(track)
 						if queue == nil{
 							//create queue
 							queue = make([]TrackItem,1)
@@ -129,8 +129,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					
 					for _,m := range tracks{
 						track := m.(map[string]interface{})
-						t := TrackItem{ProviderID:track["ProviderID"].(string),Title:track["Title"].(string),ArtistName:track["ArtistName"].(string),AlbumName:track["AlbumName"].(string),ArtworkURL:track["ArtworkURL"].(string)}
-						
+						t := trackItemFromMap(track)
 						queue = append(queue,t)					
 					}	
 					
