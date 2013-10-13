@@ -20,7 +20,7 @@
     newDevice.theme = dict[@"Theme"];
     newDevice.themeObj = dict[@"ThemeFull"];
     newDevice.user = dict[@"User"];
-    newDevice.isPlaying = dict[@"Playing"];
+    newDevice.playState = dict[@"Playing"];
     
     NSArray *coords = dict[@"Location"];
     newDevice.location = [[CLLocation alloc] initWithLatitude:[coords[0] doubleValue] longitude:[coords[1] doubleValue]];

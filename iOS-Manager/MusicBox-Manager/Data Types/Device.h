@@ -9,12 +9,16 @@
 #import <Foundation/Foundation.h>
 #import "Track.h"
 
+#define DEVICE_OFFLINE 0
+#define DEVICE_PAUSED 1
+#define DEVICE_PLAYING 2
+
 @interface Device : NSObject
 @property (nonatomic,strong) NSString* identifier;
 @property (nonatomic,strong) NSString* user;
 @property (nonatomic,strong) NSString* deviceName;
 
-@property (nonatomic,strong) NSNumber *isPlaying; //yes (playing) / no (paused)
+@property (nonatomic,strong) NSNumber *playState; //0(offline), 1(paused) 2(playing)
 
 //Moment.us information
 @property (nonatomic,strong) CLLocation* location;

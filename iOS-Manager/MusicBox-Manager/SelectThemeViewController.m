@@ -57,7 +57,7 @@
     if (![self.selectedTheme isEqual: self.themes[indexPath.row]]){
         NSIndexPath *oldPath = [NSIndexPath indexPathForRow:[self.themes indexOfObject:self.selectedTheme] inSection:0];
         self.selectedTheme = self.themes[indexPath.row];
-        [tableView reloadRowsAtIndexPaths:@[indexPath,oldPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        [tableView reloadRowsAtIndexPaths:@[indexPath,oldPath] withRowAnimation:UITableViewRowAnimationNone];
     }
 }
 
