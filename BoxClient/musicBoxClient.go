@@ -10,7 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"time"
-    "github.com/cvanderschuere/MusicBox/BoxClient/Track"
+	"MusicBox/BoxClient/Track"
 )
 
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
@@ -52,40 +52,6 @@ const(
 	NextTrack
 	//Add more later
 )
-
-//Fields must be exported for JSON marshal
-type TrackItem struct{
-	Title string
-	ArtistName string
-	AlbumName	string
-	ArtworkURL	string
-	Length	float64
-	
-	//Track info
-	ProviderID	string
-	
-	//Storage info
-	CompositeID	string //username:BoxID
-	Date	string  //Date played for accounting purposes
-}
-
-func trackItemFromMap(data map[string]interface{})(TrackItem){
-	
-	//Extract length
-	//l,_ := strconv.ParseFloat(data["Length"].(string),32)
-
-	t := TrackItem{
-		Title: data["Title"].(string),
-		ArtistName: data["ArtistName"].(string),
-		AlbumName: data["AlbumName"].(string),
-		ArtworkURL: data["ArtworkURL"].(string),
-		ProviderID: data["ProviderID"].(string),
-		Length: data["Length"].(float64),
-		Date: data["Date"].(string),
-	}
-	
-	return t
-}
 
 /*
 	Functions

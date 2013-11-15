@@ -7,7 +7,7 @@ import(
 	"encoding/json"
 	"io/ioutil"
 	"strings"
-    "github.com/cvanderschuere/MusicBox/BoxClient/Track"
+	"MusicBox/BoxClient/Track"
 )
 
 //Find `numToAdd` songs similar to `baseTrack` and send addTrack message with them
@@ -162,6 +162,6 @@ func matchToSpotify(track lastFMTrack,resultChan chan *Track.Track){
 	}
 
 	//Form musicBoxTrack and pass on channel(sync)
-	newTrack := &TrackItem{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,Title:foundSpotifyTrack.Name,ProviderID:foundSpotifyTrack.Href}
+	newTrack := &Track.Track{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,Title:foundSpotifyTrack.Name,ProviderID:foundSpotifyTrack.Href}
 	resultChan<-newTrack
 }

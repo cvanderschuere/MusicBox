@@ -2,7 +2,7 @@ package main
 
 import(
 	"github.com/cvanderschuere/turnpike"
-    "github.com/cvanderschuere/MusicBox/BoxClient/Track"
+	"MusicBox/BoxClient/Track"
 )
 
 //Decoded event into music box instruction
