@@ -7,6 +7,7 @@ import(
 	"encoding/json"
 	"io/ioutil"
 	"strings"
+    "github.com/cvanderschuere/MusicBox/BoxClient/Track"
 )
 
 //Find `numToAdd` songs similar to `baseTrack` and send addTrack message with them
@@ -71,7 +72,7 @@ const baseURLLastFM = "http://ws.audioscrobbler.com/2.0/?method=track.getsimilar
 const baseURLSpotifySearch = "http://ws.spotify.com/search/1/track.json?q="
 
 //Use Last.fm's track.getSimilar API to find songs
-func findSimilarSongsLastFM(baseTrack TrackItem, numToAdd uint)([]TrackItem){
+func findSimilarSongsLastFM(baseTrack Track.Track, numToAdd uint)([]Track.Track){
 	
 	//Make track.getsimilar request (need at least 2 to force array return type & should give padding in case of unfound songs)
 	lastFMURL := baseURLLastFM + 
@@ -94,7 +95,7 @@ func findSimilarSongsLastFM(baseTrack TrackItem, numToAdd uint)([]TrackItem){
 			log.Trace(string(body))
 	}
 				
-	returnChan := make(chan *TrackItem,numToAdd)	
+	returnChan := make(chan *Track.Track,numToAdd)	
 		
 	//Convert to MusicBoxTracks (match to spotify)
 	for _,similarTrack := range responseObject.Similartracks.Track{
@@ -103,7 +104,7 @@ func findSimilarSongsLastFM(baseTrack TrackItem, numToAdd uint)([]TrackItem){
 		go matchToSpotify(similarTrack,returnChan)
 	}
 	
-	var addedTracks []TrackItem
+	var addedTracks []Track.Track
 	
 	//Read in created tracks
 	for i:=0;i<len(responseObject.Similartracks.Track);i++{
@@ -122,7 +123,7 @@ func findSimilarSongsLastFM(baseTrack TrackItem, numToAdd uint)([]TrackItem){
 
 //Make search call to spotify with artist name & track name 
 //Return musicBoxTrack on chan if found
-func matchToSpotify(track lastFMTrack,resultChan chan *TrackItem){
+func matchToSpotify(track lastFMTrack,resultChan chan *Track.Track){
 	response,error := http.Get(baseURLSpotifySearch + url.QueryEscape(track.Artist.Name+" "+track.Name))
 	if error != nil {
 		// handle error

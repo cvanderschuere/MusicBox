@@ -2,6 +2,7 @@ package main
 
 import(
 	"github.com/cvanderschuere/turnpike"
+    "github.com/cvanderschuere/MusicBox/BoxClient/Track"
 )
 
 //Decoded event into music box instruction
@@ -9,7 +10,7 @@ import(
 func eventHandler(client *turnpike.Client, notiChan chan Notification){
 
 	//initial queue...maybe fetch update from server with rpc call
-	var queue []TrackItem
+	var queue []Track.Track
 	var isPlaying bool = false
 	
 	EVENT_LOOP:
@@ -33,10 +34,10 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					//Add all passed tracks
 					for _,trackDict := range data {
 						track := trackDict.(map[string]interface{})
-						newTrack := trackItemFromMap(track)
+						newTrack := Track.FromMap(track)
 						if queue == nil{
 							//create queue
-							queue = make([]TrackItem,1)
+							queue = make([]Track.Track,1)
 							queue[0] = newTrack
 							notiChan <- Notification{Kind:NextTrack,Content:newTrack} // Start initial playback
 							isPlaying = true
@@ -94,7 +95,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					}
 				case "updateTheme":
 					go recommendSongs(1)
-					queue = []TrackItem{}
+					queue = []Track.Track{}
 					
 				//
 				//Internal Events
@@ -129,7 +130,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					
 					for _,m := range tracks{
 						track := m.(map[string]interface{})
-						t := trackItemFromMap(track)
+						t := Track.FromMap(track)
 						queue = append(queue,t)					
 					}	
 					

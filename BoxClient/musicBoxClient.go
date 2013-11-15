@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/signal"
 	"time"
+    "github.com/cvanderschuere/MusicBox/BoxClient/Track"
 )
 
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
@@ -189,12 +190,12 @@ func main() {
 			//Take action based on update type
 			switch update.Kind{
 			case AddedToQueue:
-				track := update.Content.(TrackItem)
+				track := update.Content.(Track.Track)
 				log.Debug("Added Track: "+track.ProviderID)
 				
 			case RemovedFromQueue:
 				//Should have to do nothing...unless is current track
-				track := update.Content.(TrackItem)	
+				track := update.Content.(Track.Track)	
 				log.Debug("Removed Track: "+track.ProviderID)
 				
 			case PausedTrack:
@@ -214,7 +215,7 @@ func main() {
 				
 			case NextTrack:
 				//Play track passed
-				track := update.Content.(TrackItem)
+				track := update.Content.(Track.Track)
 				log.Debug("Play Next Track: "+track.ProviderID)
 				
 				//Send startedTrack message
