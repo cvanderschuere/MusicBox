@@ -15,7 +15,7 @@ import (
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
 
-const musicBoxID = "musicBoxID2"
+const musicBoxID = "musicBoxID4"
 
 //Auth info
 const WAMP_BASE_URL = "http://api.wamp.ws/"
