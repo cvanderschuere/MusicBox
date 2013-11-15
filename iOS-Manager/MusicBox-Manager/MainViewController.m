@@ -34,6 +34,7 @@
     [super viewDidLoad];
     
     self.title = nil;
+    self.infoButton.enabled = NO;
     
 	// Do any additional setup after loading the view.
     self.devices = [NSMutableArray array];
@@ -94,6 +95,9 @@
 #pragma mark - UICollectionView Delegate
 - (void) collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
     if (collectionView == self.deviceCollectionView) {
+        
+        self.infoButton.enabled = YES;
+        
         //Look up tracks for this device
         self.selectedDevice = self.devices[indexPath.row];
         self.title = self.selectedDevice.deviceName;
@@ -211,9 +215,14 @@
             Track* newTrack = [Track trackWithDict:data[@"track"]];
             
             [thisDevice.tracks insertObject:newTrack atIndex:0];
-            [self.trackCollectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
+            thisDevice.playState = [NSNumber numberWithInt:DEVICE_PLAYING];
             
-            thisDevice.isPlaying = [NSNumber numberWithBool:true];
+            
+            //Update if you need to
+            if ([thisDevice isEqual:self.selectedDevice]) {
+                [self.trackCollectionView insertItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
+            }
+            
             
         }else if([command isEqualToString:@"playTrack"] || [command isEqualToString:@"pauseTrack"]){
             NSArray* pathComps = [[NSURL URLWithString:topicUri] pathComponents];
@@ -229,7 +238,23 @@
                 }
             }
             
-            thisDevice.isPlaying = [NSNumber numberWithBool:[command isEqualToString:@"playTrack"]];
+            
+            thisDevice.playState = [NSNumber numberWithInt:[command isEqualToString:@"playTrack"]?DEVICE_PLAYING:DEVICE_PAUSED];
+        }else if([command isEqualToString:@"boxConnected"] || [command isEqualToString:@"boxDisconnected"]){
+            NSArray* pathComps = [[NSURL URLWithString:topicUri] pathComponents];
+            
+            NSString* deviceID = pathComps[2];
+            
+            //Find device
+            Device* thisDevice = nil;
+            for (Device* device in self.devices) {
+                if ([device.identifier isEqualToString:deviceID]) {
+                    thisDevice = device;
+                    break;
+                }
+            }
+            
+            thisDevice.playState = [NSNumber numberWithInt:[command isEqualToString:@"boxDisconnected"]?DEVICE_OFFLINE:DEVICE_PAUSED];
         }
         
 

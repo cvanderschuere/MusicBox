@@ -22,5 +22,6 @@
 @property (weak, nonatomic) IBOutlet UICollectionView *trackCollectionView;
 @property (weak, nonatomic) IBOutlet UICollectionView *deviceCollectionView;
 
+@property (weak, nonatomic) IBOutlet UIBarButtonItem *infoButton;
 
 @end

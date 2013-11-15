@@ -38,7 +38,6 @@
     AppDelegate * delegate = (AppDelegate*)[UIApplication sharedApplication].delegate;
     [delegate connectToWebSocket];
     
-    
     //
     // Update screen
     //

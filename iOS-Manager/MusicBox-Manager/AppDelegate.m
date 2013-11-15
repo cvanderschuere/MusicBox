@@ -7,7 +7,7 @@
 //
 
 #import "AppDelegate.h"
-#define DEBUG_MESSAGES YES
+#define DEBUG_MESSAGES FALSE
 
 @implementation AppDelegate
 
@@ -46,6 +46,11 @@
 }
 
 -(void) connectToWebSocket{
+    if (self.ws) {
+        [self.ws disconnect];
+        self.ws = nil;
+    }
+    
     
     // if you want debug log set this to YES, default is NO
     [MDWamp setDebug:DEBUG_MESSAGES];
