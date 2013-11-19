@@ -28,7 +28,7 @@ const(
 	//Add more later
 )
 
-func PlayLoop(updateChan chan Notification){
+func PlayLoop(updateChan chan Notification, log lumber.Logger, spotifyUsername, spotifyPassword){
 	
 	//Register for signals from OS to quit if necessary
 	signalChan := make(chan os.Signal,1)

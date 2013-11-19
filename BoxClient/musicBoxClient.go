@@ -95,7 +95,7 @@ func main() {
 	go eventHandler(client, updateChan)
 	
 	// Music Player Loop
-	MusicPlayer.PlayLoop(updateChan);
+	MusicPlayer.PlayLoop(updateChan, log, spotifyUsername, spotifyPassword);
 }
 
 func pingClient(client *turnpike.Client){
