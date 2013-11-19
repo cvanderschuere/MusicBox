@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"time"
 	"MusicBox/BoxClient/Track"
+	"MusicBox/BoxClient/MusicPlayer"
 )
 
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
@@ -34,24 +35,6 @@ const(
         spotifyPassword string = "N0ttingham11"
 )
 var deviceName,_ = os.Hostname()
-
-type Notification struct{
-	Kind NotificationType
-	Content interface{}
-}
-
-type NotificationType int
-const(
-	_ NotificationType = iota
-	EndOfTrack
-	AddedToQueue
-	RemovedFromQueue
-	PausedTrack
-	ResumedTrack
-	StoppedTrack
-	NextTrack
-	//Add more later
-)
 
 /*
 	Functions
@@ -81,12 +64,6 @@ func main() {
 		goto CONNECT
 	}
 	
-	//Make instruction channel
-	updateChan := make(chan Notification)
-	
-	//Launch Event handler
-	go eventHandler(client,updateChan)
-	
 	//
 	// Authenticate
 	//
@@ -110,112 +87,15 @@ func main() {
 	
 	//Subscribe as appropriate
 	client.Subscribe(baseURL+boxUsername+"/"+musicBoxID)
+		
+	//Make instruction channel
+	updateChan := make(chan Player.Notification)
 	
-	//
-	// Prepare music services
-	//
+	//Launch Event handler for websocket connection
+	go eventHandler(client, updateChan)
 	
-	//Login to services & music sink
-	controlChan := make(chan bool)
-	streamChan := alsa.Init(controlChan)
-	
-	//Login to spotify (should always work if login test passed)
-	ch := spotify.Login(spotifyUsername,spotifyPassword)
-	<-ch//Login sync	
-	
-	//Register for signals
-	signalChan := make(chan os.Signal,1)
-	signal.Notify(signalChan)
-	
-	//
-	// Start main loop
-	//
-	
-	//Make call for inital songs
-	go recommendSongs(4)
-	
-	var endOfTrackChan <-chan bool
-	var err error
-	
-	MAIN_LOOP:
-	for{
-		select{
-		case s := <-signalChan:
-			//Recieved signal
-			signal.Stop(signalChan)
-			log.Debug("Recieved Signal: ", s)
-			break MAIN_LOOP
-		case <-endOfTrackChan:
-			//Pass message that track is over
-			log.Trace("Recieved on end of track chan")
-			updateChan <- Notification{Kind:EndOfTrack}
-			log.Trace("Finished send on end of track update")
-		case update := <-updateChan:
-			log.Trace("Update: ",update.Kind)
-			
-			//Take action based on update type
-			switch update.Kind{
-			case AddedToQueue:
-				track := update.Content.(Track.Track)
-				log.Debug("Added Track: "+track.ProviderID)
-				
-			case RemovedFromQueue:
-				//Should have to do nothing...unless is current track
-				track := update.Content.(Track.Track)	
-				log.Debug("Removed Track: "+track.ProviderID)
-				
-			case PausedTrack:
-				//Send pause command				
-				log.Debug("Paused Track")
-				controlChan<-false
-				
-			case ResumedTrack:
-				//Send play
-				log.Debug("Resumed Track")
-				controlChan<-true
-				
-			case StoppedTrack:
-				//Unload current track
-				log.Debug("Stopped Track")
-				spotify.Stop()
-				
-			case NextTrack:
-				//Play track passed
-				track := update.Content.(Track.Track)
-				log.Debug("Play Next Track: "+track.ProviderID)
-				
-				//Send startedTrack message
-				msg := map[string]interface{} {
-					"command":"startedTrack",
-					"data": map[string]interface{}{ 
-						"deviceID":musicBoxID,
-						"track":track,
-					},
-				}
-				client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
-				
-				item := &spotify.SpotifyItem{Url:track.ProviderID}
-				endOfTrackChan,err = spotify.Play(item,streamChan)
-				if err != nil{
-					log.Error("Error playing track: "+err.Error())
-				}
-				
-			default:
-				log.Warn("Unknown Update Type: %d",update)
-			}	
-		}
-	}
-	
-	//
-	//Cleanup
-	//
-	
-	//Close alsa stream
-	close(streamChan)
-	
-	//Logout of services
-	logout := spotify.Logout()
-	<-logout	
+	// Music Player Loop
+	MusicPlayer.PlayLoop(updateChan);
 }
 
 func pingClient(client *turnpike.Client){

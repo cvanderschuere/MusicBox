@@ -170,6 +170,14 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 			
 		case update,ok := <-notiChan:
 			if ok && update.Kind == EndOfTrack{
+				
+				//Publish event
+				msg := map[string]string{
+					"command":"endOfTrack",
+				}
+				
+				client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg)
+				
 				if len(queue)>1{
 					//Remove first track
 					queue = queue[1:]
@@ -178,6 +186,16 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					isPlaying = true
 					//Send update to play next song
 					notiChan <- Notification{Kind:NextTrack,Content:queue[0]}
+					
+					// Send startedTrack message on websocket
+					msg := map[string]interface{} {
+						"command":"startedTrack",
+						"data": map[string]interface{}{ 
+							"deviceID":musicBoxID,
+							"track":track,
+						},
+					}
+					client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing	
 				}else{
 					log.Trace("Clear queue")
 					//Empty entire list
@@ -189,12 +207,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					go recommendSongs(3) //Add radio never ending playlist
 				}
 				
-				//Publish event
-				msg := map[string]string{
-					"command":"endOfTrack",
-				}
 				
-				client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg)
 			}
 		}
 	}
