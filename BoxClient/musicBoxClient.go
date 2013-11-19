@@ -86,7 +86,7 @@ func main() {
 	client.Subscribe(baseURL+boxUsername+"/"+musicBoxID)
 		
 		
-	player := MusicPlayer.PlayerDetails.Init()
+	player := MusicPlayer.InitPlayer()
 		
 	//Make instruction channel
 	updateChan := make(chan Player.Notification)

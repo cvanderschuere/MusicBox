@@ -38,14 +38,19 @@ const baseURL = "http://www.musicbox.com/"
 const musicBoxID = "musicBoxID4"
 var boxUsername string
 
-func (details PlayerDetails) Init()(PlayerDetails){
-	details = new PlayerDetails;
+var playerDetails PlayerDetails;
+
+func InitPlayer()(*PlayerDetails){
+	if(playerDetails == nil){
+		playerDetails = new(PlayerDetails)
 	
-	details.PlayerId = "musicBoxID4"
-	details.TrackQueue = new TrackQueue.Queue
-	details.IsPlaying = false
+		playerDetails.PlayerId = "musicBoxID4"
+		playerDetails.TrackQueue = TrackQueue.NewQueue()
+		playerDetails.IsPlaying = false
+	}
 	
-	return details
+	
+	return &playerDetails
 }
 
 func PlayLoop(log lumber.Logger, updateChan chan Notification, spotifyUsername string, spotifyPassword string){

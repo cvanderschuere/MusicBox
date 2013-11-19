@@ -9,30 +9,33 @@ type Queue struct{
 	History []Track.Track
 }
 
-func NewQueue(tracks []Track.Track){
+func NewQueue(tracks []Track.Track) (&Queue){
 	q := new(Queue);
 	q.Tracks = make([]Track.Track, 0)
 	q.History = make([]Track.Track, 100)
 	
 	if(tracks != nil){
-		for track := range(tracks)
-		append(q.Tracks, tracks);
+		for i := range(tracks){
+			q.Tracks = append(q.Tracks, tracks[i]);
+		}
 	}
+	
+	return &q;
 }
 
 func (q *Queue) AddTrack(track Track.Track){
-	append(q.Tracks, track);
+	q.Tracks = append(q.Tracks, track);
 }
 
 func (q *Queue) AddTracks(tracks []Track.Track){
-	for track := range(tracks){
-		q.AddTrack(track);
+	for i := range(tracks){
+		q.AddTrack(tracks[i]);
 	}
 }
 
 func (q *Queue) NextTrack()(Track.Track){
 	q.History = q.History[99:];
-	append(q.History, q.Tracks[0])
+	q.History = append(q.History, q.Tracks[0])
 	
 	q.Tracks = q.Tracks[1:];
 	
