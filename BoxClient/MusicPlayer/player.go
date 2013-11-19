@@ -6,7 +6,6 @@ import(
 	"github.com/jcelliott/lumber"
 	"os"
 	"os/signal"
-	"time"
 	"MusicBox/BoxClient/Track"
 )
 
@@ -28,7 +27,7 @@ const(
 	//Add more later
 )
 
-func PlayLoop(updateChan chan Notification, log lumber.Logger, spotifyUsername, spotifyPassword){
+func PlayLoop(updateChan chan Notification, log lumber.Logger, spotifyUsername string, spotifyPassword string){
 	
 	//Register for signals from OS to quit if necessary
 	signalChan := make(chan os.Signal,1)

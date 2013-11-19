@@ -1,27 +1,28 @@
 package MusicPlayer
 
 import(
-	"net/http"
-	"net/url"
-	"fmt"
-	"encoding/json"
-	"io/ioutil"
-	"strings"
-	"MusicBox/BoxClient/Track"
+	// "net/http"
+	// "net/url"
+	// "fmt"
+	// "encoding/json"
+	// "io/ioutil"
+	// "strings"
+	// "MusicBox/BoxClient/Track"
 )
 
 //Find `numToAdd` songs similar to `baseTrack` and send addTrack message with them
 func recommendSongs(numToAdd uint){
-	
+	/*
 	opts := map[string]interface{}{
 		"ID":musicBoxID,
 		"Count":5,
 	}
 	
+	
 	if err := client.Call("recommendSongs",baseURL+"recommendSongs",opts); err != nil{
 		fmt.Println(err.Error())
 	}
-	
+	*/
 	//Return call handled with other events
 }
 
@@ -71,6 +72,7 @@ type spotifySearchAvailability struct{
 const baseURLLastFM = "http://ws.audioscrobbler.com/2.0/?method=track.getsimilar&api_key=600be92e4856b530ec9ffaef2906e5a6&format=json" 
 const baseURLSpotifySearch = "http://ws.spotify.com/search/1/track.json?q="
 
+/*
 //Use Last.fm's track.getSimilar API to find songs
 func findSimilarSongsLastFM(baseTrack Track.Track, numToAdd uint)([]Track.Track){
 	
@@ -165,3 +167,4 @@ func matchToSpotify(track lastFMTrack,resultChan chan *Track.Track){
 	newTrack := &Track.Track{AlbumName:foundSpotifyTrack.Album.Name,ArtistName:foundSpotifyTrack.Artists[0].Name,Title:foundSpotifyTrack.Name,ProviderID:foundSpotifyTrack.Href}
 	resultChan<-newTrack
 }
+*/
