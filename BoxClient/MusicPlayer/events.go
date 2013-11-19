@@ -7,7 +7,7 @@ import(
 
 //Decoded event into music box instruction
 //This is the only function allowed to add/remove from the upcoming queue
-func EventHandler(client *turnpike.Client, notiChan chan Notification){
+func EventHandler(log lumber.Logger, client *turnpike.Client,  details PlayerDetails, notiChan chan Notification){
 
 	//initial queue...maybe fetch update from server with rpc call
 	var queue []Track.Track

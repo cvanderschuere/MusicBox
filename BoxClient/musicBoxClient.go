@@ -3,9 +3,6 @@ package main
 import (
 	"code.google.com/p/go.net/websocket"
 	"github.com/jcelliott/lumber"
-	"github.com/cvanderschuere/spotify-go"
-	"github.com/cvanderschuere/alsa-go"
-	"github.com/cvanderschuere/turnpike"
 	"runtime"
 	"os"
 	"os/signal"
@@ -88,14 +85,17 @@ func main() {
 	//Subscribe as appropriate
 	client.Subscribe(baseURL+boxUsername+"/"+musicBoxID)
 		
+		
+	player := MusicPlayer.PlayerDetails.Init()
+		
 	//Make instruction channel
 	updateChan := make(chan Player.Notification)
 	
 	//Launch Event handler for websocket connection
-	go eventHandler(client, updateChan)
+	go MusicPlayer.EventHandler(log, client, player, updateChan)
 	
 	// Music Player Loop
-	MusicPlayer.PlayLoop(updateChan, log, spotifyUsername, spotifyPassword);
+	MusicPlayer.PlayLoop(log, updateChan, spotifyUsername, spotifyPassword);
 }
 
 func pingClient(client *turnpike.Client){

@@ -27,7 +27,28 @@ const(
 	//Add more later
 )
 
-func PlayLoop(updateChan chan Notification, log lumber.Logger, spotifyUsername string, spotifyPassword string){
+type PlayerDetails struct{
+	PlayerId string
+	TrackQueue TrackQueue.Queue
+	IsPlaying bool
+}
+
+const baseURL = "http://www.musicbox.com/"
+
+const musicBoxID = "musicBoxID4"
+var boxUsername string
+
+func (details PlayerDetails) Init()(PlayerDetails){
+	details = new PlayerDetails;
+	
+	details.PlayerId = "musicBoxID4"
+	details.TrackQueue = new TrackQueue.Queue
+	details.IsPlaying = false
+	
+	return details
+}
+
+func PlayLoop(log lumber.Logger, updateChan chan Notification, spotifyUsername string, spotifyPassword string){
 	
 	//Register for signals from OS to quit if necessary
 	signalChan := make(chan os.Signal,1)
