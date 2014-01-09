@@ -9,6 +9,7 @@ import (
 	"time"
 	"MusicBox/BoxClient/Track"
 	"MusicBox/BoxClient/MusicPlayer"
+	"MusicBox/BoxClient/MusicBoxServer"
 )
 
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
@@ -19,6 +20,7 @@ const musicBoxID = "musicBoxID4"
 //Auth info
 const WAMP_BASE_URL = "http://api.wamp.ws/"
 const WAMP_PROCEDURE_URL = WAMP_BASE_URL+"procedure#"
+
 var authWait = make(chan bool,1) //Used to block until authentication
 var boxUsername string
 var boxSessionID string
@@ -41,7 +43,10 @@ func main() {
 	runtime.GOMAXPROCS(2) // Used to regulate main thread managment with libspotify (might not be needed)
 
 	log.Info("Name: "+deviceName+"ID: "+musicBoxID)
-		
+	
+	
+	/*	
+	
 	//
 	// Prepare client
 	//	
@@ -83,13 +88,16 @@ func main() {
 	go pingClient(client)
 	
 	//Subscribe as appropriate
-	client.Subscribe(baseURL+boxUsername+"/"+musicBoxID)
-		
-		
+	client.Subscribe(baseURL+boxUsername+"/"+musicBoxID)	
+	
+	*/	
+	
 	player := MusicPlayer.InitPlayer()
 		
 	//Make instruction channel
 	updateChan := make(chan Player.Notification)
+	
+	server := MusicBoxServer.InitServer(updateChan)
 	
 	//Launch Event handler for websocket connection
 	go MusicPlayer.EventHandler(log, client, player, updateChan)

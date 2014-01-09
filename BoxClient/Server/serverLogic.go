@@ -1,4 +1,4 @@
-package main
+package MusicBoxServer
 
 import(
 	"time"
@@ -9,8 +9,17 @@ import(
 	"fmt"
 )
 
+// IMPORTANT!!!
+// server global variable can be used to send messages to player
+// LOOK HERE!!
+
 //Intercept wamp events (Allow:True, Reject:False)
 func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bool){
+
+	// IMPORTANT!!!
+	// server global variable can be used to send messages to player
+	// LOOK HERE!!
+	
 	//Filter out base url and split into components
 	uri := strings.Replace(msg.TopicURI,baseURL,"",1)
 	args := strings.Split(uri,"/")

@@ -3,11 +3,12 @@ package MusicPlayer
 import(
 	"github.com/cvanderschuere/turnpike"
 	"MusicBox/BoxClient/Track"
+	"MusicBox/BoxClient/MusicPlayer"
 )
 
 //Decoded event into music box instruction
 //This is the only function allowed to add/remove from the upcoming queue
-func EventHandler(log lumber.Logger, client *turnpike.Client, details *PlayerDetails, notiChan chan Notification){
+func EventHandler(log lumber.Logger, client *turnpike.Client, details *PlayerDetails, notiChan chan MusicPlayer.Notification){
 
 	//initial queue...maybe fetch update from server with rpc call
 	var queue []Track.Track
@@ -169,46 +170,54 @@ func EventHandler(log lumber.Logger, client *turnpike.Client, details *PlayerDet
 		}
 			
 		case update,ok := <-notiChan:
-			if ok && update.Kind == EndOfTrack{
-				
-				//Publish event
-				msg := map[string]string{
-					"command":"endOfTrack",
-				}
-				
-				client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg)
-				
-				if len(queue)>1{
-					//Remove first track
-					queue = queue[1:]
-				
-					log.Trace("Moving to next song")
-					isPlaying = true
-					//Send update to play next song
-					notiChan <- Notification{Kind:NextTrack,Content:queue[0]}
-					
-					// Send startedTrack message on websocket
-					msg := map[string]interface{} {
-						"command":"startedTrack",
-						"data": map[string]interface{}{ 
-							"deviceID":musicBoxID,
-							"track":track,
-						},
-					}
-					client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing	
-				}else{
-					log.Trace("Clear queue")
-					//Empty entire list
-					queue = nil
-					isPlaying = false
-				}
-				
-				if len(queue) < 2{
-					go recommendSongs(3) //Add radio never ending playlist
-				}
+			if ok {
 				
 				
-			}
+			}&& 
 		}
 	}
+}
+
+func handlePlayerUpdate(update Notification){
+	if update.Kind == EndOfTrack{
+		
+		//Publish event
+		msg := map[string]string{
+			"command":"endOfTrack",
+		}
+		
+		client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg)
+		
+		if len(queue)>1{
+			//Remove first track
+			queue = queue[1:]
+		
+			log.Trace("Moving to next song")
+			isPlaying = true
+			//Send update to play next song
+			notiChan <- Notification{Kind:NextTrack,Content:queue[0]}
+			
+			// Send startedTrack message on websocket
+			msg := map[string]interface{} {
+				"command":"startedTrack",
+				"data": map[string]interface{}{ 
+					"deviceID":musicBoxID,
+					"track":track,
+				},
+			}
+			client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing	
+		}else{
+			log.Trace("Clear queue")
+			//Empty entire list
+			queue = nil
+			isPlaying = false
+		}
+		
+		if len(queue) < 2{
+			go recommendSongs(3) //Add radio never ending playlist
+		}
+		
+		
+	}
+	
 }
