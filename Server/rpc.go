@@ -217,7 +217,11 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 				Result_Loop:
 				for _,track := range r.Tracks{
 					if strings.Contains(track.Album.Availability.Territories,"US"){
+						//Fill in Spotify Specific Information
+						
 						t.ProviderID = track.URI
+						t.Length = track.Length
+						
 						break Result_Loop
 					}
 				}
@@ -395,8 +399,6 @@ func getTrackHistory(conn *postmaster.Connection,uri string, args ...interface{}
 		if limit > 0 && limit <= len(res) {
 			//limit the return elements to the last couple elements (first in array is oldest)
 			res = res[len(res)-limit:]
-		}else if limit > len(res){
-			res = nil
 		}
 
 		tracks := make([]*TrackItem,len(res))

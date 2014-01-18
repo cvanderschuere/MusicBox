@@ -6,6 +6,7 @@ import(
 	"postmaster"
 	"log"
 	"github.com/crowdmob/goamz/dynamodb"
+	"strconv"
 	"fmt"
 )
 
@@ -45,7 +46,14 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 		d := data["data"].(map[string]interface{})
 		
 		track := d["track"].(map[string]interface{})
-		t := TrackItem{ProviderID:track["ProviderID"].(string),Title:track["Title"].(string),ArtistName:track["ArtistName"].(string),AlbumName:track["AlbumName"].(string),ArtworkURL:track["ArtworkURL"].(string)}
+		t := TrackItem{
+				ProviderID:track["ProviderID"].(string),
+				Title:track["Title"].(string),
+				ArtistName:track["ArtistName"].(string),
+				AlbumName:track["AlbumName"].(string),
+				ArtworkURL:track["ArtworkURL"].(string),
+				Length:track["Length"].(float64),
+		}
 		fmt.Println(track)
 		deviceID := d["deviceID"].(string)
 		fmt.Println(deviceID)
@@ -57,6 +65,7 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 			*dynamodb.NewStringAttribute("ProviderID",t.ProviderID),
 			*dynamodb.NewStringAttribute("AlbumName",t.AlbumName), //Moment.us doesn't always provide this
 			*dynamodb.NewStringAttribute("ArtworkURL",t.ArtworkURL), //Moment.us doesn't always provide this
+			*dynamodb.NewNumericAttribute("Length",strconv.FormatFloat(t.Length,'f',-1,32)), //Moment.us doesn't always provide this
 		}
 								
 		//Add track to database for this user:musicbox
@@ -85,9 +94,7 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 	default:
 			log.Print("Unknown Command:",data["command"])
 	}
-		
-	fmt.Println(username,data)	
-		
+				
 	return true
 }
 
@@ -121,27 +128,27 @@ func userConnected(authKey string, authExtra map[string]interface{}, permission 
 }
 
 //Called when a websocket is disconnected with the information of the authenticated client
-func clientDisconnected(authKey string,authExtra map[string]interface{}){
-	log.Print("Client Disconnected",authExtra)
+func clientDisconnected(authKey string,authExtra map[string]interface{}){	
+	v,ok := authExtra["client-type"]
 	
-	if authExtra != nil{
-		v,ok := authExtra["client-type"]
+	if ok && v == "musicBox-v1"{	
+		log.Print("Box Disconnected: ",authExtra)
 		
-		if ok && v == "musicBox-v1"{			
-			setMusicBoxPlaying(authExtra["client-id"].(string),OFFLINE)
-			
-			//Send message that device paused
-			b,err := lookupMusicBox(authExtra["client-id"].(string))
-			
-			if err == nil{
-				//Create paused command
-				msg := map[string]interface{}{
-					"command":"boxDisconnected",
-				}
-				
-				server.PublishEvent(baseURL+b.User+"/"+b.ID, msg)
+		setMusicBoxPlaying(authExtra["client-id"].(string),OFFLINE)
+		
+		//Send message that device paused
+		b,err := lookupMusicBox(authExtra["client-id"].(string))
+		
+		if err == nil{
+			//Create paused command
+			msg := map[string]interface{}{
+				"command":"boxDisconnected",
 			}
+			
+			server.PublishEvent(baseURL+b.User+"/"+b.ID, msg)
 		}
+	}else{
+		log.Print("Client Disconnected: ",authKey)
 	}
 	
 }

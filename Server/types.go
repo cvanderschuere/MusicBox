@@ -2,7 +2,7 @@ package main
 
 import(
 	"github.com/crowdmob/goamz/dynamodb"
-	"fmt"
+	"strconv"
 )
 
 type UserItem struct{
@@ -32,10 +32,12 @@ const (
 )
 
 type TrackItem struct{
+	//Generic Information
 	Title string
 	ArtistName string
 	AlbumName	string
 	ArtworkURL	string
+	Length	float64
 	
 	//Track info
 	ProviderID	string
@@ -46,7 +48,9 @@ type TrackItem struct{
 }
 
 func trackItemFromMap(data map[string]*dynamodb.Attribute)(*TrackItem){
-	fmt.Println(data)
+	
+	//Extract length
+	l,_ := strconv.ParseFloat(data["Length"].Value,32)
 
 	t := &TrackItem{
 		Title: data["Title"].Value,
@@ -54,6 +58,7 @@ func trackItemFromMap(data map[string]*dynamodb.Attribute)(*TrackItem){
 		AlbumName: data["AlbumName"].Value,
 		ArtworkURL: data["ArtworkURL"].Value,
 		ProviderID: data["ProviderID"].Value,
+		Length: l,
 		Date: data["Date"].Value,
 	}
 	
