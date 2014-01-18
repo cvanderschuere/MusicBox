@@ -45,7 +45,7 @@ func startWebServer() {
 }
 
 func serveHomePage(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadFile("index.html")
+	body, err := ioutil.ReadFile("/home/ubuntu/MusicBoxWebClient/index.html")
 
 	if err != nil {
 		return
