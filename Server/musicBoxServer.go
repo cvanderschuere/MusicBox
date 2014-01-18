@@ -2,7 +2,6 @@ package main
 
 import (
 	"code.google.com/p/go.net/websocket"
-	"github.com/cvanderschuere/turnpike"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -19,11 +18,9 @@ var server *postmaster.Server
 func main() {
 	go startWebServer()
 
-	
 	//Setup AWS related services (DynamoDB)-defined in aws.go
 	if err := setupAWS();err != nil{
-		log.Fatal("AWS Login Error: err")
-		return
+		log.Fatal("AWS Login Error:",err)
 	}
 	
 	server = postmaster.NewServer()
@@ -60,12 +57,19 @@ func startWebServer() {
 
 	webServer.HandleFunc("/", serveHomePage)
 
-	if err := http.ListenAndServe(":80", webServer); err != nil {
+	webServer.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("/home/ubuntu/MusicBoxWebClient/css"))))
+	webServer.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("/home/ubuntu/MusicBoxWebClient/js"))))
+	webServer.Handle("/font/", http.StripPrefix("/font/", http.FileServer(http.Dir("/home/ubuntu/MusicBoxWebClient/font"))))
+
+	
+	if err := http.ListenAndServe(":2020", webServer); err != nil {
 		log.Fatal("Unable to Start Web Server: ", err)
 	}
 }
 
 func serveHomePage(w http.ResponseWriter, r *http.Request) {
+	log.Print("Web Page Connection");
+
 	body, err := ioutil.ReadFile("/home/ubuntu/MusicBoxWebClient/index.html")
 
 	if err != nil {
