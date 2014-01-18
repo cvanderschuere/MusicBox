@@ -1,25 +1,36 @@
 package main
 
 import (
-	"github.com/cvanderschuere/turnpike"
+	"code.google.com/p/go.net/websocket"
 	"github.com/jcelliott/lumber"
 	"github.com/cvanderschuere/spotify-go"
 	"github.com/cvanderschuere/alsa-go"
+	"github.com/cvanderschuere/turnpike"
 	"runtime"
 	"os"
 	"os/signal"
+	"time"
 )
 
-const serverURL = "ec2-54-218-97-11.us-west-2.compute.amazonaws.com:8080"
+const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
+
+const musicBoxID = "musicBoxID4"
+
+//Auth info
+const WAMP_BASE_URL = "http://api.wamp.ws/"
+const WAMP_PROCEDURE_URL = WAMP_BASE_URL+"procedure#"
+var authWait = make(chan bool,1) //Used to block until authentication
+var boxUsername string
+var boxSessionID string
 
 var client *turnpike.Client
 
 var log = lumber.NewConsoleLogger(lumber.TRACE)
 
 const(
-        username string = "christopher.vanderschuere@gmail.com"
-        password string = "N0ttingham11"
+        spotifyUsername string = "christopher.vanderschuere@gmail.com"
+        spotifyPassword string = "N0ttingham11"
 )
 var deviceName,_ = os.Hostname()
 
@@ -42,12 +53,37 @@ const(
 )
 
 //Fields must be exported for JSON marshal
-type MusicBoxTrack struct{
-	Service string
-	URL		string
-	AlbumName string
+type TrackItem struct{
+	Title string
 	ArtistName string
-	TrackName	string
+	AlbumName	string
+	ArtworkURL	string
+	Length	float64
+	
+	//Track info
+	ProviderID	string
+	
+	//Storage info
+	CompositeID	string //username:BoxID
+	Date	string  //Date played for accounting purposes
+}
+
+func trackItemFromMap(data map[string]interface{})(TrackItem){
+	
+	//Extract length
+	//l,_ := strconv.ParseFloat(data["Length"].(string),32)
+
+	t := TrackItem{
+		Title: data["Title"].(string),
+		ArtistName: data["ArtistName"].(string),
+		AlbumName: data["AlbumName"].(string),
+		ArtworkURL: data["ArtworkURL"].(string),
+		ProviderID: data["ProviderID"].(string),
+		Length: data["Length"].(float64),
+		Date: data["Date"].(string),
+	}
+	
+	return t
 }
 
 /*
@@ -57,7 +93,7 @@ type MusicBoxTrack struct{
 func main() {
 	runtime.GOMAXPROCS(2) // Used to regulate main thread managment with libspotify (might not be needed)
 
-	log.Info("Name: "+deviceName)
+	log.Info("Name: "+deviceName+"ID: "+musicBoxID)
 		
 	//
 	// Prepare client
@@ -66,9 +102,16 @@ func main() {
 	client = turnpike.NewClient()
 	
 	//Connect socket between server port and local port
-	if err := client.Connect("ws://"+serverURL, "http://localhost:4040"); err != nil {
+	config,_ := websocket.NewConfig("ws://"+serverURL,"http://localhost:4040")
+	config.Header.Add("musicbox-box-id",musicBoxID)
+
+
+	CONNECT:
+		
+	if err := client.ConnectConfig(config); err != nil {
 		log.Error("Error connecting: ", err)
-		return
+		time.Sleep(1)
+		goto CONNECT
 	}
 	
 	//Make instruction channel
@@ -77,9 +120,29 @@ func main() {
 	//Launch Event handler
 	go eventHandler(client,updateChan)
 	
+	//
+	// Authenticate
+	//
+	
+	//Start session (lookup user & auth)
+	client.Call("startSession",baseURL+"musicbox/startSession",musicBoxID)
+	
+	//Wait until authenticated
+	isAuth := <-authWait
+	if !isAuth{
+		log.Error("Failed auth")
+		return
+	}
+	
+	//
+	// Connection authenticated
+	//
+	
+	//Launch pinger to keep websocket open (ELB has 60 second timeout)
+	go pingClient(client)
+	
 	//Subscribe as appropriate
-	client.Subscribe(baseURL+username+"/"+deviceName)
-	client.Subscribe(baseURL+username+"/"+deviceName+"/internal") //Also recieve music box exclusive events
+	client.Subscribe(baseURL+boxUsername+"/"+musicBoxID)
 	
 	//
 	// Prepare music services
@@ -90,7 +153,7 @@ func main() {
 	streamChan := alsa.Init(controlChan)
 	
 	//Login to spotify (should always work if login test passed)
-	ch := spotify.Login(username,password)
+	ch := spotify.Login(spotifyUsername,spotifyPassword)
 	<-ch//Login sync	
 	
 	//Register for signals
@@ -100,6 +163,9 @@ func main() {
 	//
 	// Start main loop
 	//
+	
+	//Make call for inital songs
+	go recommendSongs(4)
 	
 	var endOfTrackChan <-chan bool
 	var err error
@@ -123,13 +189,13 @@ func main() {
 			//Take action based on update type
 			switch update.Kind{
 			case AddedToQueue:
-				track := update.Content.(MusicBoxTrack)
-				log.Debug("Added Track: "+track.Service+" "+track.URL)
+				track := update.Content.(TrackItem)
+				log.Debug("Added Track: "+track.ProviderID)
 				
 			case RemovedFromQueue:
 				//Should have to do nothing...unless is current track
-				track := update.Content.(MusicBoxTrack)	
-				log.Debug("Removed Track: "+track.Service+" "+track.URL)
+				track := update.Content.(TrackItem)	
+				log.Debug("Removed Track: "+track.ProviderID)
 				
 			case PausedTrack:
 				//Send pause command				
@@ -148,11 +214,21 @@ func main() {
 				
 			case NextTrack:
 				//Play track passed
-				track := update.Content.(MusicBoxTrack)
-				log.Debug("Play Next Track: "+track.URL)
+				track := update.Content.(TrackItem)
+				log.Debug("Play Next Track: "+track.ProviderID)
 				
-				item := &spotify.SpotifyItem{Url:track.URL}
-				err,endOfTrackChan = spotify.Play(item,streamChan)
+				//Send startedTrack message
+				msg := map[string]interface{} {
+					"command":"startedTrack",
+					"data": map[string]interface{}{ 
+						"deviceID":musicBoxID,
+						"track":track,
+					},
+				}
+				client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
+				
+				item := &spotify.SpotifyItem{Url:track.ProviderID}
+				endOfTrackChan,err = spotify.Play(item,streamChan)
 				if err != nil{
 					log.Error("Error playing track: "+err.Error())
 				}
@@ -163,7 +239,9 @@ func main() {
 		}
 	}
 	
+	//
 	//Cleanup
+	//
 	
 	//Close alsa stream
 	close(streamChan)
@@ -173,143 +251,11 @@ func main() {
 	<-logout	
 }
 
-//Decoded event into music box instruction
-//This is the only function allowed to add/remove from the upcoming queue
-func eventHandler(client *turnpike.Client, notiChan chan Notification){
-
-	//initial queue...maybe fetch update from server with rpc call
-	var queue []MusicBoxTrack
-	var isPlaying bool = false
+func pingClient(client *turnpike.Client){
+	t := time.Tick(50 * time.Second)
 	
-	EVENT_LOOP:
-	for{
-		log.Trace("Event Handler Select")
-		select{
-		case event,ok := <-client.HandleChan:
-			if ok == false{
-				break EVENT_LOOP
-			}
-			switch event.(type){
-			case turnpike.EventMsg:
-				message := event.(turnpike.EventMsg).Event.(map[string]interface{})
-				
-				log.Debug("Command: "+ message["command"].(string))
-				//Switch through command types
-				switch message["command"]{
-				case "addTrack":
-					data := message["data"].([]interface{}) // Need for interface due to interal marshaling in turnpike
-					
-					//Add all passed tracks
-					for _,trackDict := range data {
-						track := trackDict.(map[string]interface{})
-						newTrack := MusicBoxTrack{Service:track["service"].(string),URL:track["url"].(string),TrackName:track["trackName"].(string),ArtistName:track["artistName"].(string),AlbumName:track["albumName"].(string)}
-						if queue == nil{
-							//create queue
-							queue = make([]MusicBoxTrack,1)
-							queue[0] = newTrack
-							notiChan <- Notification{Kind:NextTrack,Content:newTrack} // Start initial playback
-							isPlaying = true
-						
-							playMsg := map[string]string{
-								"command":"playTrack",
-							}
-							client.PublishExcludeMe(baseURL+username+"/"+deviceName,playMsg) //Let others know track is playing
-						}else{
-							//Append
-							queue = append(queue,newTrack)
-							notiChan <- Notification{Kind:AddedToQueue,Content:newTrack} // Give chance to preload
-						}
-					}
-					
-					//Queue must add recommendation to stay at minimum 2
-					if len(queue) == 1{
-						log.Trace("Finding similar songs to add")
-						go addSimilarSongs(queue[0],1)
-					}
-					
-					
-				case "removeTrack":
-					//Format: [RemoveTrack ServiceName TrackName]
-						//trackToRemove := MusicBoxTrack{Service:command[1],URL:command[2]}
-						
-					//Iterate search and remove (Front to back)
-					//TODO
-					//notiChan <- Notification{Kind:RemovedFromQueue,Content:trackToRemove}
-				case "playTrack":
-					isPlaying = true
-					notiChan <- Notification{Kind:ResumedTrack}
-				case "pauseTrack":
-					isPlaying = false
-					notiChan <- Notification{Kind:PausedTrack}
-				case "stopTrack":
-					isPlaying = false
-					notiChan <- Notification{Kind:StoppedTrack} //Song stays in queue...no different than pause?
-				case "nextTrack":
-					if len(queue)>1{
-						//Remove current track
-						queue = queue[1:]
-						
-						//Create next track
-						next := queue[0]
-					
-						isPlaying = true	
-						notiChan <- Notification{Kind:NextTrack,Content:next}
-						
-						//Make sure queue has enough recommendations
-						if len(queue) <= 2{
-							log.Trace("Finding similar songs to add")
-							go addSimilarSongs(queue[0],1)
-						}
-					}
-				//
-				//Internal Events
-				//
-				case "QueueRequest":
-					//Publish queue update...only music box responds to this but all client should recieve CurrentQueue
-					client.PublishExcludeMe(baseURL+username+"/"+deviceName,queue)
-				case "statusUpdate":
-					//Send back map of current status values: title,isPlaying,queue
-					response := map[string]interface{}{
-						"deviceName": deviceName,
-						"isPlaying": isPlaying,
-						"queue": queue,	
-					}
-					
-					responseMessage := map[string]interface{}{
-						"command": "statusUpdate",
-						"data": response,
-					}
-					
-					client.PublishExcludeMe(baseURL+username+"/"+deviceName,responseMessage)
-				}
-				
-			default:
-				log.Warn("Recieved Unknown type")
-			}
-			
-		case update,ok := <-notiChan:
-			if ok && update.Kind == EndOfTrack{
-				if len(queue)>1{
-					//Remove first track
-					queue = queue[1:]
-				
-					log.Trace("Moving to next song")
-					isPlaying = true
-					//Send update to play next song
-					notiChan <- Notification{Kind:NextTrack,Content:queue[0]}
-				}else{
-					log.Trace("Clear queue")
-					//Empty entire list
-					queue = nil
-					isPlaying = false
-				}
-				//Publish event
-				msg := map[string]string{
-					"command":"endOfTrack",
-				}
-				
-				client.PublishExcludeMe(baseURL+username+"/"+deviceName,msg)
-			}
-		}
+	for _ = range t{
+		client.PublishExcludeMe(baseURL+"ping","blank")
 	}
 }
+

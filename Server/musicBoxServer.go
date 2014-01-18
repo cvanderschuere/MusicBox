@@ -6,29 +6,50 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	//"turnpike" //Local Dev
+	"postmaster"
 )
 
-//Global
-var server *turnpike.Server
-
-const (
+const(
 	baseURL = "http://www.musicbox.com/"
 )
 
+//Global
+var server *postmaster.Server
+
 func main() {
-	server = turnpike.NewServer()
-
-	//Setup RPC Functions (probably not the right way to do this)
-	server.RegisterRPC(baseURL+"currentQueueRequest", queueRequest)
-	server.RegisterRPC(baseURL+"players", boxRequest)
-	//	server.RegisterRPC(baseURL+"user/status",userUpdate)
-	//	server.RegisterRPC(baseURL+"player/status",playerUpdate)
-
-	http.Handle("/", websocket.Handler(turnpike.HandleWebsocket(server)))
-
 	go startWebServer()
 
+	
+	//Setup AWS related services (DynamoDB)-defined in aws.go
+	if err := setupAWS();err != nil{
+		log.Fatal("AWS Login Error: err")
+		return
+	}
+	
+	server = postmaster.NewServer()
+
+	//Assign auth callbacks - defined in auth.go
+	server.GetAuthSecret = lookupUserSessionID
+	server.GetAuthPermissions = getUserPremissions
+	server.OnAuthenticated = userConnected
+	server.OnDisconnect = clientDisconnected
+	
+	server.MessageToPublish = InterceptMessage //Defined in serverLogic.go
+	
+	//Setup RPC Functions - defined in rpc.go
+	server.RegisterRPC(baseURL+"players",boxRequest)
+	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
+	server.RegisterRPC(baseURL+"boxDetails",getMusicBoxDetails)
+	server.RegisterRPC(baseURL+"trackHistory",getTrackHistory)
+	server.RegisterRPC(baseURL+"themes",getThemes)
+	
+	//Unauth rpc
+	server.RegisterUnauthRPC(baseURL+"user/startSession",startSession)
+	server.RegisterUnauthRPC(baseURL+"musicbox/startSession",startSessionBox)
+		
+    s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: nil}
+	http.Handle("/", s)
+	
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
@@ -52,37 +73,4 @@ func serveHomePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte(body))
-}
-
-//RPC Handler of form: res, err = f(id, msg.ProcURI, msg.CallArgs...)
-func queueRequest(id, url string, args ...interface{}) (interface{}, error) {
-	//Format: [username password(hashed) deviceName]
-	username := args[0].(string)
-	//password := args[1].(string)
-	deviceName := args[2].(string)
-
-	//Recieved request for queue...for now just pass on to music box
-
-	//This will forward an event on a private channel to the music box
-	//The music box will then publish a typical CurrentQueue update to everyone
-	statusMsg := map[string]string{
-		"command": "statusUpdate",
-	}
-
-	server.SendEvent(baseURL+username+"/"+deviceName+"/internal", statusMsg)
-
-	//No response necessary
-	return nil, nil
-}
-
-//Return music box device names for given user (need auth down the line)
-func boxRequest(id, url string, args ...interface{}) (interface{}, error) {
-	//Format: [username password(hashed)]
-	//username := args[0].(string)
-	//password := args[1].(string)
-
-	//Simulate for  now
-	players := []string{"Awolnation", "Beatles", "Coldplay", "Deadmau5"}
-
-	return players, nil
 }

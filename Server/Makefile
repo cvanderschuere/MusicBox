@@ -1,2 +1,2 @@
 default:
-	go build musicBoxServer.go
+	go install MusicBox/Server
