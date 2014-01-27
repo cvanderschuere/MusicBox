@@ -60,7 +60,7 @@ func startWebServer() {
 	webServer.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("/home/ubuntu/MusicBoxWebClient/css"))))
 	webServer.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("/home/ubuntu/MusicBoxWebClient/js"))))
 	webServer.Handle("/font/", http.StripPrefix("/font/", http.FileServer(http.Dir("/home/ubuntu/MusicBoxWebClient/font"))))
-
+	webServer.Handle("/template/", http.StripPrefix("/template/", http.FileServer(http.Dir("/home/ubuntu/MusicBoxWebClient/template"))))
 	
 	if err := http.ListenAndServe(":2020", webServer); err != nil {
 		log.Fatal("Unable to Start Web Server: ", err)
