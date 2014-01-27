@@ -1,121 +1,34 @@
-HOST: baseURL/username/deviceName
+HOST: http://www.google.com/
 
---- Project Music Box v1 ---
-
+--- Sample API v2 ---
 ---
-Documentation of WAMP protocol between MusicBox & clients
+Welcome to the our sample API documentation. All comments can be written in (support [Markdown](http://daringfireball.net/projects/markdown/syntax) syntax)
 ---
 
 --
-Track Handling
-
-Used to modify the queue
+Shopping Cart Resources
+The following is a section of resources related to the shopping cart
 --
-
-Message sent to add array of tracks to all listeners
-PUT /addTrack
-> Content-Type: application/json
-{  
-    "command":"addTrack"
-    "data": [
-        {
-            "url": "http://www.example.com/123", 
-            "trackName":"Get Lucky", 
-            "artistName": "Daft Punk", 
-            "albumName": "Random Access Memories",
-            "service": "Spotify", 
-        }
-    ] 
-}
-< 200
-
---
-Control Commands
-
-Isssued to control music box playback
---
-
-PUT /playTrack
-> Content-Type: application/json
-{  
-    "command":"playTrack"
-}
-< 200
-
-
-PUT /pauseTrack
-> Content-Type: application/json
-{  
-    "command":"pauseTrack"
-}
-< 200
-
-
-PUT /nextTrack
-> Content-Type: application/json
-{  
-    "command":"nextTrack"
-}
-< 200
-
-
-GET /endOfTrack
+List products added into your shopping-cart. (comment block again in Markdown)
+GET /shopping-cart
 < 200
 < Content-Type: application/json
-{  
-    "command":"endOfTrack"
-}
+{ "items": [
+{ "url": "/shopping-cart/1", "product":"2ZY48XPZ", "quantity": 1, "name": "New socks", "price": 1.25 }
+] }
 
-
---
-RPC Calls
-
-Used to poll server for static information
---
-
-
-Make call to baseURL/players with args username,password to recieve array of avaliable player names
-GET /players
-< 200
-< Content-Type: application/json
-[
-    "playerName1",
-    "playerName2"
-]
-
-
-Make call to baseURL/currentQueueRequest with args username,password,playerTitle to recieve statusUpdate message. This call returns nothing but a statusUpdate message from the box will follow on usual topic
-PUT /currentQueueRequest
+Save new products in your shopping cart
+POST /shopping-cart
 > Content-Type: application/json
-{
-    nil
-}
+{ "product":"1AB23ORM", "quantity": 2 }
+< 201
+< Content-Type: application/json
+{ "status": "created", "url": "/shopping-cart/2" }
+
+
+-- Payment Resources --
+This resource allows you to submit payment information to process your *shopping cart* items
+POST /payment
+{ "cc": "12345678900", "cvc": "123", "expiry": "0112" }
 < 200
-
-
---
-Queue Managment 
-
-Maintain and inform about current queue of tracks to all interested parties (MusicBox & Clients). 
-Notice capital letters to track properties (due to shortcut in go; might change latter)
---
-
-
-Response to currentQueueRequest
-GET statusUpdate
-< 200
-{   "command":"statusUpdate"
-    "data":{ 
-        "deviceName": "My Device Name"
-        "isPlaying": 1
-        "queue":[
-            {
-                "Url": "http://www.example.com/123", 
-                "TrackName":"Get Lucky", 
-                "ArtistName": "Daft Punk",
-                "AlbumName": "Random Access Memories",
-                "Service": "Spotify", 
-            }
-        ]
-    }
-}
+{ "receipt": "/payment/receipt/1" }
