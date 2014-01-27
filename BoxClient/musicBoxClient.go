@@ -165,10 +165,9 @@ func main() {
 	//
 	
 	//Make call for inital songs
-	go recommendSongs(4)
+	//go recommendSongs(4)
 	
 	var endOfTrackChan <-chan bool
-	var err error
 	
 	MAIN_LOOP:
 	for{
@@ -227,6 +226,7 @@ func main() {
 				}
 				client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
 				
+				var err error
 				item := &spotify.SpotifyItem{Url:track.ProviderID}
 				endOfTrackChan,err = spotify.Play(item,streamChan)
 				if err != nil{
