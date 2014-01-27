@@ -1,4 +1,4 @@
-package main
+package MusicBoxServer
 
 import(
 	"postmaster"
