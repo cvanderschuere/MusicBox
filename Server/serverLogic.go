@@ -106,7 +106,7 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 func userConnected(authKey string, authExtra map[string]interface{}, permission postmaster.Permissions){	
 		v,ok := authExtra["client-type"] //Extract client information
 		
-		if ok && v == "musicBox-v1"{	
+		if ok && (v == "musicBox-v1" || v == "testClient-v1"){	
 			log.Print("Box Connected",authExtra)		
 			setMusicBoxPlaying(authExtra["client-id"].(string),PAUSED)
 			
