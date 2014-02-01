@@ -15,7 +15,7 @@ import (
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
 
-const musicBoxID = "musicBoxID4"
+const musicBoxID = "musicBoxID3"
 
 //Auth info
 const WAMP_BASE_URL = "http://api.wamp.ws/"
@@ -110,7 +110,7 @@ func main() {
 		
 	if err := client.ConnectConfig(config); err != nil {
 		log.Error("Error connecting: ", err)
-		time.Sleep(1)
+		time.Sleep(100*time.Millisecond)
 		goto CONNECT
 	}
 	
@@ -165,10 +165,9 @@ func main() {
 	//
 	
 	//Make call for inital songs
-	go recommendSongs(4)
+	go recommendSongs(1)
 	
 	var endOfTrackChan <-chan bool
-	var err error
 	
 	MAIN_LOOP:
 	for{
@@ -227,6 +226,7 @@ func main() {
 				}
 				client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
 				
+				var err error
 				item := &spotify.SpotifyItem{Url:track.ProviderID}
 				endOfTrackChan,err = spotify.Play(item,streamChan)
 				if err != nil{
