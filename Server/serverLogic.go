@@ -131,7 +131,7 @@ func userConnected(authKey string, authExtra map[string]interface{}, permission 
 func clientDisconnected(authKey string,authExtra map[string]interface{}){	
 	v,ok := authExtra["client-type"]
 	
-	if ok && v == "musicBox-v1"{	
+	if ok && (v == "musicBox-v1" || v == "testClient-v1"){	
 		log.Print("Box Disconnected: ",authExtra)
 		
 		setMusicBoxPlaying(authExtra["client-id"].(string),OFFLINE)
