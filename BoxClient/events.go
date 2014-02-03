@@ -130,7 +130,13 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					for _,m := range tracks{
 						track := m.(map[string]interface{})
 						t := trackItemFromMap(track)
-						queue = append(queue,t)					
+						queue = append(queue,t)	
+
+						addMsg := map[string]interface{}{
+							"command":"addTrack",
+							"data":[]TrackItem{t},	
+						}
+						client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,addMsg) //Let others know track is playing
 					}	
 					
 					if !isPlaying && len(queue) > 0{

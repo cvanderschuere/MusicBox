@@ -14,7 +14,7 @@ func recommendSongs(numToAdd uint){
 	
 	opts := map[string]interface{}{
 		"ID":musicBoxID,
-		"Count":5,
+		"Count":numToAdd,
 	}
 	
 	if err := client.Call("recommendSongs",baseURL+"recommendSongs",opts); err != nil{
