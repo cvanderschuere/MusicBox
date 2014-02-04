@@ -242,7 +242,7 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 		fmt.Println("Didn't meet request number");
 	}
 	
-	return tracks,nil
+	return tracks[:requestedCount],nil
 }
 
 // Used as a login
