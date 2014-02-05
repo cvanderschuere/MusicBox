@@ -27,7 +27,25 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 	
 	//Switch through command types
 	switch data["command"]{
-	case "addTrack":
+	case "addTrack":		
+		//Parse recieved tracks
+		tracks := data["data"].([]interface{})
+		
+		for _,m := range tracks{
+			track := m.(map[string]interface{})
+			
+			t := TrackItem{
+					ProviderID:track["ProviderID"].(string),
+					Title:track["Title"].(string),
+					ArtistName:track["ArtistName"].(string),
+					AlbumName:track["AlbumName"].(string),
+					ArtworkURL:track["ArtworkURL"].(string),
+					Length:track["Length"].(float64),
+			}
+			
+			addTrackToQueue(args[1],t)
+		}
+		
 	case "removeTrack":
 	case "playTrack":
 		if len(args) > 1{
@@ -57,6 +75,17 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 		fmt.Println(track)
 		deviceID := d["deviceID"].(string)
 		fmt.Println(deviceID)
+		
+		
+		//
+		// Remove from queue
+		//
+		
+		popTrackOffQueue(args[1])
+		
+		//
+		// Save in track history
+		//
 		
 		//Create aws item
 		atts := []dynamodb.Attribute{

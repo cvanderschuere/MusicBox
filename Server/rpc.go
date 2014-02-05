@@ -75,6 +75,14 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 	boxID := opts["ID"].(string)
 	requestedCount := int(opts["Count"].(float64))
 	
+	
+	//See if we can get them from the queue
+	queue,errQ := getQueueTracks(boxID,requestedCount)
+	if len(queue)==requestedCount && errQ == nil{
+		return queue,nil
+	}
+	
+	
 	box,err := lookupMusicBox(boxID)
 	if err != nil{
 		return nil,err
@@ -185,13 +193,13 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 			return []interface{}{}, nil
 	}
 	
-	var tracks []*TrackItem
+	var tracks []TrackItem
 	c := spotify.New() //Spotify client
 	
 	Recommend_Loop:
 	for _,track := range responseObject.Data{
 		//Turn Momemtus track into TrackItem
-		t := &TrackItem{}
+		t := TrackItem{}
 		t.Title = track.Title
 		t.ArtistName = track.Artist.Name
 		
@@ -238,8 +246,14 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 		tracks = append(tracks,t)
 	}
 	
+	//Protect against nil queue
+	if queue != nil && len(queue)>0{
+		tracks = append(queue,tracks...)
+	}
+	
 	if len(tracks) < requestedCount{
-		fmt.Println("Didn't meet request number");
+		fmt.Println("Recommendation Error")
+		return nil, &postmaster.RPCError{URI:uri,Description:"Recommendation Error",Details:""}
 	}
 	
 	return tracks[:requestedCount],nil
@@ -407,6 +421,33 @@ func getTrackHistory(conn *postmaster.Connection,uri string, args ...interface{}
 		}
 		
 		return tracks,nil
+	}	
+}
+
+//Used to get queue information for given device
+//Args musicBoxID
+//Returns: [queueItem1 queueItem2]
+func getQueue(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
+	//Check for valid input
+	if len(args) == 0{
+		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (No arguments)",Details:""}
+	}
+	
+	//Extract necessary information
+	
+	//ID
+	boxID,ok := args[0].(string)
+	if !ok{
+		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (ID)",Details:""}
+	}
+	
+	//Count must be 1-10
+	if tracks,err := getQueueTracks(boxID,10); err != nil{
+		fmt.Println(err)
+		return nil,&postmaster.RPCError{URI:uri,Description:err.Error(),Details:""}
+	}else{
+		fmt.Println("Returned Queue")
+		return tracks,nil		
 	}	
 }
 

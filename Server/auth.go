@@ -9,11 +9,11 @@ func getUserPremissions(authKey string,authExtra map[string]interface{})(postmas
 	
 	p := postmaster.Permissions{
 		RPC:map[string]postmaster.RPCPermission{
-			baseURL+"currentQueueRequest":true,
 			baseURL+"players":true,
 			baseURL+"recommendSongs":true,
 			baseURL+"boxDetails":true,
 			baseURL+"trackHistory":true,
+			baseURL+"queue":true,
 		},
 		PubSub:map[string]postmaster.PubSubPermission{
 		},

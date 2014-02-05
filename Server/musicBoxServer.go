@@ -38,11 +38,13 @@ func main() {
 	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
 	server.RegisterRPC(baseURL+"boxDetails",getMusicBoxDetails)
 	server.RegisterRPC(baseURL+"trackHistory",getTrackHistory)
+	server.RegisterRPC(baseURL+"queue",getQueue)
 	server.RegisterRPC(baseURL+"themes",getThemes)
 	
 	//Unauth rpc
 	server.RegisterUnauthRPC(baseURL+"user/startSession",startSession)
 	server.RegisterUnauthRPC(baseURL+"musicbox/startSession",startSessionBox)
+	
 		
     s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: nil}
 	http.Handle("/", s)
@@ -68,13 +70,9 @@ func startWebServer() {
 }
 
 func serveHomePage(w http.ResponseWriter, r *http.Request) {
-	log.Print("Web Page Connection");
-
 	body, err := ioutil.ReadFile("/home/ubuntu/MusicBoxWebClient/index.html")
-
 	if err != nil {
 		return
 	}
-
 	w.Write([]byte(body))
 }
