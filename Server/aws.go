@@ -34,23 +34,22 @@ func setupAWS()(error){
 	//
 
 	dynamoDBServer = &dynamodb.Server{auth, aws.USWest2}
-			
 	//Users
 	primary := dynamodb.NewStringAttribute("Username", "")
 	key := dynamodb.PrimaryKey{primary, nil}
-	usersTable = dynamoDBServer.NewTable("Users",key)	
-	
+	usersTable = dynamoDBServer.NewTable("Users",key)
+
 	//MusicBoxes
 	primary = dynamodb.NewStringAttribute("ID", "")
 	key = dynamodb.PrimaryKey{primary, nil}
-	musicBoxesTable = dynamoDBServer.NewTable("MusicBoxes",key)	
-	
+	musicBoxesTable = dynamoDBServer.NewTable("MusicBoxes",key)
+
 	//Track History
 	primary = dynamodb.NewStringAttribute("CompositeID", "")
 	rangeKey := dynamodb.NewStringAttribute("Date", "")
 	key = dynamodb.PrimaryKey{primary, rangeKey}
-	trackHistoryTable = dynamoDBServer.NewTable("TrackHistory",key)	
-	
+	trackHistoryTable = dynamoDBServer.NewTable("TrackHistory",key)
+
 	//Themes
 	primary = dynamodb.NewStringAttribute("ThemeID", "")
 	key = dynamodb.PrimaryKey{primary, nil}
@@ -73,7 +72,7 @@ func setupAWS()(error){
 
 func lookupMusicBox(id string)(*BoxItem,*postmaster.RPCError){
 	boxObj := &BoxItem{}
-	
+
 	//Get music box
 	if box, err3 := musicBoxesTable.GetItem(&dynamodb.Key{HashKey: id}); err3 == nil{
 		boxErr := dynamodb.UnmarshalAttributes(&box, boxObj)
@@ -83,12 +82,12 @@ func lookupMusicBox(id string)(*BoxItem,*postmaster.RPCError){
 		}else{
 			//Fill in theme information
 			themeObj := &ThemeItem{}
-			
+
 			theme, _ := themesTable.GetItem(&dynamodb.Key{HashKey:box["ThemeID"].Value})
 			dynamodb.UnmarshalAttributes(&theme, themeObj)
-			
+
 			boxObj.ThemeFull = themeObj;
-			
+
 			return boxObj,nil
 		}
 	}else{
@@ -109,14 +108,14 @@ func lookupUser(username string)(*UserItem,*postmaster.RPCError){
 			return userObj,nil
 		}
 	}else{
-		err2 := &postmaster.RPCError{URI:"",Description:"Get error:invalid user",Details:""}
+		err2 := &postmaster.RPCError{URI:"",Description:"Invalid user",Details:""}
 		return nil, err2
 	}
 }
 
 func lookupUserSessionID(authKey string)(string,error){
 	fmt.Println("Lookup user: "+authKey);
-	
+
 	user,err := lookupUser(authKey)
 	if err == nil{
 		return user.SessionID,nil
@@ -139,19 +138,19 @@ func lookupTheme(themeID string)(*ThemeItem,error){
 	}
 }
 
-func getAllThemes()([]*ThemeItem,error){	
+func getAllThemes()([]*ThemeItem,error){
 	//Scan table for all items
 	res,_ := themesTable.Scan(nil)
-	
+
 	themes := make([]*ThemeItem,len(res))
 	for i,val := range res{
 		theme := &ThemeItem{}
 		dynamodb.UnmarshalAttributes(&val,theme)
-		
+
 		themes[i] = theme
 	}
-	
-	
+
+
 	return themes,nil
 }
 
@@ -225,9 +224,9 @@ func popTrackOffQueue(boxID string)(error){
 
 func setMusicBoxPlaying(musicBoxID string, playing int64)(error){
 
-	update := []dynamodb.Attribute{*dynamodb.NewNumericAttribute("Playing",strconv.FormatInt(playing,10))} 
+	update := []dynamodb.Attribute{*dynamodb.NewNumericAttribute("Playing",strconv.FormatInt(playing,10))}
 	musicBoxesTable.UpdateAttributes(&dynamodb.Key{HashKey: musicBoxID},update)
-	
+
 	return nil
 
 }
