@@ -13,6 +13,7 @@ import(
 	"net/http"
 	"strings"
 	"errors"
+	"github.com/cvanderschuere/go-pandora"
 )
 
 //Args [none] (uses conn Username)
@@ -92,169 +93,189 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 	}else if box.User != user.Username{
 		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid boxID",Details:""}
 	}
-
-	//Make Moment.us request based on box information
-	fmt.Println(box.Theme,box.ThemeFull)
-
-	//Get theme item for this box
-	theme := box.ThemeFull //Already inlcuded in box lookup
-
-	fmt.Println(theme)
-
-	//Create recommendation request
-	v := url.Values{}
-	v.Set("access_token", user.SessionID) //Moment.us access token is same as user session id
-
-	//
-	//Use theme to populate information
-	//
-
-	//Weather
-	if theme.Weather == "AUTO:AUTO"{
-		//Find weather information for current location
-
-		var condition string
-		var temperature string
-
-		// TODO: Use actual weather conditions
-		//
-		// Mock data
-		//
-
-		condition = "overcast"
-		temperature = "20"
-
-		//
-		// End fillin data
-		//
-
-		v.Set("by[weather][condition]",condition)
-		v.Set("by[weather][temperature]",temperature)
-	}else{
-		//Use provided weather information
-		p := strings.Split(theme.Weather,":")
-
-		v.Set("by[weather][condition]",p[0])
-		v.Set("by[weather][temperature]",p[1])
-	}
-
-	//Time of day []'Early Morning', 'Morning', 'Late Morning', 'Afternoon', 'Late Afternoon', 'Evening', 'Night', 'Late Night'] (required)
-	if theme.Time == "AUTO"{
-		//Use current time of day to determine value
-		var time string
-
-		//
-		// Mock data
-		//
-
-		time = "Afternoon"
-		//End Mock
-
-		v.Set("by[time_of_day]",time)
-	}else{
-		v.Set("by[time_of_day]",theme.Time)
-	}
-
-	//Mood ['Happy', 'Inspired', 'Tender', 'Nostalgic', 'Relaxed', 'Strong', 'Joyful', 'Tense', 'Sad'] (required)
-	v.Set("by[mood]",theme.Mood)
-
-	//City (optional)
-	if theme.City != "AUTO"{
-		v.Set("by[city]",theme.City)
-	}//Else do nothing
-
-	//Keywords (optional)
-	if len(theme.Keywords)>0{
-		v.Set("by[keywords]",strings.Join(theme.Keywords,","))
-	}
-
-	//Current Context (unchanged by theme)
-	v.Set("current_context[date]",time.Now().Format(time.RFC3339))//2006-01-02T15:04:05Z time format layout time.RFC3339
-	v.Set("current_context[location][lng]",box.Location[0])
-	v.Set("current_context[location][lat]",box.Location[1])
-	query := v.Encode()
-
-	resp,errGet := http.Get("https://api.wearemoment.us/v1/songs/discover?"+query)
-	if errGet != nil {
-		// handle error
-		fmt.Println("Moment.us Error:%s",err)
-	}
-	defer resp.Body.Close()
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	//Unmarshal JSON
-	var responseObject DiscoverResult
-	errJson := json.Unmarshal(body,&responseObject)
-	if errJson != nil {
-			fmt.Println("Json Error: ",err)
-			fmt.Println(string(body))
-			return []interface{}{}, nil
-	}
 	
-	var tracks []TrackItem
-	c := spotify.New() //Spotify client
+	//Determine what type of theme this is
+	if box.ThemeFull.Type == PandoraTheme{
+		returnMap := map[string]interface{}{
+			"type":PandoraTheme,
+			"id":box.ThemeFull.ThemeID,
+		}
+		
+		return returnMap,nil
+		
+	}else if box.ThemeFull.Type == MomentusTheme{
+		//Make Moment.us request based on box information
+		fmt.Println(box.Theme,box.ThemeFull)
 
-	Recommend_Loop:
-	for _,track := range responseObject.Data{
-		//Turn Momemtus track into TrackItem
-		t := TrackItem{}
-		t.Title = track.Title
-		t.ArtistName = track.Artist.Name
+		//Get theme item for this box
+		theme := box.ThemeFull //Already inlcuded in box lookup
 
-		if track.Album.Name != ""{
-			t.AlbumName = track.Album.Name
+		fmt.Println(theme)
 
+		//Create recommendation request
+		v := url.Values{}
+		v.Set("access_token", user.SessionID) //Moment.us access token is same as user session id
+
+		//
+		//Use theme to populate information
+		//
+
+		//Weather
+		if theme.Weather == "AUTO:AUTO"{
+			//Find weather information for current location
+
+			var condition string
+			var temperature string
+
+			// TODO: Use actual weather conditions
+			//
+			// Mock data
+			//
+
+			condition = "overcast"
+			temperature = "20"
+
+			//
+			// End fillin data
+			//
+
+			v.Set("by[weather][condition]",condition)
+			v.Set("by[weather][temperature]",temperature)
 		}else{
-			t.AlbumName = "UNKNOWN"
+			//Use provided weather information
+			p := strings.Split(theme.Weather,":")
+
+			v.Set("by[weather][condition]",p[0])
+			v.Set("by[weather][temperature]",p[1])
 		}
 
+		//Time of day []'Early Morning', 'Morning', 'Late Morning', 'Afternoon', 'Late Afternoon', 'Evening', 'Night', 'Late Night'] (required)
+		if theme.Time == "AUTO"{
+			//Use current time of day to determine value
+			var time string
 
-		if len(track.Album.Image) > 0{
-			t.ArtworkURL = track.Album.Image[0].Content
+			//
+			// Mock data
+			//
+
+			time = "Afternoon"
+			//End Mock
+
+			v.Set("by[time_of_day]",time)
 		}else{
-			t.ArtworkURL = "UNKNOWN"
+			v.Set("by[time_of_day]",theme.Time)
 		}
 
-		//Look up on spotify
-		if r,e := c.SearchTracks(t.Title+" "+t.ArtistName,0); e == nil{
+		//Mood ['Happy', 'Inspired', 'Tender', 'Nostalgic', 'Relaxed', 'Strong', 'Joyful', 'Tense', 'Sad'] (required)
+		v.Set("by[mood]",theme.Mood)
 
-			//Make sure results returned
-			if r.Info.TotalResults > 0{
-				Result_Loop:
-				for _,track := range r.Tracks{
-					if strings.Contains(track.Album.Availability.Territories,"US"){
-						//Fill in Spotify Specific Information
+		//City (optional)
+		if theme.City != "AUTO"{
+			v.Set("by[city]",theme.City)
+		}//Else do nothing
 
-						t.ProviderID = track.URI
-						t.Length = track.Length
+		//Keywords (optional)
+		if len(theme.Keywords)>0{
+			v.Set("by[keywords]",strings.Join(theme.Keywords,","))
+		}
 
-						break Result_Loop
-					}
-				}
+		//Current Context (unchanged by theme)
+		v.Set("current_context[date]",time.Now().Format(time.RFC3339))//2006-01-02T15:04:05Z time format layout time.RFC3339
+		v.Set("current_context[location][lng]",box.Location[0])
+		v.Set("current_context[location][lat]",box.Location[1])
+		query := v.Encode()
+
+		resp,errGet := http.Get("https://api.wearemoment.us/v1/songs/discover?"+query)
+		if errGet != nil {
+			// handle error
+			fmt.Println("Moment.us Error:%s",err)
+		}
+		defer resp.Body.Close()
+		body, _ := ioutil.ReadAll(resp.Body)
+
+		//Unmarshal JSON
+		var responseObject DiscoverResult
+		errJson := json.Unmarshal(body,&responseObject)
+		if errJson != nil {
+				fmt.Println("Json Error: ",err)
+				fmt.Println(string(body))
+				return []interface{}{}, nil
+		}
+	
+		var tracks []TrackItem
+		c := spotify.New() //Spotify client
+
+		Recommend_Loop:
+		for _,track := range responseObject.Data{
+			//Turn Momemtus track into TrackItem
+			t := TrackItem{}
+			t.Title = track.Title
+			t.ArtistName = track.Artist.Name
+
+			if track.Album.Name != ""{
+				t.AlbumName = track.Album.Name
+
 			}else{
-				fmt.Println("Spotify error: no matching track")
+				t.AlbumName = "UNKNOWN"
+			}
+
+
+			if len(track.Album.Image) > 0{
+				t.ArtworkURL = track.Album.Image[0].Content
+			}else{
+				t.ArtworkURL = "UNKNOWN"
+			}
+
+			//Look up on spotify
+			if r,e := c.SearchTracks(t.Title+" "+t.ArtistName,0); e == nil{
+
+				//Make sure results returned
+				if r.Info.TotalResults > 0{
+					Result_Loop:
+					for _,track := range r.Tracks{
+						if strings.Contains(track.Album.Availability.Territories,"US"){
+							//Fill in Spotify Specific Information
+
+							t.ProviderID = track.URI
+							t.Length = track.Length
+
+							break Result_Loop
+						}
+					}
+				}else{
+					fmt.Println("Spotify error: no matching track")
+					continue Recommend_Loop
+				}
+
+			}else{
+				fmt.Println("Spotify error: ",e)
 				continue Recommend_Loop
 			}
 
-		}else{
-			fmt.Println("Spotify error: ",e)
-			continue Recommend_Loop
+			tracks = append(tracks,t)
+		}
+	
+		//Protect against nil queue
+		if queue != nil && len(queue)>0{
+			tracks = append(queue,tracks...)
+		}
+	
+		if len(tracks) < requestedCount{
+			fmt.Println("Recommendation Error")
+			return nil, &postmaster.RPCError{URI:uri,Description:"Recommendation Error",Details:""}
+		}
+		
+		returnMap := map[string]interface{}{
+			"type":MomentusTheme,
+			"id":box.ThemeFull.ThemeID,
+			"track":tracks[:requestedCount],
 		}
 
-		tracks = append(tracks,t)
+		return returnMap,nil
+	}else{
+		//Unknown theme type
+		return nil,&postmaster.RPCError{URI:uri,Description:"Unknown Theme",Details:""}
 	}
-	
-	//Protect against nil queue
-	if queue != nil && len(queue)>0{
-		tracks = append(queue,tracks...)
-	}
-	
-	if len(tracks) < requestedCount{
-		fmt.Println("Recommendation Error")
-		return nil, &postmaster.RPCError{URI:uri,Description:"Recommendation Error",Details:""}
-	}
-
-	return tracks[:requestedCount],nil
 }
 
 // Used as a login
@@ -453,10 +474,58 @@ func getQueue(conn *postmaster.Connection,uri string, args ...interface{})(inter
 //Used to get list of avaliable themes
 //Args [none]
 func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
-	themes,err := getAllThemes()
+	
+	//Get Pandora themes in parallel
+	returnChan := make(chan []*ThemeItem,1)
+	go func(c chan []*ThemeItem, username string){
+		//Lookup the user
+		user,err := lookupUser(username)
+		if err != nil{
+			c<-nil
+			return
+		}
+		
+		//Login to pandora
+		login := pandora.Login(username,user.PandoraPassword)
+		loginError := <-login
+
+		//Probably wrong username/password
+		if loginError != nil{
+			c<-nil
+			return
+		}
+
+		stations,stationError := pandora.GetStationList()
+
+		if stationError != nil || len(stations) == 0{
+			c<-nil
+			return
+		}
+		
+		//Convert pandoraStation into ThemeItem
+		themeList := make([]*ThemeItem,len(stations))
+		for i,station := range stations{
+			themeList[i] = &ThemeItem{ThemeID:station.ID,Name:station.Name,ArtworkURL:station.ArtworkURL,Type:PandoraTheme}
+		}
+
+		c<-themeList
+		
+		//Try Logout
+		logout := pandora.Logout()
+		<-logout
+		
+	}(returnChan,conn.Username)
+	
+	//Get AWS Themes
+	themes,err := getAWSThemes()
 	if err != nil{
 		return nil, &postmaster.RPCError{URI:uri,Description:err.Error(),Details:""}
 	}
+	
+	pandoraThemes := <-returnChan
+	
+	//Merge the two
+	themes = append(themes,pandoraThemes...)
 
 	return themes,nil
 }

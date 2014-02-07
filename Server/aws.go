@@ -81,12 +81,10 @@ func lookupMusicBox(id string)(*BoxItem,*postmaster.RPCError){
 			return nil,boxErr2
 		}else{
 			//Fill in theme information
-			themeObj := &ThemeItem{}
-
-			theme, _ := themesTable.GetItem(&dynamodb.Key{HashKey:box["ThemeID"].Value})
-			dynamodb.UnmarshalAttributes(&theme, themeObj)
-
-			boxObj.ThemeFull = themeObj;
+			theme,themeErr := lookupTheme(box["ThemeID"].Value)
+			if themeErr != nil{
+				boxObj.ThemeFull = theme;
+			}
 
 			return boxObj,nil
 		}
@@ -138,7 +136,7 @@ func lookupTheme(themeID string)(*ThemeItem,error){
 	}
 }
 
-func getAllThemes()([]*ThemeItem,error){
+func getAWSThemes()([]*ThemeItem,error){
 	//Scan table for all items
 	res,_ := themesTable.Scan(nil)
 
@@ -146,6 +144,7 @@ func getAllThemes()([]*ThemeItem,error){
 	for i,val := range res{
 		theme := &ThemeItem{}
 		dynamodb.UnmarshalAttributes(&val,theme)
+		theme.Type = MomentusTheme
 
 		themes[i] = theme
 	}

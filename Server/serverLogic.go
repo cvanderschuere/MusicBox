@@ -108,11 +108,14 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 		setMusicBoxPlaying(deviceID,PLAYING) //Set Playing = true
 		
 	case "updateTheme":
-		theme := themeItemFromMap(data["data"].(map[string]interface{}))
+		//Extract ThemeID (All that is needed to find on recommendSongs)
+		dataMap := data["data"].(map[string]interface{})
+		themeID := dataMap["ThemeID"].(string)
+		
 		boxID := args[1]
 		
 		//Update box information with new theme
-		themeUpdate := []dynamodb.Attribute{*dynamodb.NewStringAttribute("ThemeID",theme.ThemeID)}
+		themeUpdate := []dynamodb.Attribute{*dynamodb.NewStringAttribute("ThemeID",themeID)}
 		
 		_, err := musicBoxesTable.UpdateAttributes(&dynamodb.Key{HashKey: boxID},themeUpdate)
 		if err != nil{

@@ -11,6 +11,10 @@ type UserItem struct{
 	SessionID string
 	
 	MusicBoxes []string
+	
+	//Private Information
+	PandoraPassword string `json:"-"`
+	SpotifyPassword string `json:"-"`
 }
 
 type BoxItem struct{
@@ -65,23 +69,32 @@ func trackItemFromMap(data map[string]*dynamodb.Attribute)(*TrackItem){
 	return t
 }
 
+type ThemeType int
+const(
+	MomentusTheme ThemeType = iota
+	PandoraTheme
+)
+
 type ThemeItem struct{
 	ThemeID string
 	Name	string
+	ArtworkURL string
+	Type	ThemeType
 	
-	//Moment.us specific
-	City string
-	DayOfWeek string
-	Keywords []string
-	Mood string
-	Time string
-	Weather string	
+	//Moment.us specific (Don't give it back)
+	City string `json:"-"`
+	DayOfWeek string `json:"-"`
+	Keywords []string `json:"-"`
+	Mood string `json:"-"`
+	Time string `json:"-"`
+	Weather string `json:"-"`
 }
 
 func themeItemFromMap(data map[string]interface{})(*ThemeItem){
 	t := &ThemeItem{
 		ThemeID: data["ThemeID"].(string),
 		Name: data["Name"].(string),
+		ArtworkURL: data["ArtworkURL"].(string),
 		
 		City: data["City"].(string),
 		DayOfWeek: data["DayOfWeek"].(string),
@@ -101,7 +114,6 @@ func themeItemFromMap(data map[string]interface{})(*ThemeItem){
 	
 	return t
 }
-
 
 // Moment.us
 type DiscoverResult struct{
