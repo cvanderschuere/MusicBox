@@ -165,7 +165,8 @@ func main() {
 	//
 	
 	//Make call for inital songs
-	go recommendSongs(1)
+	//go recommendSongs(4)
+	client.Call("queue",baseURL+"queue",musicBoxID)
 	
 	var endOfTrackChan <-chan bool
 	

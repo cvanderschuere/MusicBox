@@ -2,6 +2,7 @@ package main
 
 import(
 	"github.com/cvanderschuere/turnpike"
+	"fmt"
 )
 
 //Decoded event into music box instruction
@@ -76,9 +77,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 					isPlaying = false
 					notiChan <- Notification{Kind:StoppedTrack} //Song stays in queue...no different than pause?
 				case "nextTrack":
-					if len(queue)>1{
-						//Remove current track
-						queue = queue[1:]
+					if len(queue)>0{
 						
 						//Create next track
 						next := queue[0]
@@ -86,10 +85,17 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 						isPlaying = true	
 						notiChan <- Notification{Kind:NextTrack,Content:next}
 						
+						//Remove current track
+						if len(queue) == 1{
+							queue = nil
+						}else{
+							queue = queue[1:]
+						}
+						
 						//Make sure queue has enough recommendations
 						if len(queue) <= 1{
 							log.Trace("Finding similar songs to add")
-							go recommendSongs(1)
+							//go recommendSongs(1)
 						}
 					}
 				case "updateTheme":
@@ -121,27 +127,69 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 			case turnpike.CallResultMsg:
 				message := event.(turnpike.CallResultMsg)
 				
+				fmt.Println(message.CallID)
+				
 				switch message.CallID {
 				case "recommendSongs":
 					tracks := message.Result.([]interface{})
 					
 					log.Info("Adding %d recommendations to queue",len(tracks))
 					
-					for _,m := range tracks{
-						track := m.(map[string]interface{})
+					addedTracks := make([]TrackItem,len(tracks))
+					
+					for i,m := range tracks{
+						track,ok := m.(map[string]interface{})
+						if !ok{
+							continue
+						}
 						t := trackItemFromMap(track)
 						queue = append(queue,t)	
+						addedTracks[i] = t //Save TrackItems
 
-						addMsg := map[string]interface{}{
-							"command":"addTrack",
-							"data":[]TrackItem{t},	
-						}
-						client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,addMsg) //Let others know track is playing
-					}	
+					}
+					
+					addMsg := map[string]interface{}{
+						"command":"addTrack",
+						"data":addedTracks,	
+					}
+					client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,addMsg) //Let others know track is playing	
 					
 					if !isPlaying && len(queue) > 0{
 						notiChan <- Notification{Kind:NextTrack,Content:queue[0]} // Start initial playback
-					}	
+					}
+				case "queue":
+					tracks := message.Result.([]interface{})
+				
+					log.Info("Setting queue to %d items",len(tracks))
+					
+					if len(tracks)>0{
+						currentQueue := make([]TrackItem,len(tracks))
+						for i,m := range tracks{
+							track,ok := m.(map[string]interface{})
+							if !ok{
+								continue
+							}
+							
+							t := trackItemFromMap(track)
+							currentQueue[i] = t //Save TrackItem
+						}
+						
+						if !isPlaying && queue == nil{
+							notiChan <- Notification{Kind:NextTrack,Content:currentQueue[0]} // Start initial playback
+						}
+						
+						if len(currentQueue)>1{
+							log.Info("Setting remaining queue")
+							queue = currentQueue[1:]
+						}else{
+							log.Info("Queue Empty")
+							queue = nil
+						}
+					}else{
+						queue = nil
+					}
+					
+						
 				case "startSession":
 					user := message.Result.(map[string]interface{})
 					boxUsername = user["username"].(string)
@@ -175,14 +223,17 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 			
 		case update,ok := <-notiChan:
 			if ok && update.Kind == EndOfTrack{
-				if len(queue)>1{
-					//Remove first track
-					queue = queue[1:]
-				
+				if len(queue)>0{
 					log.Trace("Moving to next song")
 					isPlaying = true
 					//Send update to play next song
 					notiChan <- Notification{Kind:NextTrack,Content:queue[0]}
+					
+					if len(queue) == 1{
+						queue = nil //Empty
+					}else{
+						queue = queue[1:] //Shift
+					}
 				}else{
 					log.Trace("Clear queue")
 					//Empty entire list
@@ -191,7 +242,7 @@ func eventHandler(client *turnpike.Client, notiChan chan Notification){
 				}
 				
 				if len(queue) < 2{
-					go recommendSongs(3) //Add radio never ending playlist
+					//go recommendSongs(3) //Add radio never ending playlist
 				}
 				
 				//Publish event
