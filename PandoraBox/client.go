@@ -7,6 +7,7 @@ import(
 	"os"
 	"os/signal"
 	"time"
+	"fmt"
 )
 
 //
@@ -15,12 +16,11 @@ import(
 
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
-const musicBoxID = "musicBoxID3"
+const musicBoxID = "musicBoxID1"
 
 //Auth info
 const WAMP_BASE_URL = "http://api.wamp.ws/"
 const WAMP_PROCEDURE_URL = WAMP_BASE_URL+"procedure#"
-var authWait = make(chan bool,1) //Used to block until authentication
 var boxUsername string
 var boxSessionID string
 var client *turnpike.Client
@@ -45,7 +45,6 @@ type TrackItem struct{
 	Date	string  //Date played for accounting purposes
 }
 
-
 func main() {
 		
 	setupClient()	
@@ -54,7 +53,6 @@ func main() {
 	signalChan := make(chan os.Signal,1)
 	signal.Notify(signalChan)
 		
-	
 	//Wait on signal
 	s := <-signalChan
 	signal.Stop(signalChan)
@@ -68,38 +66,26 @@ func setupClient()(*turnpike.Client){
 	// Prepare client
 	//	
 		
-	client := turnpike.NewClient()
+	client = turnpike.NewClient()
 	
 	//Connect socket between server port and local port
 	config,_ := websocket.NewConfig("ws://"+serverURL,"http://localhost:4040")
 	config.Header.Add("musicbox-box-id",musicBoxID)
 
-
 	CONNECT:
-		
 	if err := client.ConnectConfig(config); err != nil {
 		log.Error("Error connecting: ", err)
 		time.Sleep(100*time.Millisecond)
 		goto CONNECT
 	}
 	
-	//Launch Event handler
-	go eventHandler(client)
+	fmt.Println("CONNECTED TO SERVER")
 	
 	//
 	// Authenticate
 	//
-	
-	//Start session (lookup user & auth)
-	client.Call("startSession",baseURL+"musicbox/startSession",musicBoxID)
-	
-	//Wait until authenticated
-	isAuth := <-authWait
-	if !isAuth{
-		log.Error("Failed auth")
-		return nil
-	}
-	
+	authenticate(client)
+
 	//
 	// Connection authenticated
 	//
@@ -107,13 +93,41 @@ func setupClient()(*turnpike.Client){
 	//Launch pinger to keep websocket open (ELB has 60 second timeout)
 	go pingClient(client)
 	
-	client.Call("userInfo",baseURL+"userInfo",musicBoxID)
-	<-callback
+	//Subscribe as appropriate
+	fmt.Println(baseURL+boxUsername+"/"+musicBoxID)
+	client.Subscribe(baseURL+boxUsername+"/"+musicBoxID, handleEvent)
 	
-	client.Call("boxDetails",baseURL+"boxDetails",[]string{musicBoxID})
-	<-callback
+	setupPandora(client)
 	
 	return client
+}
+
+func authenticate(client *turnpike.Client){
+	//Start session (lookup user & auth)
+	resp := client.Call(baseURL+"musicbox/startSession",musicBoxID)
+	message := <-resp
+
+	user := message.Result.(map[string]interface{})
+	boxUsername = user["username"].(string)
+	boxSessionID = user["sessionID"].(string)
+
+	extra := map[string]interface{}{
+		"client-type":"musicBox-v1", //Used to diferentiate musicbox from other clients (ie Website)
+		"client-id":musicBoxID,
+	}
+
+	resp = client.Call(WAMP_PROCEDURE_URL+"authreq",boxUsername,extra)
+	message = <-resp	
+	
+	ch,ok := message.Result.(string)
+	if !ok{
+		log.Error("Incorrect response type")
+	}
+
+	//Calculate & send signature
+	sig := authSignature([]byte(ch),boxSessionID,nil)
+	resp = client.Call(WAMP_PROCEDURE_URL+"auth",sig)
+	<-resp //This give back permissions
 }
 
 func pingClient(client *turnpike.Client){

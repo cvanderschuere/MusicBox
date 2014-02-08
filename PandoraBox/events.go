@@ -8,37 +8,34 @@ import(
 
 var pandoraClient *pandora.PandoraClient
 
-//Decoded event into music box instruction
-//This is the only function allowed to add/remove from the upcoming queue
-func eventHandler(client *turnpike.Client){
-	
-	EVENT_LOOP:
-	for{
-		log.Trace("Event Handler Select")
-		select{
-		case event,ok := <-client.HandleChan:
-			if ok == false{
-				break EVENT_LOOP
-			}
-			
-			switch event.(type){
-			case turnpike.EventMsg:
-				handleEvent(event.(turnpike.EventMsg))
-					
-			case turnpike.CallResultMsg:
-				handleResult(event.(turnpike.CallResultMsg))
-				
-			default:
-				log.Warn("Recieved Unknown type")
-			}
-		}
+func setupPandora(client * turnpike.Client){
+	resp := client.Call(baseURL+"userInfo",musicBoxID)
+	message := <-resp
+	user := message.Result.(map[string]interface{})
+		
+	//Use this given info to sign into pandora
+	var ch <-chan error
+	pandoraClient,ch = pandora.Login(user["Username"].(string),user["PandoraPassword"].(string))
+	err := <-ch
+	if err != nil{
+		fmt.Println(err)
 	}
+	
+	resp = client.Call(baseURL+"boxDetails",[]string{musicBoxID})
+	message = <-resp
+
+	boxes := message.Result.(map[string]interface{})		
+	thisBox := boxes[musicBoxID].(map[string]interface{})
+	boxDetails := thisBox["box"].(map[string]interface{})
+	
+	playStation(boxDetails["ThemeID"].(string))
 }
 
-func handleEvent(event turnpike.EventMsg){
-	message := event.Event.(map[string]interface{})
+func handleEvent(topicURI string, event interface{}){
+	message := event.(map[string]interface{})
 	command := message["command"].(string)
 	
+	fmt.Println("Command: "+command)
 	switch command{
 	case "playTrack":
 		pandoraClient.TogglePlayback(true)
@@ -49,57 +46,37 @@ func handleEvent(event turnpike.EventMsg){
 	case "updateTheme":
 		//Extract station ID
 		data := message["data"].(map[string]interface{})
-		station := pandora.Station{ID:data["ID"].(string)}
-
-		pandoraClient.Play(station)
+		playStation(data["ThemeID"].(string))
+		
 	default:
 		fmt.Println("Unknown message: ",command)
 	}
 }
 
-func handleResult(message turnpike.CallResultMsg){
-	fmt.Println(message.CallID)
-
-	switch message.CallID {
-	case "userInfo":
-		user := message.Result.(map[string]interface{})
-			
-		//Use this given info to sign into pandora
-		pandoraClient,_ = pandora.Login(user["Username"].(string),user["PandoraPassword"].(string))
-		callback<-true
+func playStation(stationID string){
+	fmt.Println(stationID)
 	
-	case "boxDetails":
-		boxes := message.Result.(map[string]interface{})
-		thisBox := boxes[musicBoxID].(map[string]interface{})
-		
-		pandoraClient.Play(thisBox["Theme"].(string))
-		
-		callback<-true
-		
-	case "startSession":
-		user := message.Result.(map[string]interface{})
-		boxUsername = user["username"].(string)
-		boxSessionID = user["sessionID"].(string)
-
-		extra := map[string]interface{}{
-			"client-type":"musicBox-v1", //Used to diferentiate musicbox from other clients (ie Website)
-			"client-id":musicBoxID,
+	station := pandora.Station{ID:stationID}	
+	
+	ch,_ := pandoraClient.Play(station)
+	go func(c <-chan *pandora.Track){
+		for track := range c{
+			if track == nil{
+				continue
+			}
+			
+			//Send this track as started track
+			msg := map[string]interface{} {
+				"command":"startedTrack",
+				"data": map[string]interface{}{ 
+					"deviceID":musicBoxID,
+					"track":track, //Luckily a TrackItem and pandora.Track are identical :)
+				},
+			}
+			
+			client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing	
 		}
-
-		client.Call("authreq",WAMP_PROCEDURE_URL+"authreq",boxUsername,extra)
-	case "authreq":
-		//Recieve challenge
-		ch,ok := message.Result.(string)
-		if !ok{
-			log.Error("Incorrect response type")
-		}
-
-		//Calculate & send signature
-		sig := authSignature([]byte(ch),boxSessionID,nil)
-		client.Call("auth",WAMP_PROCEDURE_URL+"auth",sig)
-
-	case "auth":
-		//Recieve permission information
-		authWait<-true
-	}
+	}(ch)
+	
+	fmt.Println("Finished Playing")
 }
