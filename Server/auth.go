@@ -11,6 +11,7 @@ func getUserPremissions(authKey string,authExtra map[string]interface{})(postmas
 		RPC:map[string]postmaster.RPCPermission{
 			baseURL+"players":true,
 			baseURL+"recommendSongs":true,
+			baseURL+"userInfo":true,
 			baseURL+"boxDetails":true,
 			baseURL+"trackHistory":true,
 			baseURL+"queue":true,

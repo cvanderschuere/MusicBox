@@ -81,7 +81,7 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 		// Remove from queue
 		//
 		
-		popTrackOffQueue(args[1])
+		//popTrackOffQueue(args[1])
 		
 		//
 		// Save in track history

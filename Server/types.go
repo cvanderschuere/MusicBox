@@ -13,8 +13,8 @@ type UserItem struct{
 	MusicBoxes []string
 	
 	//Private Information
-	PandoraPassword string `json:"-"`
-	SpotifyPassword string `json:"-"`
+	PandoraPassword string 
+	SpotifyPassword string
 }
 
 type BoxItem struct{
@@ -22,7 +22,7 @@ type BoxItem struct{
 	User string
 	DeviceName string
 	Location	[]string
-	Theme	string
+	ThemeID	string
 	ThemeFull *ThemeItem
 	
 	//Dynamic stats

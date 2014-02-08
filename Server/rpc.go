@@ -17,6 +17,20 @@ import(
 )
 
 //Args [none] (uses conn Username)
+func userInfoRequest(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){
+	user,err2 := lookupUser(conn.Username)
+	
+	//Clear sensitive info
+	user.Password = ""
+	
+	if err2 != nil{
+		return nil,err2
+	}
+	
+	return user,nil
+}
+
+//Args [none] (uses conn Username)
 func boxRequest(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){
 
 	var boxes []BoxItem
@@ -105,7 +119,7 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 		
 	}else if box.ThemeFull.Type == MomentusTheme{
 		//Make Moment.us request based on box information
-		fmt.Println(box.Theme,box.ThemeFull)
+		fmt.Println(box.ThemeID,box.ThemeFull)
 
 		//Get theme item for this box
 		theme := box.ThemeFull //Already inlcuded in box lookup
@@ -486,7 +500,7 @@ func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(inte
 		}
 		
 		//Login to pandora
-		login := pandora.Login(username,user.PandoraPassword)
+		client,login := pandora.Login(username,user.PandoraPassword)
 		loginError := <-login
 
 		//Probably wrong username/password
@@ -495,7 +509,7 @@ func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(inte
 			return
 		}
 
-		stations,stationError := pandora.GetStationList()
+		stations,stationError := client.GetStationList()
 
 		if stationError != nil || len(stations) == 0{
 			c<-nil
@@ -511,22 +525,26 @@ func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(inte
 		c<-themeList
 		
 		//Try Logout
-		logout := pandora.Logout()
+		logout := client.Logout()
 		<-logout
 		
 	}(returnChan,conn.Username)
 	
+	//Get moment.us themes
+	/*
 	//Get AWS Themes
 	themes,err := getAWSThemes()
 	if err != nil{
 		return nil, &postmaster.RPCError{URI:uri,Description:err.Error(),Details:""}
 	}
 	
-	pandoraThemes := <-returnChan
 	
 	//Merge the two
 	themes = append(themes,pandoraThemes...)
+	*/
+	pandoraThemes := <-returnChan
+	
 
-	return themes,nil
+	return pandoraThemes,nil
 }
 

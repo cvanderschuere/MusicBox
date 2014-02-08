@@ -34,6 +34,7 @@ func main() {
 	server.MessageToPublish = InterceptMessage //Defined in serverLogic.go
 	
 	//Setup RPC Functions - defined in rpc.go
+	server.RegisterRPC(baseURL+"userInfo",userInfoRequest)
 	server.RegisterRPC(baseURL+"players",boxRequest)
 	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
 	server.RegisterRPC(baseURL+"boxDetails",getMusicBoxDetails)
