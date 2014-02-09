@@ -297,7 +297,7 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 func startSession(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
 	searchUser := args[0].(map[string]interface{})
 
-	user,err := lookupUser(searchUser["username"].(string))
+	user,err := lookupUser(strings.ToLower(searchUser["username"].(string)))
 	if err != nil{
 		return nil,err
 	}

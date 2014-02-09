@@ -9,6 +9,7 @@ import(
 	"fmt"
 	"strconv"
 	"encoding/json"
+	"strings"
 )
 
 //Global database tables (setup in setupAWS())
@@ -95,7 +96,8 @@ func lookupMusicBox(id string)(*BoxItem,*postmaster.RPCError){
 }
 
 func lookupUser(username string)(*UserItem,*postmaster.RPCError){
-	if item, err := usersTable.GetItem(&dynamodb.Key{HashKey: username}); err == nil{
+	
+	if item, err := usersTable.GetItem(&dynamodb.Key{HashKey: strings.ToLower(username)}); err == nil{
 		userObj := &UserItem{}
 
 		err := dynamodb.UnmarshalAttributes(&item, userObj)
