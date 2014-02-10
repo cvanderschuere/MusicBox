@@ -22,6 +22,12 @@
 		834EF43918A83B5E0072287F /* PandoraControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 834EF43818A83B5E0072287F /* PandoraControllerTests.m */; };
 		834EF44418A84DD30072287F /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 834EF44318A84DD30072287F /* LoginViewController.m */; };
 		834EF44718A84F150072287F /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 834EF44618A84F150072287F /* User.m */; };
+		83B292C518A85270000FC74A /* MBWebsocket.m in Sources */ = {isa = PBXBuildFile; fileRef = 83B292C418A85270000FC74A /* MBWebsocket.m */; };
+		83B292C818A8573F000FC74A /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 83B292C718A8573F000FC74A /* MainViewController.m */; };
+		83B292CB18A863FD000FC74A /* Station.m in Sources */ = {isa = PBXBuildFile; fileRef = 83B292CA18A863FD000FC74A /* Station.m */; };
+		83B292CE18A8738A000FC74A /* Device.m in Sources */ = {isa = PBXBuildFile; fileRef = 83B292CD18A8738A000FC74A /* Device.m */; };
+		83B292D118A87493000FC74A /* Track.m in Sources */ = {isa = PBXBuildFile; fileRef = 83B292D018A87493000FC74A /* Track.m */; };
+		F976A8155C2F4F02B4B5E6AD /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EA5B1CC618248BD82D96423 /* libPods.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +41,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1EA5B1CC618248BD82D96423 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		834EF40A18A83B5E0072287F /* PandoraController.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PandoraController.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		834EF40D18A83B5E0072287F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		834EF40F18A83B5E0072287F /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -56,6 +63,17 @@
 		834EF44318A84DD30072287F /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		834EF44518A84F150072287F /* User.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = User.h; sourceTree = "<group>"; };
 		834EF44618A84F150072287F /* User.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = User.m; sourceTree = "<group>"; };
+		83B292C318A85270000FC74A /* MBWebsocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBWebsocket.h; sourceTree = "<group>"; };
+		83B292C418A85270000FC74A /* MBWebsocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBWebsocket.m; sourceTree = "<group>"; };
+		83B292C618A8573F000FC74A /* MainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
+		83B292C718A8573F000FC74A /* MainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
+		83B292C918A863FD000FC74A /* Station.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Station.h; sourceTree = "<group>"; };
+		83B292CA18A863FD000FC74A /* Station.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Station.m; sourceTree = "<group>"; };
+		83B292CC18A8738A000FC74A /* Device.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Device.h; sourceTree = "<group>"; };
+		83B292CD18A8738A000FC74A /* Device.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Device.m; sourceTree = "<group>"; };
+		83B292CF18A87493000FC74A /* Track.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Track.h; sourceTree = "<group>"; };
+		83B292D018A87493000FC74A /* Track.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Track.m; sourceTree = "<group>"; };
+		B20A4565217E4768A9187C3E /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +84,7 @@
 				834EF41018A83B5E0072287F /* CoreGraphics.framework in Frameworks */,
 				834EF41218A83B5E0072287F /* UIKit.framework in Frameworks */,
 				834EF40E18A83B5E0072287F /* Foundation.framework in Frameworks */,
+				F976A8155C2F4F02B4B5E6AD /* libPods.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,6 +108,7 @@
 				834EF43218A83B5E0072287F /* PandoraControllerTests */,
 				834EF40C18A83B5E0072287F /* Frameworks */,
 				834EF40B18A83B5E0072287F /* Products */,
+				B20A4565217E4768A9187C3E /* Pods.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -108,6 +128,7 @@
 				834EF40F18A83B5E0072287F /* CoreGraphics.framework */,
 				834EF41118A83B5E0072287F /* UIKit.framework */,
 				834EF42C18A83B5E0072287F /* XCTest.framework */,
+				1EA5B1CC618248BD82D96423 /* libPods.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -117,11 +138,21 @@
 			children = (
 				834EF41C18A83B5E0072287F /* AppDelegate.h */,
 				834EF41D18A83B5E0072287F /* AppDelegate.m */,
+				83B292C318A85270000FC74A /* MBWebsocket.h */,
+				83B292C418A85270000FC74A /* MBWebsocket.m */,
 				834EF44218A84DD30072287F /* LoginViewController.h */,
 				834EF44318A84DD30072287F /* LoginViewController.m */,
 				834EF44518A84F150072287F /* User.h */,
 				834EF44618A84F150072287F /* User.m */,
+				83B292CF18A87493000FC74A /* Track.h */,
+				83B292D018A87493000FC74A /* Track.m */,
+				83B292CC18A8738A000FC74A /* Device.h */,
+				83B292CD18A8738A000FC74A /* Device.m */,
+				83B292C918A863FD000FC74A /* Station.h */,
+				83B292CA18A863FD000FC74A /* Station.m */,
 				834EF41F18A83B5E0072287F /* Main.storyboard */,
+				83B292C618A8573F000FC74A /* MainViewController.h */,
+				83B292C718A8573F000FC74A /* MainViewController.m */,
 				834EF42518A83B5E0072287F /* Images.xcassets */,
 				834EF41418A83B5E0072287F /* Supporting Files */,
 			);
@@ -164,9 +195,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 834EF43C18A83B5E0072287F /* Build configuration list for PBXNativeTarget "PandoraController" */;
 			buildPhases = (
+				39346ED66AA743DE8DAC3E55 /* Check Pods Manifest.lock */,
 				834EF40618A83B5E0072287F /* Sources */,
 				834EF40718A83B5E0072287F /* Frameworks */,
 				834EF40818A83B5E0072287F /* Resources */,
+				A9FD3502274D4BB78575CC8A /* Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -249,14 +282,52 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		39346ED66AA743DE8DAC3E55 /* Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		A9FD3502274D4BB78575CC8A /* Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Pods-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		834EF40618A83B5E0072287F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83B292D118A87493000FC74A /* Track.m in Sources */,
 				834EF44718A84F150072287F /* User.m in Sources */,
+				83B292C818A8573F000FC74A /* MainViewController.m in Sources */,
 				834EF41E18A83B5E0072287F /* AppDelegate.m in Sources */,
+				83B292CE18A8738A000FC74A /* Device.m in Sources */,
 				834EF41A18A83B5E0072287F /* main.m in Sources */,
+				83B292C518A85270000FC74A /* MBWebsocket.m in Sources */,
+				83B292CB18A863FD000FC74A /* Station.m in Sources */,
 				834EF44418A84DD30072287F /* LoginViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -381,6 +452,7 @@
 		};
 		834EF43D18A83B5E0072287F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B20A4565217E4768A9187C3E /* Pods.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -394,6 +466,7 @@
 		};
 		834EF43E18A83B5E0072287F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = B20A4565217E4768A9187C3E /* Pods.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
@@ -466,6 +539,7 @@
 				834EF43E18A83B5E0072287F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		834EF43F18A83B5E0072287F /* Build configuration list for PBXNativeTarget "PandoraControllerTests" */ = {
 			isa = XCConfigurationList;
@@ -474,6 +548,7 @@
 				834EF44118A83B5E0072287F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

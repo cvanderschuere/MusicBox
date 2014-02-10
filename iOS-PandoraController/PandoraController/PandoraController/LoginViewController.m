@@ -9,7 +9,7 @@
 #import "LoginViewController.h"
 #import "AppDelegate.h"
 #import "User.h"
-//#import "MainViewController.h"
+#import "MainViewController.h"
 
 @interface LoginViewController ()
 
@@ -75,7 +75,7 @@
     }
     
     AppDelegate * delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
-    [delegate authenticateWebsocketWithUsername:username Password:password Callback:^(User* user, NSError* error) {
+    [delegate.ws authenticateWebsocketWithUsername:username Password:password Callback:^(User* user, NSError* error) {
         [self.loadingIndicator stopAnimating];
         if (error == nil) {
             NSLog(@"Successfully logged in");
@@ -99,9 +99,6 @@
         //Prepare destination with user
         MainViewController* mainVC = (MainViewController*) segue.destinationViewController;
         [mainVC setCurrentUser:user];
-        
-        AppDelegate *delegate = (AppDelegate*) [UIApplication sharedApplication].delegate;
-        mainVC.ws = delegate.ws;
     }
     
 }

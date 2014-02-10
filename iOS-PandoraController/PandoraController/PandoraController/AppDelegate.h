@@ -8,8 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate, MDWampClientDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+
+@property (nonatomic, strong) MBWebsocket *ws;
+@property (nonatomic, strong) NSTimer* pingTimer;
+
+-(void) connectToWebSocket;
 
 @end

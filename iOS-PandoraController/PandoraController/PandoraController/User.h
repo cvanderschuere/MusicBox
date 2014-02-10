@@ -7,12 +7,18 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Device.h"
 
 @interface User : NSObject
 
 
 @property (nonatomic,strong) NSString* username;
 @property (nonatomic,strong) NSString* sessionID;
+
+@property (nonatomic,strong) NSArray* stations;
+@property (nonatomic,strong) NSArray* devices;
+
+@property (nonatomic,strong) Device *selectedDevice;
 
 
 //Permissions

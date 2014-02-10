@@ -1,0 +1,3 @@
+pod 'MDWamp'
+pod 'AFNetworking', '~> 2.1.0'
+pod 'FXBlurView', '~> 1.5.3'
