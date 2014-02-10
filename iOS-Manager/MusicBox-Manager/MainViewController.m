@@ -155,6 +155,7 @@
         return 0;
     }
 }
+
 - (UICollectionViewCell*) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     if (collectionView == self.trackCollectionView) {
         TrackCell *cell = (TrackCell*) [collectionView dequeueReusableCellWithReuseIdentifier:@"trackCell" forIndexPath:indexPath];
