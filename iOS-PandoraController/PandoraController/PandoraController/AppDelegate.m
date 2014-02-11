@@ -89,7 +89,7 @@
 - (void) pingWebsocket{
     if (self.ws.isConnected) {
         //Not an actual method but will keep the websocket open
-        [self.ws publish:@"ping" toTopic:@"ping"];
+        [self.ws publish:@"ping" toTopic:[self.ws.baseURL stringByAppendingString:@"ping"]];
     }
 }
 
