@@ -29,13 +29,15 @@ func setupPandora(client * turnpike.Client){
 	boxDetails := thisBox["box"].(map[string]interface{})
 	
 	playStation(boxDetails["ThemeID"].(string))
+	
+	pandoraClient.SetVolume(65) //Set to half initially
 }
 
 func handleEvent(topicURI string, event interface{}){
 	message := event.(map[string]interface{})
 	command := message["command"].(string)
 	
-	fmt.Println("Command: "+command)
+	//fmt.Println("Command: "+command)
 	switch command{
 	case "playTrack":
 		pandoraClient.TogglePlayback(true)
@@ -47,7 +49,9 @@ func handleEvent(topicURI string, event interface{}){
 		//Extract station ID
 		data := message["data"].(map[string]interface{})
 		playStation(data["ThemeID"].(string))
-		
+	case "setVolume":
+		data := message["data"].(map[string]interface{})
+		pandoraClient.SetVolume(uint8(data["Volume"].(float64)))
 	default:
 		fmt.Println("Unknown message: ",command)
 	}

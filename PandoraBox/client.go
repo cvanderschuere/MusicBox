@@ -27,7 +27,6 @@ var client *turnpike.Client
 var log = lumber.NewConsoleLogger(lumber.TRACE)
 var deviceName,_ = os.Hostname()
 
-var callback = make(chan bool)
 
 //Fields must be exported for JSON marshal
 type TrackItem struct{
