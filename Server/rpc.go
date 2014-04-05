@@ -19,14 +19,14 @@ import(
 //Args [none] (uses conn Username)
 func userInfoRequest(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){
 	user,err2 := lookupUser(conn.Username)
-	
+
 	//Clear sensitive info
 	user.Password = ""
-	
+
 	if err2 != nil{
 		return nil,err2
 	}
-	
+
 	return user,nil
 }
 
@@ -95,7 +95,7 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 	if len(queue)==requestedCount && errQ == nil{
 		return queue,nil
 	}
-	
+
 	box,err := lookupMusicBox(boxID)
 	if err != nil{
 		return nil,err
@@ -107,16 +107,16 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 	}else if box.User != user.Username{
 		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid boxID",Details:""}
 	}
-	
+
 	//Determine what type of theme this is
 	if box.ThemeFull.Type == PandoraTheme{
 		returnMap := map[string]interface{}{
 			"type":PandoraTheme,
 			"id":box.ThemeFull.ThemeID,
 		}
-		
+
 		return returnMap,nil
-		
+
 	}else if box.ThemeFull.Type == MomentusTheme{
 		//Make Moment.us request based on box information
 		fmt.Println(box.ThemeID,box.ThemeFull)
@@ -215,7 +215,7 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 				fmt.Println(string(body))
 				return []interface{}{}, nil
 		}
-	
+
 		var tracks []TrackItem
 		c := spotify.New() //Spotify client
 
@@ -268,17 +268,17 @@ func recommendSongs(conn *postmaster.Connection,uri string, args ...interface{})
 
 			tracks = append(tracks,t)
 		}
-	
+
 		//Protect against nil queue
 		if queue != nil && len(queue)>0{
 			tracks = append(queue,tracks...)
 		}
-	
+
 		if len(tracks) < requestedCount{
 			fmt.Println("Recommendation Error")
 			return nil, &postmaster.RPCError{URI:uri,Description:"Recommendation Error",Details:""}
 		}
-		
+
 		returnMap := map[string]interface{}{
 			"type":MomentusTheme,
 			"id":box.ThemeFull.ThemeID,
@@ -466,29 +466,29 @@ func getQueue(conn *postmaster.Connection,uri string, args ...interface{})(inter
 	if len(args) == 0{
 		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (No arguments)",Details:""}
 	}
-	
+
 	//Extract necessary information
-	
+
 	//ID
 	boxID,ok := args[0].(string)
 	if !ok{
 		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (ID)",Details:""}
 	}
-	
+
 	//Count must be 1-10
 	if tracks,err := getQueueTracks(boxID,10); err != nil{
 		fmt.Println(err)
 		return nil,&postmaster.RPCError{URI:uri,Description:err.Error(),Details:""}
 	}else{
 		fmt.Println("Returned Queue")
-		return tracks,nil		
-	}	
+		return tracks,nil
+	}
 }
 
 //Used to get list of avaliable themes
 //Args [none]
 func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
-	
+
 	//Get Pandora themes in parallel
 	returnChan := make(chan []*ThemeItem,1)
 	go func(c chan []*ThemeItem, username string){
@@ -498,7 +498,7 @@ func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(inte
 			c<-nil
 			return
 		}
-		
+
 		//Login to pandora
 		client,login := pandora.Login(username,user.PandoraPassword)
 		loginError := <-login
@@ -515,7 +515,7 @@ func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(inte
 			c<-nil
 			return
 		}
-		
+
 		//Convert pandoraStation into ThemeItem
 		themeList := make([]*ThemeItem,len(stations))
 		for i,station := range stations{
@@ -523,13 +523,13 @@ func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(inte
 		}
 
 		c<-themeList
-		
+
 		//Try Logout
 		logout := client.Logout()
 		<-logout
-		
+
 	}(returnChan,conn.Username)
-	
+
 	//Get moment.us themes
 	/*
 	//Get AWS Themes
@@ -537,14 +537,55 @@ func getThemes(conn *postmaster.Connection,uri string, args ...interface{})(inte
 	if err != nil{
 		return nil, &postmaster.RPCError{URI:uri,Description:err.Error(),Details:""}
 	}
-	
-	
+
+
 	//Merge the two
 	themes = append(themes,pandoraThemes...)
 	*/
 	pandoraThemes := <-returnChan
-	
+
 
 	return pandoraThemes,nil
 }
 
+
+func getNearbyDevices(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
+	if len(args) == 0{
+		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (No arguments)",Details:""}
+	}
+
+
+	latLong := args[0].(interface{})
+
+	boxes := make(map[string]interface{}) //*BoxItem or error
+
+	idList = []string{"musicBox1"}
+
+	for _,boxID := range idList{
+		//Lookup musicbox
+		if id,ok := boxID.(string); ok {
+			if box,err := lookupMusicBox(id); err == nil{
+				//Match with username
+				if box.User == conn.Username{
+					//Convert box to map
+					m := map[string]interface{}{
+						"uri":baseURL+conn.Username+"/"+box.ID,
+						"box":box,
+					}
+
+					boxes[id] = m
+
+				}else{
+					boxes[id] = errors.New("No box exists for this user")
+				}
+			}else{
+				boxes[id] = errors.New("No box exists")
+			}
+
+		}else{
+			boxes[id] = errors.New("Incorrect arg type")
+		}
+	}
+
+	return boxes,nil
+}
