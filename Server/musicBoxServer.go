@@ -38,7 +38,6 @@ func main() {
 	server.RegisterRPC(baseURL+"players",boxRequest)
 	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
 	server.RegisterRPC(baseURL+"boxDetails",getMusicBoxDetails)
-	server.RegisterRPC(baseURL+"trackHistory",getTrackHistory)
 	server.RegisterRPC(baseURL+"queue",getQueue)
 	server.RegisterRPC(baseURL+"themes",getThemes)
 
@@ -46,6 +45,7 @@ func main() {
 	server.RegisterUnauthRPC(baseURL+"user/startSession",startSession)
 	server.RegisterUnauthRPC(baseURL+"musicbox/startSession",startSessionBox)
 	server.RegisterUnauthRPC(baseURL+"getNearbyDevices",getNearbyDevices)
+	server.RegisterUnauthRPC(baseURL+"trackHistory",getTrackHistory)
 
 
     s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: nil}

@@ -554,36 +554,26 @@ func getNearbyDevices(conn *postmaster.Connection,uri string, args ...interface{
 		return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (No arguments)",Details:""}
 	}
 
-
-	latLong := args[0].(interface{})
+	// To Be used later
+	//latLong := args[0].(interface{})
 
 	boxes := make(map[string]interface{}) //*BoxItem or error
 
-	idList = []string{"musicBox1"}
+	// For Testing, always send musicBox 3
+	idList := []string{"musicBoxID3"}
 
-	for _,boxID := range idList{
+	for _,id := range idList{
 		//Lookup musicbox
-		if id,ok := boxID.(string); ok {
-			if box,err := lookupMusicBox(id); err == nil{
-				//Match with username
-				if box.User == conn.Username{
-					//Convert box to map
-					m := map[string]interface{}{
-						"uri":baseURL+conn.Username+"/"+box.ID,
-						"box":box,
-					}
-
-					boxes[id] = m
-
-				}else{
-					boxes[id] = errors.New("No box exists for this user")
-				}
-			}else{
-				boxes[id] = errors.New("No box exists")
+		if box,err := lookupMusicBox(id); err == nil{
+			//Match with username
+			m := map[string]interface{}{
+				"uri":baseURL+box.User+"/"+box.ID,
+				"box":box,
 			}
 
+			boxes[id] = m
 		}else{
-			boxes[id] = errors.New("Incorrect arg type")
+			boxes[id] = errors.New("No box exists")
 		}
 	}
 
