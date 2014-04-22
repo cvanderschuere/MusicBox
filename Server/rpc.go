@@ -432,9 +432,12 @@ func getTrackHistory(conn *postmaster.Connection,uri string, args ...interface{}
 		}
 	}
 
+	// TODO: need to query db to get this based on device Id
+	username := "christopher.vanderschuere@gmail.com"
+
 	//Query table
 	comps := []dynamodb.AttributeComparison{
-		*dynamodb.NewEqualStringAttributeComparison("CompositeID",conn.Username+":"+compositeID), //Composite ID
+		*dynamodb.NewEqualStringAttributeComparison("CompositeID",username+":"+compositeID), //Composite ID
 		*dynamodb.NewStringAttributeComparison("Date",dynamodb.COMPARISON_LESS_THAN_OR_EQUAL,date),
 	}
 
