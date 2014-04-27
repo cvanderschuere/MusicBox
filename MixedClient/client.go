@@ -203,7 +203,7 @@ LOOP:
 
                         pClient.PlayStation(themeId)
 
-                        delayedAction := new(Notification)
+                        delayedAction = new(Notification)
                     }else{
                         pClient.NextTrack()
                     }
