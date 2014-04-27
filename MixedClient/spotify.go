@@ -12,7 +12,7 @@ type spotifyClient struct{
     streamChan chan alsa.AudioStream
 }
 
-func setupSpotify(client *turnpike.Client) *spotifyClient{
+func SetupSpotify(client *turnpike.Client) *spotifyClient{
     sClient = new(spotifyClient)
 
     sClient.controlChan = make(chan bool)
@@ -38,7 +38,7 @@ func (c *spotifyClient)Stop(){
 }
 
 
-func (c *spotifyClient)NextTrack(track *TrackItem) (chan bool){
+func (c *spotifyClient)NextTrack(track TrackItem) (chan bool){
 
     //Send startedTrack message
     msg := map[string]interface{} {

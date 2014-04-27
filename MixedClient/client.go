@@ -108,8 +108,9 @@ func playerLoop(signalChan chan os.Signal, pClient *pandoraClient, sClient *spot
 
     spotifyEndChan := make(chan bool)
     var queue []TrackItem = make([]TrackItem,0)
+    var isPlaying = true
 
-    var delayedAction Notification
+    delayedAction := new(Notification)
 
 LOOP:
     select{
@@ -149,6 +150,7 @@ LOOP:
             }else{
                 sClient.Pause()
             }
+            isPlaying = false
 
         case ResumedTrack:
             //Send play
@@ -159,6 +161,7 @@ LOOP:
             }else{
                 sClient.Play()
             }
+            isPlaying = true
 
         case StoppedTrack:
             //Unload current track
@@ -169,6 +172,7 @@ LOOP:
             }else{
                 sClient.Stop()
             }
+            isPlaying = false
 
         case NextTrack:
 
@@ -194,10 +198,12 @@ LOOP:
                 }else{
                     sClient.Stop()
 
-                    if delayedAction {
+                    if delayedAction != nil {
                         themeId := delayedAction.Content.(string)
 
                         pClient.PlayStation(themeId)
+
+                        delayedAction := new(Notification)
                     }else{
                         pClient.NextTrack()
                     }
@@ -240,7 +246,7 @@ LOOP:
             //Send back map of current status values: title,isPlaying,queue
             response := map[string]interface{}{
                 //"deviceName": deviceName,
-                "deviceId": musicBoxId,
+                "deviceId": musicBoxID,
                 "isPlaying": isPlaying,
                 "pandora": pandoraPlaying,
                 "queue": queue,
@@ -274,11 +280,8 @@ func initializeClient()(*pandoraClient, *spotifyClient){
     client.Subscribe(baseURL+boxUsername+"/"+musicBoxID, handleMessages)
 
 
-    sClient := setupSpotify(client)
-    pClient := setupPandora(client)
-
-    //Launch Event handler
-    go eventHandler(client, updateChan)
+    sClient := SetupSpotify(client)
+    pClient := SetupPandora(client)
 
     return pClient, sClient
 }
@@ -298,13 +301,13 @@ func handleMessages(topicURI string, event interface{}){
             track := trackDict.(map[string]interface{})
             newTrack := trackItemFromMap(track)
 
-            notiChan <- Notification{Kind:AddedToQueue,Content:newTrack} // Give chance to preload
+            updateChan <- Notification{Kind:AddedToQueue,Content:newTrack} // Give chance to preload
         }
 
     case "playTrack":
         updateChan <- Notification{Kind:ResumedTrack}
     case "pauseTrack":
-        updateChan <- Notification{Kind:PauseedTrack}
+        updateChan <- Notification{Kind:PausedTrack}
     case "nextTrack":
         updateChan <- Notification{Kind:NextTrack}
     case "updateTheme":
