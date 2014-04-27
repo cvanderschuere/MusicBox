@@ -113,153 +113,155 @@ func playerLoop(signalChan chan os.Signal, pClient *pandoraClient, sClient *spot
     delayedAction := new(Notification)
 
 LOOP:
-    select{
-    case s := <- signalChan:
-        signal.Stop(signalChan)
-        log.Debug("Recieved Signal: ", s)
-        break LOOP
+    for{
+        select{
+        case s := <- signalChan:
+            signal.Stop(signalChan)
+            log.Debug("Recieved Signal: ", s)
+            break LOOP
 
-    case <- spotifyEndChan:
-        log.Trace("Recieved on end of track chan")
-        updateChan <- Notification{Kind:EndOfTrack}
-        log.Trace("Finished send on end of track update")
+        case <- spotifyEndChan:
+            log.Trace("Recieved on end of track chan")
+            updateChan <- Notification{Kind:EndOfTrack}
+            log.Trace("Finished send on end of track update")
 
-    case update := <- updateChan:
-        log.Trace("Recieved Update: ", update.Kind)
+        case update := <- updateChan:
+            log.Trace("Recieved Update: ", update.Kind)
 
-        //Take action based on update type
-        switch update.Kind{
-        case AddedToQueue:
-            track := update.Content.(TrackItem)
-            log.Trace("Added Track: "+track.ProviderID)
+            //Take action based on update type
+            switch update.Kind{
+            case AddedToQueue:
+                track := update.Content.(TrackItem)
+                log.Trace("Added Track: "+track.ProviderID)
 
-            //Append
-            queue = append(queue, track)
+                //Append
+                queue = append(queue, track)
 
-        case RemovedFromQueue:
-            //Should have to do nothing...unless is current track
-            track := update.Content.(TrackItem)
-            log.Warn("Remove Track Not Implemented Yet: "+track.ProviderID)
+            case RemovedFromQueue:
+                //Should have to do nothing...unless is current track
+                track := update.Content.(TrackItem)
+                log.Warn("Remove Track Not Implemented Yet: "+track.ProviderID)
 
-        case PausedTrack:
-            //Send pause command
-            log.Trace("Paused Track")
+            case PausedTrack:
+                //Send pause command
+                log.Trace("Paused Track")
 
-            if(pandoraPlaying){
-                pClient.Pause()
-            }else{
-                sClient.Pause()
-            }
-            isPlaying = false
-
-        case ResumedTrack:
-            //Send play
-            log.Trace("Resumed Track")
-
-            if(pandoraPlaying){
-                pClient.Play()
-            }else{
-                sClient.Play()
-            }
-            isPlaying = true
-
-        case StoppedTrack:
-            //Unload current track
-            log.Trace("Stopped Track")
-
-            if(pandoraPlaying){
-                pClient.Pause()
-            }else{
-                sClient.Stop()
-            }
-            isPlaying = false
-
-        case NextTrack:
-
-            // check queue for track, if has one start playing it, otherwise continue
-            // pandora
-            if len(queue) > 0{
-                track := queue[0]
-
-                if pandoraPlaying{
+                if(pandoraPlaying){
                     pClient.Pause()
+                }else{
+                    sClient.Pause()
                 }
+                isPlaying = false
 
-                spotifyEndChan = sClient.NextTrack(track)
+            case ResumedTrack:
+                //Send play
+                log.Trace("Resumed Track")
 
-                queue = queue[1:]
-                pandoraPlaying = false
+                if(pandoraPlaying){
+                    pClient.Play()
+                }else{
+                    sClient.Play()
+                }
+                isPlaying = true
 
-            }else{
-                if pandoraPlaying{
-                    // Tell Pandora Client to Skip, Handler in Pandora.go will update
-                    // other clients with the new song
-                    pClient.NextTrack()
+            case StoppedTrack:
+                //Unload current track
+                log.Trace("Stopped Track")
+
+                if(pandoraPlaying){
+                    pClient.Pause()
                 }else{
                     sClient.Stop()
+                }
+                isPlaying = false
 
-                    if delayedAction != nil {
-                        themeId := delayedAction.Content.(string)
+            case NextTrack:
 
-                        pClient.PlayStation(themeId)
+                // check queue for track, if has one start playing it, otherwise continue
+                // pandora
+                if len(queue) > 0{
+                    track := queue[0]
 
-                        delayedAction = new(Notification)
-                    }else{
-                        pClient.NextTrack()
+                    if pandoraPlaying{
+                        pClient.Pause()
                     }
 
-                    pandoraPlaying = true
+                    spotifyEndChan = sClient.NextTrack(track)
+
+                    queue = queue[1:]
+                    pandoraPlaying = false
+
+                }else{
+                    if pandoraPlaying{
+                        // Tell Pandora Client to Skip, Handler in Pandora.go will update
+                        // other clients with the new song
+                        pClient.NextTrack()
+                    }else{
+                        sClient.Stop()
+
+                        if delayedAction != nil {
+                            themeId := delayedAction.Content.(string)
+
+                            pClient.PlayStation(themeId)
+
+                            delayedAction = new(Notification)
+                        }else{
+                            pClient.NextTrack()
+                        }
+
+                        pandoraPlaying = true
+                    }
+
+                }
+            case ChangeTheme:
+                themeId := update.Content.(string)
+                log.Trace("Changed Theme: "+themeId)
+
+                if(pandoraPlaying){
+                    pClient.PlayStation(themeId)
+                }else{
+                    delayedAction = &update
                 }
 
+            case SetVolume:
+                volume := update.Content.(uint8)
+                log.Trace("Changed Volume: ",volume)
+
+                if pandoraPlaying{
+                    pClient.SetVolume(volume)
+                }else{
+                    log.Warn("Spotify Volume cannot be set")
+                }
+
+            case EndOfTrack:
+                // Tell other Clients that the track has ended
+                msg := map[string]string{
+                    "command":"endOfTrack",
+                }
+
+                client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg)
+
+                updateChan <- Notification{Kind:NextTrack}
+
+            case StatusUpdate:
+                //Send back map of current status values: title,isPlaying,queue
+                response := map[string]interface{}{
+                    //"deviceName": deviceName,
+                    "deviceId": musicBoxID,
+                    "isPlaying": isPlaying,
+                    "pandora": pandoraPlaying,
+                    "queue": queue,
+                }
+
+                responseMessage := map[string]interface{}{
+                    "command": "statusUpdate",
+                    "data": response,
+                }
+
+                client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,responseMessage)
+            default:
+                log.Warn("Unknown Update Type: %d",update)
             }
-        case ChangeTheme:
-            themeId := update.Content.(string)
-            log.Trace("Changed Theme: "+themeId)
-
-            if(pandoraPlaying){
-                pClient.PlayStation(themeId)
-            }else{
-                delayedAction = &update
-            }
-
-        case SetVolume:
-            volume := update.Content.(uint8)
-            log.Trace("Changed Volume: ",volume)
-
-            if pandoraPlaying{
-                pClient.SetVolume(volume)
-            }else{
-                log.Warn("Spotify Volume cannot be set")
-            }
-
-        case EndOfTrack:
-            // Tell other Clients that the track has ended
-            msg := map[string]string{
-                "command":"endOfTrack",
-            }
-
-            client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg)
-
-            updateChan <- Notification{Kind:NextTrack}
-
-        case StatusUpdate:
-            //Send back map of current status values: title,isPlaying,queue
-            response := map[string]interface{}{
-                //"deviceName": deviceName,
-                "deviceId": musicBoxID,
-                "isPlaying": isPlaying,
-                "pandora": pandoraPlaying,
-                "queue": queue,
-            }
-
-            responseMessage := map[string]interface{}{
-                "command": "statusUpdate",
-                "data": response,
-            }
-
-            client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,responseMessage)
-        default:
-            log.Warn("Unknown Update Type: %d",update)
         }
     }
 }
