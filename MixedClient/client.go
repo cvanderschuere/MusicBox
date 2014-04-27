@@ -4,7 +4,6 @@ import(
     "code.google.com/p/go.net/websocket"
     "github.com/jcelliott/lumber"
     "github.com/cvanderschuere/turnpike"
-    "runtime"
     "os"
     "os/signal"
     "time"
@@ -110,7 +109,7 @@ func playerLoop(signalChan chan os.Signal, pClient pandoraClient, sClient spotif
     spotifyEndChan := make(chan bool)
     var queue []TrackItem = make([]TrackItem,0)
 
-    var delayedAction Notification = nil
+    var delayedAction Notification
 
 LOOP:
     select{
@@ -125,7 +124,7 @@ LOOP:
         log.Trace("Finished send on end of track update")
 
     case update := <- updateChan:
-        log.trace("Recieved Update: ",update.Kind)
+        log.Trace("Recieved Update: ", update.Kind)
 
         //Take action based on update type
         switch update.Kind{
@@ -176,7 +175,7 @@ LOOP:
             // check queue for track, if has one start playing it, otherwise continue
             // pandora
             if len(queue) > 0{
-                track = queue[0]
+                track := queue[0]
 
                 if pandoraPlaying{
                     pClient.Pause()
@@ -259,7 +258,7 @@ LOOP:
     }
 }
 
-func initializeClient()(*turnpike.Client){
+func initializeClient()(*pandoraClient, *spotifyClient){
     //log.info("Name:" + deviceName + " ID:" + deviceID)
 
     client = turnpike.NewClient()
