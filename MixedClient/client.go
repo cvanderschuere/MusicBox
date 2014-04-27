@@ -106,7 +106,7 @@ func main(){
 
 func playerLoop(signalChan chan os.Signal, pClient *pandoraClient, sClient *spotifyClient){
 
-    spotifyEndChan := make(chan bool)
+    spotifyEndChan := make(<-chan bool)
     var queue []TrackItem = make([]TrackItem,0)
     var isPlaying = true
 
