@@ -219,7 +219,7 @@ LOOP:
             if(pandoraPlaying){
                 pClient.PlayStation(themeId)
             }else{
-                delayedAction = update
+                delayedAction = &update
             }
 
         case SetVolume:
@@ -326,7 +326,7 @@ func handleMessages(topicURI string, event interface{}){
     case "statusUpdate":
         updateChan <- Notification{Kind:StatusUpdate}
     default:
-        fmt.Println("Unknown message: ",command)
+        log.Warn("Unknown message: ",command)
     }
 }
 
@@ -336,7 +336,7 @@ func handleMessages(topicURI string, event interface{}){
 func connectToServer(client *turnpike.Client){
     //Connect socket between server port and local port
     config,_ := websocket.NewConfig("ws://"+serverURL,"http://localhost:4040")
-    config.Header.Add("musicbox-box-id", deviceID)
+    config.Header.Add("musicbox-box-id", musicBoxID)
 
     CONNECT:
     if err := client.ConnectConfig(config); err != nil {

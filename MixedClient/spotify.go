@@ -13,7 +13,7 @@ type spotifyClient struct{
 }
 
 func SetupSpotify(client *turnpike.Client) *spotifyClient{
-    sClient = new(spotifyClient)
+    sClient := new(spotifyClient)
 
     sClient.controlChan = make(chan bool)
     sClient.streamChan = alsa.Init(sClient.controlChan)

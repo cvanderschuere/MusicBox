@@ -51,7 +51,7 @@ func SetupPandora(client *turnpike.Client) (*pandoraClient){
 }
 
 
-func (c *pandoraClient)SetVolume(vol int){
+func (c *pandoraClient)SetVolume(vol uint8){
     c.client.SetVolume(vol)
 }
 
