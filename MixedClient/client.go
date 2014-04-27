@@ -104,7 +104,7 @@ func main(){
 }
 
 
-func playerLoop(signalChan chan os.Signal, pClient pandoraClient, sClient spotifyClient){
+func playerLoop(signalChan chan os.Signal, pClient *pandoraClient, sClient *spotifyClient){
 
     spotifyEndChan := make(chan bool)
     var queue []TrackItem = make([]TrackItem,0)
@@ -181,7 +181,7 @@ LOOP:
                     pClient.Pause()
                 }
 
-                endOfTrackChan = sClient.NextTrack(track)
+                spotifyEndChan = sClient.NextTrack(track)
 
                 queue = queue[1:]
                 pandoraPlaying = false
@@ -190,16 +190,16 @@ LOOP:
                 if pandoraPlaying{
                     // Tell Pandora Client to Skip, Handler in Pandora.go will update
                     // other clients with the new song
-                    pClient.Next()
+                    pClient.NextTrack()
                 }else{
                     sClient.Stop()
 
-                    if delayedAction != nil{
+                    if delayedAction {
                         themeId := delayedAction.Content.(string)
 
                         pClient.PlayStation(themeId)
                     }else{
-                        pClient.Next()
+                        pClient.NextTrack()
                     }
 
                     pandoraPlaying = true
@@ -218,7 +218,7 @@ LOOP:
 
         case SetVolume:
             volume := update.Content.(uint8)
-            log.Trace("Changed Volume: "+volume)
+            log.Trace("Changed Volume: ",volume)
 
             if pandoraPlaying{
                 pClient.SetVolume(volume)

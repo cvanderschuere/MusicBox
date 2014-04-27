@@ -1,6 +1,7 @@
 package main
 
 import(
+    "github.com/cvanderschuere/turnpike"
     "github.com/cvanderschuere/spotify-go"
     "github.com/cvanderschuere/alsa-go"
     "fmt"
@@ -37,7 +38,7 @@ func (c *spotifyClient)Stop(){
 }
 
 
-func (c *spotifyClient)NextTrack() (chan bool){
+func (c *spotifyClient)NextTrack(track *TrackItem) (chan bool){
 
     //Send startedTrack message
     msg := map[string]interface{} {
