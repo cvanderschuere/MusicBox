@@ -9,7 +9,7 @@ import(
 
 type spotifyClient struct{
     controlChan chan bool
-    streamChan chan alsa.AudioStream
+    streamChan chan<- alsa.AudioStream
 }
 
 func SetupSpotify(client *turnpike.Client) *spotifyClient{
@@ -50,10 +50,9 @@ func (c *spotifyClient)NextTrack(track TrackItem) (chan bool){
     }
     client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
 
-    var err error
     item := &spotify.SpotifyItem{Url:track.ProviderID}
 
-    endOfTrackChan,err = spotify.Play(item, c.streamChan)
+    endOfTrackChan,err := spotify.Play(item, c.streamChan)
     if err != nil{
         fmt.Println("Error playing track: "+err.Error())
     }
