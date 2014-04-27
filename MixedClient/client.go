@@ -183,18 +183,29 @@ LOOP:
                 // check queue for track, if has one start playing it, otherwise continue
                 // pandora
                 if len(queue) > 0{
+                    log.Trace("Adding song from queue")
                     track := queue[0]
 
                     if pandoraPlaying{
+                        log.Debug("Pause Pandora")
                         pClient.Pause()
                     }
 
+                    log.Debug("Start Spotify", track)
                     spotifyEndChan = sClient.NextTrack(track)
 
-                    queue = queue[1:]
+                    if len(queue) > 1{
+                        queue = queue[1:]
+                        log.Debug("Shift Queue", queue)
+                    }else{
+                        queue = make([]TrackItem,0)
+                        log.Debug("Clear Queue", queue)
+                    }
+
                     pandoraPlaying = false
 
                 }else{
+                    log.Trace("Adding song from pandora")
                     if pandoraPlaying{
                         // Tell Pandora Client to Skip, Handler in Pandora.go will update
                         // other clients with the new song
