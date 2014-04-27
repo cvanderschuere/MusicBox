@@ -12,7 +12,7 @@ import(
 
 const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
-const musicBoxID = "musicBoxID1"
+const musicBoxID = "musicBoxID3"
 
 const spotifyUsername string = "christopher.vanderschuere@gmail.com"
 const spotifyPassword string = "N0ttingham11"
