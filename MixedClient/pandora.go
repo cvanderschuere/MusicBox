@@ -9,8 +9,6 @@ import(
 
 type pandoraClient struct{
     client *pandora.PandoraClient
-
-    wampClient *turnpike.Client
 }
 
 func SetupPandora(client *turnpike.Client) (*pandoraClient){
@@ -75,13 +73,13 @@ func (c *pandoraClient)PlayStation(stationID string){
     ch,_ := c.client.Play(station)
 
 
-    go handlePandoraStart(ch, c.wampClient)
+    go handlePandoraStart(ch)
 
     fmt.Println("Finished Playing")
 }
 
 
-func handlePandoraStart(c <-chan *pandora.Track, client *turnpike.Client){
+func handlePandoraStart(c <-chan *pandora.Track){
     for track := range c{
         if track == nil{
             continue
