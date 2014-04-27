@@ -131,8 +131,8 @@ LOOP:
             //Take action based on update type
             switch update.Kind{
             case AddedToQueue:
-                track := update.Content.(TrackItem)
-                if(track != nil){
+                track, ok := update.Content.(TrackItem)
+                if(ok){
                     log.Trace("Added Track: "+track.ProviderID)
 
                     //Append
