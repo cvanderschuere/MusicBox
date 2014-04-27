@@ -114,6 +114,7 @@ func playerLoop(signalChan chan os.Signal, pClient *pandoraClient, sClient *spot
 
 LOOP:
     for{
+        log.Trace("good")
         select{
         case s := <- signalChan:
             signal.Stop(signalChan)
@@ -307,7 +308,7 @@ func handleMessages(topicURI string, event interface{}){
     message := event.(map[string]interface{})
     command := message["command"].(string)
 
-    //fmt.Println("Command: "+command)
+    log.Trace("Command: ",command)
     switch command{
     case "addTrack":
         data := message["data"].([]interface{}) // Need for interface due to interal marshaling in turnpike
