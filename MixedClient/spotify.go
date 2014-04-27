@@ -38,7 +38,7 @@ func (c *spotifyClient)Stop(){
 }
 
 
-func (c *spotifyClient)NextTrack(track TrackItem) (chan bool){
+func (c *spotifyClient)NextTrack(track TrackItem) (chan<- bool){
 
     //Send startedTrack message
     msg := map[string]interface{} {

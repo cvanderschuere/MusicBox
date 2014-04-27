@@ -345,7 +345,7 @@ func connectToServer(client *turnpike.Client){
         goto CONNECT
     }
 
-    log.info("Connected to Server at " + serverURL)
+    log.Info("Connected to Server at " + serverURL)
 }
 
 const WAMP_BASE_URL = "http://api.wamp.ws/"
