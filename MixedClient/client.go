@@ -132,11 +132,14 @@ LOOP:
             switch update.Kind{
             case AddedToQueue:
                 track := update.Content.(TrackItem)
-                log.Trace("Added Track: "+track.ProviderID)
+                if(track != nil){
+                    log.Trace("Added Track: "+track.ProviderID)
 
-                //Append
-                queue = append(queue, track)
-
+                    //Append
+                    queue = append(queue, track)
+                }else{
+                    log.Warn("No Track to Add")
+                }
             case RemovedFromQueue:
                 //Should have to do nothing...unless is current track
                 track := update.Content.(TrackItem)
