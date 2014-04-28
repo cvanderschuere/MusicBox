@@ -197,6 +197,9 @@ LOOP:
                     log.Debug("Start Spotify", track)
                     sClient.NextTrack(track, spotifyEndChan)
 
+                    log.Debug("channel: ", spotifyEndChan)
+                    log.Debug("channelAddr: ", &spotifyEndChan)
+
                     if len(queue) > 1{
                         queue = queue[1:]
                         log.Debug("Shift Queue", queue)
