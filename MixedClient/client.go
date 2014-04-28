@@ -133,7 +133,7 @@ LOOP:
             case AddedToQueue:
                 track, ok := update.Content.(TrackItem)
                 if(ok){
-                    log.Trace("Added Track: "+track.Title+" ("+track.ProviderID+")")
+                    log.Trace("Added Track: ''"+track.Title+"'' ("+track.ProviderID+")")
 
                     //Append
                     queue = append(queue, track)

@@ -38,7 +38,7 @@ func (c *spotifyClient)Stop(){
 }
 
 
-func (c *spotifyClient)NextTrack(track TrackItem, endOfTrackChan *<-chan bool) (<-chan bool){
+func (c *spotifyClient)NextTrack(track TrackItem, endOfTrackChan <-chan bool) (<-chan bool){
 
     log.Debug("channel: ", endOfTrackChan)
     log.Debug("channelAddr: ", &endOfTrackChan)
