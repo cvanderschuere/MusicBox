@@ -40,9 +40,6 @@ func (c *spotifyClient)Stop(){
 
 func (c *spotifyClient)NextTrack(track TrackItem) (<-chan bool){
 
-    log.Debug("channel: ", endOfTrackChan)
-    log.Debug("channelAddr: ", &endOfTrackChan)
-
     //Send startedTrack message
     msg := map[string]interface{} {
         "command":"startedTrack",
