@@ -195,7 +195,7 @@ LOOP:
                     log.Debug("channelAddr: ", &spotifyEndChan)
 
                     log.Debug("Start Spotify", track)
-                    sClient.NextTrack(track, spotifyEndChan)
+                    spotifyEndChan = sClient.NextTrack(track, spotifyEndChan)
 
                     log.Debug("channel: ", spotifyEndChan)
                     log.Debug("channelAddr: ", &spotifyEndChan)
