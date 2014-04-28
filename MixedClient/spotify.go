@@ -38,7 +38,7 @@ func (c *spotifyClient)Stop(){
 }
 
 
-func (c *spotifyClient)NextTrack(track TrackItem) (<-chan bool){
+func (c *spotifyClient)NextTrack(track TrackItem, endOfTrackChan <-chan bool) (<-chan bool){
 
     //Send startedTrack message
     msg := map[string]interface{} {
@@ -52,7 +52,8 @@ func (c *spotifyClient)NextTrack(track TrackItem) (<-chan bool){
 
     item := &spotify.SpotifyItem{Url:track.ProviderID}
 
-    endOfTrackChan,err := spotify.Play(item, c.streamChan)
+    var err error
+    endOfTrackChan,err = spotify.Play(item, c.streamChan)
     if err != nil{
         fmt.Println("Error playing track: "+err.Error())
     }

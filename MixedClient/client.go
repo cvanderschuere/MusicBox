@@ -114,7 +114,6 @@ func playerLoop(signalChan chan os.Signal, pClient *pandoraClient, sClient *spot
 
 LOOP:
     for{
-        log.Trace("good")
         select{
         case s := <- signalChan:
             signal.Stop(signalChan)
@@ -134,7 +133,7 @@ LOOP:
             case AddedToQueue:
                 track, ok := update.Content.(TrackItem)
                 if(ok){
-                    log.Trace("Added Track: "+track.ProviderID)
+                    log.Trace("Added Track: "+track.Title+" ("+track.ProviderID+")")
 
                     //Append
                     queue = append(queue, track)
@@ -193,7 +192,7 @@ LOOP:
                     }
 
                     log.Debug("Start Spotify", track)
-                    spotifyEndChan = sClient.NextTrack(track)
+                    sClient.NextTrack(track, spotifyEndChan)
 
                     if len(queue) > 1{
                         queue = queue[1:]
