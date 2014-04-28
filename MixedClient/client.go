@@ -191,6 +191,9 @@ LOOP:
                         pClient.Pause()
                     }
 
+                    log.Debug("channel: ", spotifyEndChan)
+                    log.Debug("channelAddr: ", &spotifyEndChan)
+
                     log.Debug("Start Spotify", track)
                     sClient.NextTrack(track, spotifyEndChan)
 
