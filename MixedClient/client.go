@@ -14,9 +14,6 @@ const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
 const musicBoxID = "musicBoxID3"
 
-const spotifyUsername string = "christopher.vanderschuere@gmail.com"
-const spotifyPassword string = "N0ttingham11"
-
 var boxUsername string
 var boxSessionID string
 
@@ -84,10 +81,6 @@ func trackItemFromMap(data map[string]interface{})(TrackItem){
     return t
 }
 
-
-
-
-
 var updateChan chan Notification
 
 func main(){
@@ -110,8 +103,6 @@ func playerLoop(signalChan chan os.Signal, pClient *pandoraClient, sClient *spot
     var queue []TrackItem = make([]TrackItem,0)
     var isPlaying = true
 
-    delayedAction := new(Notification)
-
 LOOP:
     for{
         select{
@@ -122,7 +113,7 @@ LOOP:
 
         case <- spotifyEndChan:
             log.Trace("Recieved on end of track chan")
-            updateChan <- Notification{Kind:EndOfTrack}
+            //updateChan <- Notification{Kind:EndOfTrack}
             log.Trace("Finished send on end of track update")
 
         case update := <- updateChan:
@@ -187,18 +178,12 @@ LOOP:
                     track := queue[0]
 
                     if pandoraPlaying{
-                        log.Debug("Pause Pandora")
-                        pClient.Pause()
+                        log.Debug("Stop Pandora")
+                        pClient.Stop()
                     }
-
-                    log.Debug("channel: ", spotifyEndChan)
-                    log.Debug("channelAddr: ", &spotifyEndChan)
 
                     log.Debug("Start Spotify", track)
                     spotifyEndChan = sClient.NextTrack(track)
-
-                    log.Debug("channel: ", spotifyEndChan)
-                    log.Debug("channelAddr: ", &spotifyEndChan)
 
                     if len(queue) > 1{
                         queue = queue[1:]
@@ -217,30 +202,27 @@ LOOP:
                         // other clients with the new song
                         pClient.NextTrack()
                     }else{
+	                    log.Trace("Stopping Spotify")
+						
                         sClient.Stop()
 
-                        if delayedAction != nil {
-                            themeId := delayedAction.Content.(string)
-
-                            pClient.PlayStation(themeId)
-
-                            delayedAction = new(Notification)
-                        }else{
-                            pClient.NextTrack()
+                        if pClient.ThemeID != "" {
+		                    log.Trace("Starting pandora theme: ",pClient.ThemeID)
+							
+                            pClient.PlayStation(pClient.ThemeID)
+	                        pandoraPlaying = true
                         }
-
-                        pandoraPlaying = true
                     }
 
                 }
             case ChangeTheme:
                 themeId := update.Content.(string)
                 log.Trace("Changed Theme: "+themeId)
+				
+				pClient.ThemeID = themeId
 
                 if(pandoraPlaying){
                     pClient.PlayStation(themeId)
-                }else{
-                    delayedAction = &update
                 }
 
             case SetVolume:
@@ -250,7 +232,7 @@ LOOP:
                 if pandoraPlaying{
                     pClient.SetVolume(volume)
                 }else{
-                    log.Warn("Spotify Volume cannot be set")
+                    sClient.SetVolume(volume)
                 }
 
             case EndOfTrack:

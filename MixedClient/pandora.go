@@ -9,6 +9,7 @@ import(
 
 type pandoraClient struct{
     client *pandora.PandoraClient
+	ThemeID string //Current themeID
 }
 
 func SetupPandora(client *turnpike.Client) (*pandoraClient){
@@ -28,7 +29,6 @@ func SetupPandora(client *turnpike.Client) (*pandoraClient){
         fmt.Println(err)
     }
 
-
     // Get Box Details so we can play the current station
     resp = client.Call(baseURL+"boxDetails",[]string{musicBoxID})
     message = <-resp
@@ -37,10 +37,11 @@ func SetupPandora(client *turnpike.Client) (*pandoraClient){
     thisBox := boxes[musicBoxID].(map[string]interface{})
     boxDetails := thisBox["box"].(map[string]interface{})
 
-    themeId := boxDetails["ThemeID"].(string)
+	// Save theme
+    pClient.ThemeID = boxDetails["ThemeID"].(string) 
 
     // Start Station
-    pClient.PlayStation(themeId)
+    pClient.PlayStation(pClient.ThemeID)
 
     //Set to half initially
     pClient.SetVolume(65)
@@ -61,6 +62,10 @@ func (c *pandoraClient)Pause(){
     c.client.TogglePlayback(false)
 }
 
+func (c *pandoraClient)Stop(){
+    c.client.Stop()
+}
+
 func (c *pandoraClient)NextTrack(){
     c.client.Next()
 }
@@ -71,7 +76,6 @@ func (c *pandoraClient)PlayStation(stationID string){
     station := pandora.Station{ID:stationID}
 
     ch,_ := c.client.Play(station)
-
 
     go handlePandoraStart(ch)
 
