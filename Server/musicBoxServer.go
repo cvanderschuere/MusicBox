@@ -40,15 +40,16 @@ func main() {
 	server.RegisterRPC(baseURL+"boxDetails",getMusicBoxDetails)
 	server.RegisterRPC(baseURL+"queue",getQueue)
 	server.RegisterRPC(baseURL+"themes",getThemes)
+	server.RegisterRPC(baseURL+"trackHistory",getTrackHistory)
+	server.RegisterRPC(baseURL+"getNearbyDevices",getNearbyDevices)
 
 	//Unauth rpc
 	server.RegisterUnauthRPC(baseURL+"user/startSession",startSession)
 	server.RegisterUnauthRPC(baseURL+"musicbox/startSession",startSessionBox)
-	server.RegisterUnauthRPC(baseURL+"getNearbyDevices",getNearbyDevices)
 	server.RegisterUnauthRPC(baseURL+"trackHistory",getTrackHistory)
+	server.RegisterUnauthRPC(baseURL+"getNearbyDevices",getNearbyDevices)
 
-
-    s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: nil}
+    	s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: nil}
 	http.Handle("/", s)
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
