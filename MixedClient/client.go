@@ -10,7 +10,7 @@ import(
 )
 
 
-const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
+const serverURL = "ec2-54-201-63-215.us-west-2.compute.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
 const musicBoxID = "musicBoxID3"
 
