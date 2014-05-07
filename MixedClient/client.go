@@ -112,7 +112,7 @@ LOOP:
                     log.Trace("Adding song from queue")
                     track := queue[0]
 
-                    pClient.Stop()
+                    pClient.Pause()
 
                     log.Debug("Start Spotify", track)
                     spotifyEndChan = sClient.NextTrack(track)
@@ -215,7 +215,7 @@ LOOP:
 
                     if pandoraPlaying{
                         log.Debug("Stop Pandora")
-                        pClient.Stop()
+                        pClient.Pause()
                     }
 
                     log.Debug("Start Spotify", track)
