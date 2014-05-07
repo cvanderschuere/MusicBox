@@ -264,7 +264,7 @@ LOOP:
             default:
                 log.Warn("Unknown Update Type: %d",update)
             }
-        }
+
         case track := <- pClient.trackChan:
             if(track != nil){
                 if len(queue) > 0{
@@ -301,6 +301,7 @@ LOOP:
 
                 client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
             }
+        }
     }
 }
 
