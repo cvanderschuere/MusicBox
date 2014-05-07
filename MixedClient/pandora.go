@@ -10,6 +10,8 @@ import(
 type pandoraClient struct{
     client *pandora.PandoraClient
 	ThemeID string //Current themeID
+
+    trackChan <-chan *pandora.Track
 }
 
 func SetupPandora(client *turnpike.Client) (*pandoraClient){
@@ -38,9 +40,8 @@ func SetupPandora(client *turnpike.Client) (*pandoraClient){
     boxDetails := thisBox["box"].(map[string]interface{})
 
 	// Save theme
-    pClient.ThemeID = boxDetails["ThemeID"].(string) 
+    pClient.ThemeID = boxDetails["ThemeID"].(string)
 
-    // Start Station
     pClient.PlayStation(pClient.ThemeID)
 
     //Set to half initially
@@ -70,34 +71,19 @@ func (c *pandoraClient)NextTrack(){
     c.client.Next()
 }
 
-func (c *pandoraClient)PlayStation(stationID string){
+func (c *pandoraClient)PlayStation(stationID string) (<-chan *pandora.Track){
     fmt.Println(stationID)
 
     station := pandora.Station{ID:stationID}
 
-    ch,_ := c.client.Play(station)
+    c.trackChan,_ := c.client.Play(station)
 
-    go handlePandoraStart(ch)
+//    go handlePandoraStart(ch)
 
-    fmt.Println("Finished Playing")
+
 }
 
 
-func handlePandoraStart(c <-chan *pandora.Track){
-    for track := range c{
-        if track == nil{
-            continue
-        }
-
-        //Send this track as started track
-        msg := map[string]interface{} {
-            "command":"startedTrack",
-            "data": map[string]interface{}{
-                "deviceID":musicBoxID,
-                "track":track, //Luckily a TrackItem and pandora.Track are identical :)
-            },
-        }
-
-        client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
-    }
-}
+//func handlePandoraStart(c <-chan *pandora.Track){
+//
+//}

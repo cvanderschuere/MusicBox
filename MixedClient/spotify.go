@@ -6,7 +6,7 @@ import(
 	"github.com/cvanderschuere/go-libspotify/spotify"
 	"io/ioutil"
 	"fmt"
-	
+
 )
 
 type spotifyClient struct{
@@ -17,12 +17,12 @@ type spotifyClient struct{
 
 func SetupSpotify(client *turnpike.Client) *spotifyClient{
     sClient := new(spotifyClient)
-	
+
     // Request pandora info
     resp := client.Call(baseURL+"userInfo",musicBoxID)
 
 	portaudio.Initialize()
-    
+
 	appKey, err := ioutil.ReadFile("spotify_appkey.key")
 	if err != nil {
 		log.Fatal(err.Error())
@@ -38,7 +38,7 @@ func SetupSpotify(client *turnpike.Client) *spotifyClient{
 		DisablePlaylistMetadataCache: true,
 		InitiallyUnloadPlaylists:     true,
 	})
-	
+
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -53,15 +53,15 @@ func SetupSpotify(client *turnpike.Client) *spotifyClient{
 	if err = session.Login(credentials, false); err != nil {
 		log.Fatal(err.Error())
 	}
-	
+
 	// Wait for login
 	err = <-session.LoginUpdates()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	
+
 	sClient.session = session
-	
+
     return sClient
 }
 
@@ -90,10 +90,10 @@ func (c *spotifyClient)NextTrack(t TrackItem) (<-chan bool){
 		c.consumer = newPortAudio()
 		go c.consumer.player()
 		c.session.SetAudioConsumer(c.consumer)
-		
+
 		c.EOT = c.consumer.eotChan
 	}
-	
+
     //Send startedTrack message
     msg := map[string]interface{} {
         "command":"startedTrack",
@@ -130,9 +130,11 @@ func (c *spotifyClient)NextTrack(t TrackItem) (<-chan bool){
 func (c *spotifyClient)ShutDown(){
 	// Close portaudio
     portaudio.Terminate()
-	
+
 	//Close EOT chan
-	close(c.EOT)
+    if(c.EOT != nil){
+	   close(c.EOT)
+    }
 
     //Logout of services
     c.session.Close()
@@ -190,16 +192,16 @@ func (pa *portAudio) player() {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	defer func(){
 		pa.currStream = nil
 	}()
-		
+
 	defer pa.currStream.Close()
 
 	pa.currStream.Start()
 	defer pa.currStream.Stop()
-	
+
 	// Decode the incoming data which is expected to be 2 channels and
 	// delivered as int16 in []byte, hence we need to convert it.
 	for audio := range pa.buffer {
@@ -216,6 +218,6 @@ func (pa *portAudio) player() {
 		pa.currStream.Write()
 	}
 	fmt.Println("Exited Player loop")
-	
+
 	pa.eotChan<-true
 }
