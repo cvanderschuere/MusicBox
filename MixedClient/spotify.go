@@ -206,7 +206,9 @@ func (pa *portAudio) player() {
 	// delivered as int16 in []byte, hence we need to convert it.
 	for audio := range pa.buffer {
 		if len(audio.frames) != 2048*2*2 {
-			panic("unexpected")
+			//panic("unexpected")
+            log.Warn("unexpected")
+            goto EXIT
 		}
 
 		j := 0
@@ -217,7 +219,9 @@ func (pa *portAudio) player() {
 
 		pa.currStream.Write()
 	}
-	fmt.Println("Exited Player loop")
+
+EXIT:
+	log.Trace("Exited Player loop")
 
 	pa.eotChan<-true
 }

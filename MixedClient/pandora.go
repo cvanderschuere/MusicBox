@@ -71,19 +71,13 @@ func (c *pandoraClient)NextTrack(){
     c.client.Next()
 }
 
-func (c *pandoraClient)PlayStation(stationID string) (<-chan *pandora.Track){
+func (c *pandoraClient)PlayStation(stationID string){
     fmt.Println(stationID)
 
     station := pandora.Station{ID:stationID}
 
-    c.trackChan,_ := c.client.Play(station)
+    ch,_ := c.client.Play(station)
 
-//    go handlePandoraStart(ch)
-
+    c.trackChan = ch
 
 }
-
-
-//func handlePandoraStart(c <-chan *pandora.Track){
-//
-//}

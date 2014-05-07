@@ -10,7 +10,7 @@ import(
 )
 
 
-const serverURL = "ClientBalencer-394863257.us-west-2.elb.amazonaws.com:8080"
+const serverURL = "ec2-54-201-63-215.us-west-2.compute.amazonaws.com:8080"
 const baseURL = "http://www.musicbox.com/"
 const musicBoxID = "musicBoxID3"
 
@@ -107,40 +107,41 @@ LOOP:
     for{
         select{
         case track := <- pClient.trackChan:
-            if len(queue) > 0{
-                log.Trace("Adding song from queue")
-                track := queue[0]
+            if(track != nil){
+                if len(queue) > 0{
+                    log.Trace("Adding song from queue")
+                    track := queue[0]
 
-                pClient.Stop()
+                    pClient.Stop()
 
-                log.Debug("Start Spotify", track)
-                spotifyEndChan = sClient.NextTrack(track)
+                    log.Debug("Start Spotify", track)
+                    spotifyEndChan = sClient.NextTrack(track)
 
-                if len(queue) > 1{
-                    queue = queue[1:]
-                    log.Debug("Shift Queue", queue)
+                    if len(queue) > 1{
+                        queue = queue[1:]
+                        log.Debug("Shift Queue", queue)
+                    }else{
+                        queue = make([]TrackItem,0)
+                        log.Debug("Clear Queue", queue)
+                    }
+
+                    pandoraPlaying = false
+
                 }else{
-                    queue = make([]TrackItem,0)
-                    log.Debug("Clear Queue", queue)
+                    log.Trace("Adding song from pandora: ", track)
                 }
 
-                pandoraPlaying = false
+                //Send this track as started track
+                msg := map[string]interface{} {
+                    "command":"startedTrack",
+                    "data": map[string]interface{}{
+                        "deviceID":musicBoxID,
+                        "track":track, //Luckily a TrackItem and pandora.Track are identical :)
+                    },
+                }
 
-            }else{
-                log.Trace("Adding song from pandora: ", track)
+                client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
             }
-
-            //Send this track as started track
-            msg := map[string]interface{} {
-                "command":"startedTrack",
-                "data": map[string]interface{}{
-                    "deviceID":musicBoxID,
-                    "track":track, //Luckily a TrackItem and pandora.Track are identical :)
-                },
-            }
-
-            client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
-
         case s := <- signalChan:
             signal.Stop(signalChan)
             log.Debug("Recieved Signal: ", s)
