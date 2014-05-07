@@ -106,42 +106,6 @@ func playerLoop(signalChan chan os.Signal, pClient *pandoraClient, sClient *spot
 LOOP:
     for{
         select{
-        case track := <- pClient.trackChan:
-            if(track != nil){
-                if len(queue) > 0{
-                    log.Trace("Adding song from queue")
-                    track := queue[0]
-
-                    pClient.Pause()
-
-                    log.Debug("Start Spotify", track)
-                    spotifyEndChan = sClient.NextTrack(track)
-
-                    if len(queue) > 1{
-                        queue = queue[1:]
-                        log.Debug("Shift Queue", queue)
-                    }else{
-                        queue = make([]TrackItem,0)
-                        log.Debug("Clear Queue", queue)
-                    }
-
-                    pandoraPlaying = false
-
-                }else{
-                    log.Trace("Adding song from pandora: ", track)
-                }
-
-                //Send this track as started track
-                msg := map[string]interface{} {
-                    "command":"startedTrack",
-                    "data": map[string]interface{}{
-                        "deviceID":musicBoxID,
-                        "track":track, //Luckily a TrackItem and pandora.Track are identical :)
-                    },
-                }
-
-                client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
-            }
         case s := <- signalChan:
             signal.Stop(signalChan)
             log.Debug("Recieved Signal: ", s)
@@ -199,7 +163,7 @@ LOOP:
                 log.Trace("Stopped Track")
 
                 if(pandoraPlaying){
-                    pClient.Pause()
+                    pClient.Stop()
                 }else{
                     sClient.Stop()
                 }
@@ -215,7 +179,7 @@ LOOP:
 
                     if pandoraPlaying{
                         log.Debug("Stop Pandora")
-                        pClient.Pause()
+                        pClient.Stop()
                     }
 
                     log.Debug("Start Spotify", track)
@@ -301,6 +265,42 @@ LOOP:
                 log.Warn("Unknown Update Type: %d",update)
             }
         }
+        case track := <- pClient.trackChan:
+            if(track != nil){
+                if len(queue) > 0{
+                    log.Trace("Adding song from queue")
+                    track := queue[0]
+
+                    pClient.Stop()
+
+                    log.Debug("Start Spotify", track)
+                    spotifyEndChan = sClient.NextTrack(track)
+
+                    if len(queue) > 1{
+                        queue = queue[1:]
+                        log.Debug("Shift Queue", queue)
+                    }else{
+                        queue = make([]TrackItem,0)
+                        log.Debug("Clear Queue", queue)
+                    }
+
+                    pandoraPlaying = false
+
+                }else{
+                    log.Trace("Adding song from pandora: ", track)
+                }
+
+                //Send this track as started track
+                msg := map[string]interface{} {
+                    "command":"startedTrack",
+                    "data": map[string]interface{}{
+                        "deviceID":musicBoxID,
+                        "track":track, //Luckily a TrackItem and pandora.Track are identical :)
+                    },
+                }
+
+                client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
+            }
     }
 }
 
