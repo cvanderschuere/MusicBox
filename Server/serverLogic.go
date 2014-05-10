@@ -43,7 +43,9 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 					Length:track["Length"].(float64),
 			}
 
-			addTrackToCachedQueue(args[1], t)
+			if CACHED {
+				addTrackToCachedQueue(args[1], t)
+			}
 			addTrackToQueue(args[1],t)
 		}
 
@@ -77,6 +79,10 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 		deviceID := d["deviceID"].(string)
 		fmt.Println(deviceID)
 
+
+		if CACHED {
+			nextTrackInCachedQueue(deviceID, t)
+		}
 
 		//
 		// Remove from queue

@@ -10,6 +10,8 @@ import (
 
 const(
 	baseURL = "http://www.musicbox.com/"
+
+	CACHED = true
 )
 
 //Global
@@ -25,8 +27,6 @@ func main() {
 
 	server = postmaster.NewServer()
 
-	prepareRPCcache();
-
 	//Assign auth callbacks - defined in auth.go
 	server.GetAuthSecret = lookupUserSessionID
 	server.GetAuthPermissions = getUserPremissions
@@ -35,7 +35,11 @@ func main() {
 
 	server.MessageToPublish = InterceptMessage //Defined in serverLogic.go
 
-	registerRPCs();
+	if CACHED {
+		registerCachedRPCs()
+	} else {
+		registerRPCs()
+	}
 
     s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: nil}
 	http.Handle("/", s)

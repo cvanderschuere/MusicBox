@@ -9,22 +9,22 @@ var userCache map[string]UserItem
 
 func cachedUserInfoRequest(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){
 
-    if userCache[conn.Username] != nil{
-        return userCache[conn.UserName]
+    if user, ok := userCache[conn.Username]; ok{
+        return user, nil
     }
 
-    user, err : = userInfoRequest(conn, url, args)
+    user, err := userInfoRequest(conn, url, args)
 
     if err != nil{
-        return err
+        return nil, err
     }
 
-    userCache[conn.Username] = user
+    userCache[conn.Username] = user.(UserItem)
 
     return user, nil
 }
 
-func cachedGetQueue(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){
+func cachedGetQueue(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
     if len(args) == 0{
         return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (No arguments)",Details:""}
     }
@@ -37,22 +37,26 @@ func cachedGetQueue(conn *postmaster.Connection,url string, args ...interface{})
         return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (ID)",Details:""}
     }
 
-    if boxCache[boxID] != nil{
-        return boxCache[boxID].Queue
+    if box, ok := boxCache[boxID]; ok && len(box.Queue) > 0{
+        return box.Queue, nil
+    }else if !ok {
+        boxCache[boxID] = *new(BoxCacheWrapper)
     }
 
-    tracks,err := getQueue(conn, url, args)
+    tracks,err := getQueue(conn, uri, args)
 
     if err != nil{
         return nil, err
     }
 
-    boxCache[boxID].Queue = tracks
+    box := boxCache[boxID]
+    box.Queue = tracks.([]TrackItem)
+    boxCache[boxID] = box
 
     return tracks, nil
 }
 
-func cachedGetTrackHistory(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){
+func cachedGetTrackHistory(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
     if len(args) == 0{
         return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (No arguments)",Details:""}
     }else{
@@ -68,22 +72,26 @@ func cachedGetTrackHistory(conn *postmaster.Connection,url string, args ...inter
         }
 
         //ID
-        compositeID,ok = a[0].(string)
+        compositeID,ok := a[0].(string)
         if !ok{
             return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (ID)",Details:""}
         }
 
-        if boxCache[compositeID] != nil{
-            return boxCache[compositeID].History
+        if box,ok := boxCache[compositeID]; ok && len(box.History) > 0{
+            return box.History, nil
+        }else if !ok {
+            boxCache[compositeID] = *new(BoxCacheWrapper)
         }
 
-        tracks, err := getTrackHistory(conn, url, args)
+        tracks, err := getTrackHistory(conn, uri, args)
 
         if err != nil{
             return nil, err
         }
 
-        boxCache[compositeID].History = tracks
+        box := boxCache[compositeID]
+        box.History = tracks.([]TrackItem)
+        boxCache[compositeID] = box
 
         return tracks, nil
     }
@@ -91,32 +99,37 @@ func cachedGetTrackHistory(conn *postmaster.Connection,url string, args ...inter
 
 
 func addTrackToCachedQueue(boxID string, track TrackItem){
-    if(boxCache[boxID].Queue == nil){
-        return nil
+    if _, ok := boxCache[boxID]; !ok{
+	boxCache[boxID] = *new(BoxCacheWrapper)
     }
 
-    boxCache[boxID].Queue = append(boxCache[boxID].Queue, TrackItem)
+    box := boxCache[boxID]
+    box.Queue = append(boxCache[boxID].Queue, track)
+    boxCache[boxID] = box
 }
 
-func nextTrackInCachedQueue(boxId string, track TrackItem) TrackItem{
-    if boxCache[boxID] == nil{
-        return nil
+func nextTrackInCachedQueue(boxID string, track TrackItem) TrackItem{
+    if box, ok := boxCache[boxID]; !ok{
+        boxCache[boxID] = *new(BoxCacheWrapper)
     }else{
-        if len(boxCache[boxID].Queue) > 0{
-                nextTrack := boxCache[boxID].Queue[0]
+        if len(box.Queue) > 0{
+	    nextTrack := box.Queue[0]
 
-                if nextTrack == track{
-                    boxCache[boxID].Queue = boxCache[boxID].Queue[1:]
+	    if nextTrack == track{
+	        box.Queue = boxCache[boxID].Queue[1:]
 
-                    boxCache[boxID].History = append(boxCache[boxId].History, nextTrack)
+	        box.History = append(boxCache[boxID].History, nextTrack)
 
-                    return nextTrack
-                }else{
-                    return nil
-                }
+		boxCache[boxID] = box
+
+	    	return nextTrack
+	    }
         }else{
-            return nil
+            box.History = append(boxCache[boxID].History, track)
+
+	    boxCache[boxID] = box
         }
     }
-
+    
+    return track
 }
