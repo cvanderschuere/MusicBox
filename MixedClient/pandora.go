@@ -66,7 +66,7 @@ func (c *pandoraClient)Pause(){
 func (c *pandoraClient)Stop(){
     c.client.Stop()
 
-    c.trackChan = make(chan *Track,0)
+    c.trackChan = make(chan *pandora.Track,0)
 }
 
 func (c *pandoraClient)NextTrack(){
@@ -82,6 +82,6 @@ func (c *pandoraClient)PlayStation(stationID string){
 
     ch,_ := c.client.Play(station)
 
-    c.trackChan = c
+    c.trackChan = ch
 
 }

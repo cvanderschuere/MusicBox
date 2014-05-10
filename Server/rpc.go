@@ -16,6 +16,7 @@ import(
 	"github.com/cvanderschuere/go-pandora"
 )
 
+
 //Args [none] (uses conn Username)
 func userInfoRequest(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){
 	user,err2 := lookupUser(conn.Username)
