@@ -177,7 +177,7 @@ LOOP:
                 // check queue for track, if has one start playing it, otherwise continue
                 // pandora
                 if len(queue) > 0{
-                    log.Trace("Adding song from queue")
+                    log.Trace("Next Song - Adding song from queue")
                     track := queue[0]
 
                     if pandoraPlaying{
@@ -199,7 +199,7 @@ LOOP:
                     pandoraPlaying = false
 
                 }else{
-                    log.Trace("Adding song from pandora")
+                    log.Trace("Next Song - Adding song from pandora")
                     if pandoraPlaying{
                         // Tell Pandora Client to Skip, Handler in Pandora.go will update
                         // other clients with the new song
@@ -271,8 +271,8 @@ LOOP:
         case track := <- pClient.trackChan:
             if(track != nil){
                 if len(queue) > 0{
-                    log.Trace("Adding song from queue")
                     track := queue[0]
+                    log.Trace("End Pandora Song - Adding song from queue: ", track)
 
                     pClient.Stop()
 
@@ -290,7 +290,7 @@ LOOP:
                     pandoraPlaying = false
 
                 }else{
-                    log.Trace("Adding song from pandora: ", track)
+                    log.Trace("End Pandora Song - Adding song from pandora: ", track)
                 }
 
                 //Send this track as started track
@@ -303,7 +303,9 @@ LOOP:
                 }
 
                 client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing
-            }
+            }else{
+		log.Trace("End Pandora Song - No track started..")
+	    }
         }
     }
 }

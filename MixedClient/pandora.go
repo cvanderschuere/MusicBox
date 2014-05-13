@@ -88,7 +88,6 @@ func (c *pandoraClient)PlayStation(stationID string){
 			continue
 		}
 
-		fmt.Println("test")
 		//Send this track as started track
 		msg := map[string]interface{} {
 			"command":"startedTrack",
