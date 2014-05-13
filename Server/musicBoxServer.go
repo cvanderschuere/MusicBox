@@ -66,6 +66,7 @@ func registerRPCs(){
 	server.RegisterUnauthRPC(baseURL+"musicbox/startSession",startSessionBox)
 	server.RegisterUnauthRPC(baseURL+"trackHistory",getTrackHistory)
 	server.RegisterUnauthRPC(baseURL+"getNearbyDevices",getNearbyDevices)
+	server.RegisterUnauthRPC(baseURL+"queue",getQueue)
 }
 
 func registerCachedRPCs(){
@@ -75,6 +76,7 @@ func registerCachedRPCs(){
 	server.RegisterRPC(baseURL+"trackHistory",cachedGetTrackHistory)
 
 	server.RegisterUnauthRPC(baseURL+"trackHistory",cachedGetTrackHistory)
+	server.RegisterUnauthRPC(baseURL+"queue",cachedGetQueue)
 
 	//Setup RPC Functions - defined in rpc.go
 	server.RegisterRPC(baseURL+"players",boxRequest)
