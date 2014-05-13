@@ -2,10 +2,16 @@ package main
 
 import(
     "postmaster"
+    "fmt"
     )
 
 var boxCache map[string]BoxCacheWrapper
-var userCache map[string]UserItem
+var userCache map[string]*UserItem
+
+func setupCaches(){
+    boxCache = make(map[string]BoxCacheWrapper, 10)
+    userCache = make(map[string]*UserItem, 5)
+}
 
 func cachedUserInfoRequest(conn *postmaster.Connection,url string, args ...interface{})(interface{},*postmaster.RPCError){
 
@@ -19,7 +25,7 @@ func cachedUserInfoRequest(conn *postmaster.Connection,url string, args ...inter
         return nil, err
     }
 
-    userCache[conn.Username] = user.(UserItem)
+    userCache[conn.Username] = user.(*UserItem)
 
     return user, nil
 }
@@ -29,31 +35,24 @@ func cachedGetQueue(conn *postmaster.Connection,uri string, args ...interface{})
         return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (No arguments)",Details:""}
     }
 
-    //Extract necessary information
-
-    //ID
-    boxID,ok := args[0].(string)
+	//Extract necessary information
+	boxID,ok := args[0].(string)
     if !ok{
+	fmt.Println(ok)
         return nil, &postmaster.RPCError{URI:uri,Description:"Invalid format (ID)",Details:""}
     }
 
     if box, ok := boxCache[boxID]; ok && len(box.Queue) > 0{
+fmt.Println("return queue: ", box.Queue)
         return box.Queue, nil
-    }else if !ok {
-        boxCache[boxID] = *new(BoxCacheWrapper)
     }
+fmt.Println("create Queue")
+	box := *new(BoxCacheWrapper)
 
-    tracks,err := getQueue(conn, uri, args)
+	box.Queue = make([]TrackItem, 0)
+	boxCache[boxID] = box
 
-    if err != nil{
-        return nil, err
-    }
-
-    box := boxCache[boxID]
-    box.Queue = tracks.([]TrackItem)
-    boxCache[boxID] = box
-
-    return tracks, nil
+	return box.Queue, nil
 }
 
 func cachedGetTrackHistory(conn *postmaster.Connection,uri string, args ...interface{})(interface{},*postmaster.RPCError){
@@ -83,14 +82,14 @@ func cachedGetTrackHistory(conn *postmaster.Connection,uri string, args ...inter
             boxCache[compositeID] = *new(BoxCacheWrapper)
         }
 
-        tracks, err := getTrackHistory(conn, uri, args)
+        tracks, err := getTrackHistory(conn, uri, args[0])
 
         if err != nil{
             return nil, err
         }
 
         box := boxCache[compositeID]
-        box.History = tracks.([]TrackItem)
+        box.History = tracks.([]*TrackItem)
         boxCache[compositeID] = box
 
         return tracks, nil
@@ -99,8 +98,12 @@ func cachedGetTrackHistory(conn *postmaster.Connection,uri string, args ...inter
 
 
 func addTrackToCachedQueue(boxID string, track TrackItem){
+fmt.Println("add track to cached queue:", track)
     if _, ok := boxCache[boxID]; !ok{
-	boxCache[boxID] = *new(BoxCacheWrapper)
+	box := *new(BoxCacheWrapper)
+
+	box.Queue = make([]TrackItem, 0)
+	boxCache[boxID] = box
     }
 
     box := boxCache[boxID]
@@ -109,23 +112,27 @@ func addTrackToCachedQueue(boxID string, track TrackItem){
 }
 
 func nextTrackInCachedQueue(boxID string, track TrackItem) TrackItem{
+fmt.Println("next track in cached queue:", track)
     if box, ok := boxCache[boxID]; !ok{
-        boxCache[boxID] = *new(BoxCacheWrapper)
+	box := *new(BoxCacheWrapper)
+
+	box.Queue = make([]TrackItem, 0)
+	boxCache[boxID] = box
     }else{
         if len(box.Queue) > 0{
 	    nextTrack := box.Queue[0]
 
-	    if nextTrack == track{
+	    if nextTrack.Title == track.Title{
 	        box.Queue = boxCache[boxID].Queue[1:]
 
-	        box.History = append(boxCache[boxID].History, nextTrack)
+	        box.History = append(boxCache[boxID].History, &nextTrack)
 
 		boxCache[boxID] = box
 
 	    	return nextTrack
 	    }
         }else{
-            box.History = append(boxCache[boxID].History, track)
+            box.History = append(boxCache[boxID].History, &track)
 
 	    boxCache[boxID] = box
         }

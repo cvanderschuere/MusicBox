@@ -19,7 +19,7 @@ type UserItem struct{
 
 type BoxCacheWrapper struct{
 	Box	BoxItem
-	History []TrackItem
+	History []*TrackItem
 	Queue	[]TrackItem
 }
 

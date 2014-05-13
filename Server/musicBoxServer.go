@@ -36,6 +36,7 @@ func main() {
 	server.MessageToPublish = InterceptMessage //Defined in serverLogic.go
 
 	if CACHED {
+		setupCaches()
 		registerCachedRPCs()
 	} else {
 		registerRPCs()
