@@ -72,12 +72,15 @@ func trackItemFromMap(data map[string]interface{})(TrackItem){
         Title: data["Title"].(string),
         ArtistName: data["ArtistName"].(string),
         AlbumName: data["AlbumName"].(string),
-        ArtworkURL: data["ArtworkURL"].(string),
+        ArtworkURL: "",
         ProviderID: data["ProviderID"].(string),
         Length: data["Length"].(float64),
         Date: data["Date"].(string),
     }
 
+if url, ok := data["ArtworkURL"].(string); ok{
+	t.ArtworkURL = url
+}
     return t
 }
 
@@ -113,7 +116,7 @@ LOOP:
 
         case <- spotifyEndChan:
             log.Trace("Recieved on end of track chan")
-            //updateChan <- Notification{Kind:EndOfTrack}
+            updateChan <- Notification{Kind:EndOfTrack}
             log.Trace("Finished send on end of track update")
 
         case update := <- updateChan:

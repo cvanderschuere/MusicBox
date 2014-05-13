@@ -82,6 +82,26 @@ func (c *pandoraClient)PlayStation(stationID string){
 
     ch,_ := c.client.Play(station)
 
+	go func(ch <-chan *pandora.Track){
+	for track := range ch{
+		if track == nil{
+			continue
+		}
+
+		fmt.Println("test")
+		//Send this track as started track
+		msg := map[string]interface{} {
+			"command":"startedTrack",
+			"data": map[string]interface{}{ 
+				"deviceID":musicBoxID,
+				"track":track, //Luckily a TrackItem and pandora.Track are identical :)
+			},
+		}
+
+		client.PublishExcludeMe(baseURL+boxUsername+"/"+musicBoxID,msg) //Let others know track has started playing	
+	}
+	}(ch)
+
     c.trackChan = ch
 
 }
