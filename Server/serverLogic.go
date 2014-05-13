@@ -39,14 +39,21 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 					Title:track["Title"].(string),
 					ArtistName:track["ArtistName"].(string),
 					AlbumName:track["AlbumName"].(string),
-					ArtworkURL:track["ArtworkURL"].(string),
+					ArtworkURL:"",
 					Length:track["Length"].(float64),
 			}
 
-			if CACHED {
-				addTrackToCachedQueue(args[1], t)
+
+			if url, ok := track["ArtworkURL"].(string); ok{
+				t.ArtworkURL = url
 			}
-			addTrackToQueue(args[1],t)
+
+			if strings.Contains(t.ProviderID,"spotify"){
+				if CACHED {
+					addTrackToCachedQueue(args[1], t)
+				}
+				addTrackToQueue(args[1],t)
+			}
 		}
 
 	case "removeTrack":
@@ -72,9 +79,15 @@ func InterceptMessage(conn *postmaster.Connection, msg postmaster.PublishMsg)(bo
 				Title:track["Title"].(string),
 				ArtistName:track["ArtistName"].(string),
 				AlbumName:track["AlbumName"].(string),
-				ArtworkURL:track["ArtworkURL"].(string),
+				ArtworkURL:"",
 				Length:track["Length"].(float64),
 		}
+
+
+		if url, ok := track["ArtworkURL"].(string); ok{
+			t.ArtworkURL = url
+		}
+
 		fmt.Println(track)
 		deviceID := d["deviceID"].(string)
 		fmt.Println(deviceID)
