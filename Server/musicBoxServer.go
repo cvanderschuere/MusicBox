@@ -10,6 +10,8 @@ import (
 
 const(
 	baseURL = "http://www.musicbox.com/"
+
+	CACHED = true
 )
 
 //Global
@@ -33,6 +35,21 @@ func main() {
 
 	server.MessageToPublish = InterceptMessage //Defined in serverLogic.go
 
+	if CACHED {
+		registerCachedRPCs()
+	} else {
+		registerRPCs()
+	}
+
+    s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: nil}
+	http.Handle("/", s)
+
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal("ListenAndServe:", err)
+	}
+}
+
+func registerRPCs(){
 	//Setup RPC Functions - defined in rpc.go
 	server.RegisterRPC(baseURL+"userInfo",userInfoRequest)
 	server.RegisterRPC(baseURL+"players",boxRequest)
@@ -48,13 +65,29 @@ func main() {
 	server.RegisterUnauthRPC(baseURL+"musicbox/startSession",startSessionBox)
 	server.RegisterUnauthRPC(baseURL+"trackHistory",getTrackHistory)
 	server.RegisterUnauthRPC(baseURL+"getNearbyDevices",getNearbyDevices)
+}
 
-    	s := websocket.Server{Handler: postmaster.HandleWebsocket(server), Handshake: nil}
-	http.Handle("/", s)
+func registerCachedRPCs(){
+	//Setup RPC Functions - defined in cache.go
+	server.RegisterRPC(baseURL+"userInfo",cachedUserInfoRequest)
+	server.RegisterRPC(baseURL+"queue",cachedGetQueue)
+	server.RegisterRPC(baseURL+"trackHistory",cachedGetTrackHistory)
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatal("ListenAndServe:", err)
-	}
+	server.RegisterUnauthRPC(baseURL+"trackHistory",cachedGetTrackHistory)
+
+	//Setup RPC Functions - defined in rpc.go
+	server.RegisterRPC(baseURL+"players",boxRequest)
+	server.RegisterRPC(baseURL+"boxDetails",getMusicBoxDetails)
+	server.RegisterRPC(baseURL+"recommendSongs",recommendSongs)
+	server.RegisterRPC(baseURL+"themes",getThemes)
+	server.RegisterRPC(baseURL+"getNearbyDevices",getNearbyDevices)
+
+	//Unauth rpc
+	server.RegisterUnauthRPC(baseURL+"user/startSession",startSession)
+	server.RegisterUnauthRPC(baseURL+"musicbox/startSession",startSessionBox)
+	server.RegisterUnauthRPC(baseURL+"getNearbyDevices",getNearbyDevices)
+
+
 }
 
 func startWebServer() {
