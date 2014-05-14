@@ -5,7 +5,6 @@ import(
 	"code.google.com/p/portaudio-go/portaudio"
 	"github.com/cvanderschuere/go-libspotify/spotify"
 	"io/ioutil"
-	"fmt"
 
 )
 
@@ -76,8 +75,11 @@ func (c *spotifyClient)Pause(){
 }
 
 func (c *spotifyClient)Stop(){
+    if _, ok := <- c.consumer.buffer; ok {
 	close(c.consumer.buffer)
+    }
     c.session.Player().Unload()
+
 }
 
 func (c *spotifyClient)SetVolume(vol uint8){
@@ -118,7 +120,6 @@ func (c *spotifyClient)NextTrack(t TrackItem) (<-chan bool){
 	track.Wait()
 	player := c.session.Player()
 	if err := player.Load(track); err != nil {
-		fmt.Println("%#v", err)
 		log.Fatal(err.Error())
 	}
 

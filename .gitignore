@@ -43,3 +43,8 @@ DerivedData
 .idea/
 *.hmap
 *.xcuserstate
+
+
+#spotify
+MixedClient/tmp
+BoxClient/tmp

@@ -102,7 +102,6 @@ func main(){
 
 func playerLoop(signalChan chan os.Signal, pClient *pandoraClient, sClient *spotifyClient){
 
-    spotifyEndChan := make(<-chan bool)
     var queue []TrackItem = make([]TrackItem,0)
     var isPlaying = true
 
@@ -114,10 +113,51 @@ LOOP:
             log.Debug("Recieved Signal: ", s)
             break LOOP
 
-        case <- spotifyEndChan:
+        case <- sClient.EOT:
             log.Trace("Recieved on end of track chan")
-            updateChan <- Notification{Kind:EndOfTrack}
-            log.Trace("Finished send on end of track update")
+                if len(queue) > 0{
+                    log.Trace("Next Song - Adding song from queue")
+                    track := queue[0]
+
+                    if pandoraPlaying{
+                        log.Debug("Stop Pandora")
+                        pClient.Stop()
+                    }
+
+//		    sClient.Stop()
+                    log.Debug("Start Spotify", track)
+                    sClient.NextTrack(track)
+
+                    if len(queue) > 1{
+                        queue = queue[1:]
+                        log.Debug("Shift Queue", queue)
+                    }else{
+                        queue = make([]TrackItem,0)
+                        log.Debug("Clear Queue", queue)
+                    }
+
+                    pandoraPlaying = false
+
+                }else{
+                    log.Trace("Next Song - Adding song from pandora")
+                    if pandoraPlaying{
+                        // Tell Pandora Client to Skip, Handler in Pandora.go will update
+                        // other clients with the new song
+                        pClient.NextTrack()
+                    }else{
+	                log.Trace("Stopping Spotify")
+
+                        sClient.Stop()
+
+                        if pClient.ThemeID != "" {
+		            log.Trace("Starting pandora theme: ",pClient.ThemeID)
+
+                            pClient.PlayStation(pClient.ThemeID)
+	                    pandoraPlaying = true
+                        }
+                    }
+
+                }
 
         case update := <- updateChan:
             log.Trace("Recieved Update: ", update.Kind)
@@ -174,6 +214,7 @@ LOOP:
 
             case NextTrack:
 
+		log.Trace("Next Track Message")
                 // check queue for track, if has one start playing it, otherwise continue
                 // pandora
                 if len(queue) > 0{
@@ -186,7 +227,7 @@ LOOP:
                     }
 
                     log.Debug("Start Spotify", track)
-                    spotifyEndChan = sClient.NextTrack(track)
+                    sClient.NextTrack(track)
 
                     if len(queue) > 1{
                         queue = queue[1:]
@@ -205,15 +246,15 @@ LOOP:
                         // other clients with the new song
                         pClient.NextTrack()
                     }else{
-	                    log.Trace("Stopping Spotify")
+	                log.Trace("Stopping Spotify")
 
                         sClient.Stop()
 
                         if pClient.ThemeID != "" {
-		                    log.Trace("Starting pandora theme: ",pClient.ThemeID)
+		            log.Trace("Starting pandora theme: ",pClient.ThemeID)
 
                             pClient.PlayStation(pClient.ThemeID)
-	                        pandoraPlaying = true
+	                    pandoraPlaying = true
                         }
                     }
 
@@ -239,6 +280,7 @@ LOOP:
                 }
 
             case EndOfTrack:
+		log.Trace("End Of Track Message")
                 // Tell other Clients that the track has ended
                 msg := map[string]string{
                     "command":"endOfTrack",
@@ -277,7 +319,7 @@ LOOP:
                     pClient.Stop()
 
                     log.Debug("Start Spotify", track)
-                    spotifyEndChan = sClient.NextTrack(track)
+                    sClient.NextTrack(track)
 
                     if len(queue) > 1{
                         queue = queue[1:]
