@@ -75,15 +75,20 @@ func (c *spotifyClient)Pause(){
 }
 
 func (c *spotifyClient)Stop(){
-    if _, ok := <- c.consumer.buffer; ok {
-	close(c.consumer.buffer)
-    }
+    close(c.consumer.buffer)
     c.session.Player().Unload()
 
 }
 
 func (c *spotifyClient)SetVolume(vol uint8){
 	// Do nothing for now
+}
+
+func (c* spotifyClient)EndTrackNext(t TrackItem) (<-chan bool){
+	c.consumer.buffer = make(chan *audio, 8)
+	go c.consumer.player()
+	c.EOT = c.consumer.eotChan
+	return c.NextTrack(t)
 }
 
 func (c *spotifyClient)NextTrack(t TrackItem) (<-chan bool){
@@ -182,6 +187,11 @@ func (pa *portAudio) player() {
 	out := make([]int16, 2048*2)
 
 	var err error
+
+	if pa.currStream != nil{
+		pa.currStream.Close()
+		pa.currStream = nil
+	}
 
 	pa.currStream, err = portaudio.OpenDefaultStream(
 		0,

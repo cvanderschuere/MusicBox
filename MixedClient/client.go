@@ -124,9 +124,8 @@ LOOP:
                         pClient.Stop()
                     }
 
-//		    sClient.Stop()
                     log.Debug("Start Spotify", track)
-                    sClient.NextTrack(track)
+                    sClient.EndTrackNext(track)
 
                     if len(queue) > 1{
                         queue = queue[1:]
