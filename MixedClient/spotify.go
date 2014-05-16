@@ -22,7 +22,7 @@ func SetupSpotify(client *turnpike.Client) *spotifyClient{
 
 	portaudio.Initialize()
 
-	appKey, err := ioutil.ReadFile("spotify_appkey.key")
+	appKey, err := ioutil.ReadFile("/home/ubuntu/gocode/src/MusicBox/MixedClient/spotify_appkey.key")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
